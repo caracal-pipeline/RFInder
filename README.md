@@ -24,8 +24,9 @@ These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) can gui
 
 **Requisites**
 - RFInder makes use of the most common `python` packages (e.g. `numpy`, `scipy`, `astropy`). 
-- The parameter file is in `yaml` format, hence `pyaml`, and `json` packages should be installed.
-- Tutorials make use of `tabulate` and `glob` for fancy outputs.
+- The parameter file is in `yaml` format, hence [`pyaml`](https://anaconda.org/anaconda/pyyaml), and [`json`](https://anaconda.org/conda-forge/json-c) packages should be installed,
+- Tutorials make use of [`tabulate`](https://pypi.org/project/tabulate/) and [`glob`](https://anaconda.org/conda-forge/glob2) for fancy outputs.
+- **beam_shape** uses [`wsclean`] option `wcclean --psf-only`. Instructions to download and install `wsclean` [(Offringa et al. 2014)](https://arxiv.org/abs/1407.1943) can be found [here](https://sourceforge.net/projects/wsclean/).
 
 **Insallation instructions**
 - Clone this repository. From terminal type:
@@ -37,7 +38,7 @@ git clone https://github.com/Fil8/RFInder.git
 - add `rfinder` directory to `PYTHONPATH` (for permanent use save it in your `.cshrc_profile`, or `.bash_profile`, respectively)
 
 ```
-setenv PYTHONPATH $path_to_sharpener:${PYTHONPATH}
+setenv PYTHONPATH $path_to_rfindser:${PYTHONPATH}
 
 export PYTHONPATH=$PYTHONPATH:path_to_rfinder
 ```
