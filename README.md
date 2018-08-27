@@ -37,7 +37,7 @@ git clone https://github.com/Fil8/RFInder.git
 - add `rfinder` directory to `PYTHONPATH` (for permanent use save it in your `.cshrc_profile`, or `.bash_profile`, respectively)
 
 ```
-setenv PYTHONPATH $path_to_sharpener:${PYTHONPATH}
+setenv PYTHONPATH $path_to_rfindser:${PYTHONPATH}
 
 export PYTHONPATH=$PYTHONPATH:path_to_rfinder
 ```
