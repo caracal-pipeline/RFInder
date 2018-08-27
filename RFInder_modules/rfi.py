@@ -290,5 +290,5 @@ class rfi:
         tout.putcol('FLAG',self.flag)
         tout.close()
 
-    return 0
+        return 0
 

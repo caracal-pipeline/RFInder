@@ -71,7 +71,6 @@ class rfinder:
     
         self.set_dirs()
 
-        return
 
     def enable_task(self,config,task):
 
@@ -96,8 +95,9 @@ class rfinder:
         key = 'general'
 
         self.workdir  = self.cfg_par[key].get('workdir', None)
-        self.msfile = self.workdir + self.cfg_par[key].get('msname', None)
-        self.cfg_par[key]['msname'] = self.msname       
+
+        self.msfile = self.workdir + self.cfg_par[key].get('msname', None)[0]
+        self.cfg_par[key]['msname'] = self.msfile      
 
         self.rfidir  = self.workdir+'rfi/'
         self.cfg_par[key]['rfidir'] = self.rfidir
@@ -108,7 +108,7 @@ class rfinder:
         self.rfi_table = self.rfidir+'rfi_table.fits'
     
         self.rfiplotdir = self.rfidir+'plot/'
-        self.cfg_par[key]['plotdir'] = self.plotdir 
+        self.cfg_par[key]['plotdir'] = self.rfiplotdir 
 
         self.rfi_freq_plot = self.rfiplotdir+'freq_fri.png'
         self.rfi_freq_base_plot = self.rfiplotdir+'freq_base.png'
@@ -118,8 +118,8 @@ class rfinder:
         if os.path.exists(self.rfidir) == False:
              os.makedirs(self.rfidir)           
 
-        if os.path.exists(self.plotdir) == False:
-             os.makedirs(self.plotdir)
+        if os.path.exists(self.rfiplotdir) == False:
+             os.makedirs(self.rfiplotdir)
 
 
 

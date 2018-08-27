@@ -1,4 +1,4 @@
-import logger
+import logging
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 import aplpy
