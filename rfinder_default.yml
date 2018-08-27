@@ -1,0 +1,23 @@
+general:
+    __helpstr: General INPUT directories and filenames
+    workdir: /Users/maccagni/Projects/FornaX/ATCA/ # full path to working directory
+    msname: ['WSRTA110311_B000.MS'] #name of input continuum image
+    verbose: False #if True warnings and Miriad outputs are printed on terminal
+
+rfi: 
+    __helpstr: Find RFI in msfile over threshold 
+    enable: false #if True this module is enabled
+    flagfile: ['1110311.MS'] #NVSS or SUMSS are allowed
+    bad_antenna: [4] #Field of view in degrees (d)
+    rms_clip: 30 #Threshold for RFI identification
+    noise_measure_edges: [1.2890e9, 1.300e9] #RA(hms):DEC(hms) centre of the field for catalog query
+ 
+beam_shape:
+    __helpstr: estimate beam shape after RFI flagging 
+    enable: false #if True this module is enabled 
+
+plots:
+    __helpstr: plot rfi over different axes 
+    plot_noise: 'rfi' #RA(hms):DEC(hms) centre of the field for catalog query
+    plot_long_short: false #RA(hms):DEC(hms) centre of the field for catalog query
+
