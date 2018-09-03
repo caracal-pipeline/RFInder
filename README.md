@@ -25,7 +25,7 @@ These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) can gui
 **Requisites**
 - RFInder makes use of the most common `python` packages (e.g. `numpy`, `scipy`, `astropy`). 
 - The parameter file is in `yaml` format, hence [`pyaml`](https://anaconda.org/anaconda/pyyaml), and [`json`](https://anaconda.org/conda-forge/json-c) packages should be installed,
-- Tutorials make use of [`tabulate`](https://pypi.org/project/tabulate/) and [`glob`](https://anaconda.org/conda-forge/glob2) for fancy outputs.
+- The `logging` module is used to print out warnings.
 - **beam_shape** uses [`wsclean`] option `wcclean --psf-only`. Instructions to download and install `wsclean` [(Offringa et al. 2014)](https://arxiv.org/abs/1407.1943) can be found [here](https://sourceforge.net/projects/wsclean/).
 
 **Insallation instructions**
