@@ -16,7 +16,7 @@ from astropy.table import Table, Column, MaskedColumn
 
 
 
-__author__ = "Filippo Maccagni"
+__author__ = "Filippo Maccagni, Tom Oosterloo"
 __copyright__ = "RadioLife"
 __version__ = "1.0.0"
 __email__ = "filippo.maccagni@gmail.com"
