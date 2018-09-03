@@ -7,10 +7,9 @@ general:
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
     enable: false #if True this module is enabled
-    flagfile: ['1110311.MS'] #name of msfile to flag
-    bad_antenna: [4] #list of bad antennas
-    rms_clip: 30 #Threshold for RFI identification
-    noise_measure_edges: [1.2890e9, 1.300e9] #min frequency and maximum frequency where to measure average std of visibilities
+    bad_antenna: [4] #list of bad antennas: for no antennas try '[]'
+    rms_clip: 5 #Threshold for RFI identification
+    noise_measure_edges: [1.400e9, 1.420e9] #min frequency and maximum frequency where to measure average std of visibilities
  
 beam_shape:
     __helpstr: estimate beam shape after RFI flagging 
@@ -19,6 +18,6 @@ beam_shape:
 plots:
     __helpstr: plot rfi over different axes
     enable: false 
-    plot_noise: 'rfi' #choose to plot % of RFI, 'rfi', or noise, 'noise', in 1D plots
-    plot_long_short: false #plot all baselines, or only the short and the long
+    plot_noise: 'flag' #choose to plot % of RFI, 'flag', or noise, 'noise', in 1D plots
+    plot_long_short: True #plot all baselines, or only the short and the long
 

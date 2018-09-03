@@ -44,8 +44,9 @@ class rfi:
         '''
 
         self.logger.info("\t Loading file from MS\n")
-        print cfg_par['general']['msname'] 
-        t=tables.table(cfg_par['general']['msname'])
+        self.msfile = cfg_par['general']['msname']
+        self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
+        t=tables.table(self.msfile)
 
         self.fieldIDs=t.getcol('FIELD_ID')
         self.vis = t.getcol('DATA')
@@ -73,6 +74,9 @@ class rfi:
         spw=tables.table(self.msfile+'/SPECTRAL_WINDOW')
         self.channelWidths=spw.getcol('CHAN_WIDTH')
         self.channelFreqs=spw.getcol('CHAN_FREQ')
+        cfg_par['rfi']['lowfreq'] = int(self.channelFreqs[0][0])
+        cfg_par['rfi']['highfreq'] = int(self.channelFreqs[-1][0])
+       
         self.logger.info("\tBandwidth\t:"+str(self.channelWidths))
         self.logger.info("\tStart Frequency\t:"+str(self.channelFreqs[0][0]))
         self.logger.info("\tEnd Frequency\t:"+str(self.channelFreqs[-1][0]))
@@ -81,6 +85,8 @@ class rfi:
         print "\tStart Frequency [GHz]\t:"+str(self.channelFreqs[0][0]/1e9)
         print "\tEnd Frequency [GHz]\t:"+str(self.channelFreqs[-1][-1]/1e9)
         spw.close()
+
+        print '... info from MS loaded ...\n'
 
 
         return 
@@ -130,7 +136,9 @@ class rfi:
             self.blMatrix[ant1,ant2] = i
             self.blMatrix[ant2,ant1] = i
 
-        print self.blMatrix
+
+        print '... baselines loaded...\n'
+
 
     def priors_flag(self,cfg_par):
         '''
@@ -152,14 +160,14 @@ class rfi:
 
         #flag autocorrelations and bad antennas
         for i in xrange(0,self.vis.shape[0]):
+            
 
-            if self.ant1[i] == self.ant2[i]:
-                self.flag[i,:,0] = True
-                
-            elif self.aperfi_badant != None:
+            if self.aperfi_badant != None:
                 if (any(x == self.ant1[i] for x in self.aperfi_badant) or any(x == self.ant2[i] for x in self.aperfi_badant)):
                     self.flag[i,:,0] = True
-
+            if self.ant1[i] == self.ant2[i]:
+                self.flag[i,:,0] = True
+            
             else:
                 a1 = self.ant1[i]
                 a2 = self.ant2[i]
@@ -174,10 +182,10 @@ class rfi:
 
         #self.datacube = np.transpose(self.datacube, (1, 0, 2)) 
 
+        print '... prior flagging done...\n'
+        return self.datacube
 
-    
-
-    def find_rfi(self,cfg_par):
+    def find_rfi(self,datas,cfg_par):
         '''
 
         For each baseline finds all signal above rms*aperfi_clip
@@ -186,15 +194,22 @@ class rfi:
         Creates the Matrix to analize visibilites on each baseline separately
 
         '''
+        
+        self.datacube = datas
 
-
-        self.rms = np.zeros([self.datacube.shape[0],self.datacube.shape[1]])
+        rms = np.zeros([self.datacube.shape[0],self.datacube.shape[1]])
         self.mean_array = np.zeros([self.datacube.shape[0],self.datacube.shape[1]])
         self.flag_lim_array= np.zeros([self.datacube.shape[0]])
+
+        self.aperfi_rfifree_min = float(cfg_par['rfi']['noise_measure_edges'][0])
+        self.aperfi_rfifree_max = float(cfg_par['rfi']['noise_measure_edges'][1])
+        self.aperfi_rmsclip = float(cfg_par['rfi']['rms_clip'])
+
 
         chan_min = np.argmin(np.abs(self.channelFreqs[0] - self.aperfi_rfifree_min))
         chan_max = np.argmin(np.abs(self.channelFreqs[0] - self.aperfi_rfifree_max))
         time_ax_len = int(self.datacube.shape[2])
+
         for i in xrange(0,self.datacube.shape[0]):
             tmp_rms = np.nanmedian(self.datacube[i, chan_min:chan_max, 0])
             med2 = abs(self.datacube[i, chan_min:chan_max, 0] - tmp_rms)
@@ -216,13 +231,16 @@ class rfi:
                 tmp_over = len(tmpar[index_rms:-1])+1
                 if tmp_over == 1. :
                     tmp_over = 0.
-                self.rms[i,j] = 100.*tmp_over/time_ax_len
+                rms[i,j] = 100.*tmp_over/time_ax_len
 
-        self.write_freq_base()
+        self.write_freq_base(cfg_par,rms)
+
+        print '... RFI found...\n'
+
 
         return 0
 
-    def write_freq_base(self,cfg_par) :
+    def write_freq_base(self,cfg_par,rms) :
         '''
         
         Writes an image.fits of visibilities ordered by frequency, baseline.
@@ -231,8 +249,11 @@ class rfi:
         '''
         #reverse frequencies if going from high-to-low         
         
+
+        self.rfi_freq_base = cfg_par['general']['rfidir']+'freq_base.fits'
+
         #set fits file
-        hdu = fits.PrimaryHDU(self.rms)
+        hdu = fits.PrimaryHDU(rms)
         hdulist = fits.HDUList([hdu])
         header = hdulist[0].header
         #write header keywords               
@@ -249,13 +270,10 @@ class rfi:
         header['BUNIT'] = ('% > '+str(5)+'*rms')
         header['BTYPE'] = ('intensity')
         #write file
-        fits.writeto(self.rfi_freq_base,self.rms,header)
+        fits.writeto(self.rfi_freq_base,rms,header,overwrite=True)
         hdulist.close()
 
         return 0
-
-
-
 
     def rfi_flag(self,cfg_par):
         '''
@@ -277,11 +295,16 @@ class rfi:
                 
                     self.flag[i,j,0] = True
         
+
+        self.rfifile = cfg_par['general']['rfidir']+'rfi_flagged_vis.MS'
+
         t=tables.table(self.msfile)
         tout = t.copy(self.rfifile)       # make deep copy
         tout.close()
         t.close()
-        tout = tables.table(self.rfifile, readonly=False)
+
+        #fr
+        #tout = tables.table(self.rfifile, readonly=False)
         #coldmi = tout.getdminfo('DATA')     # get dminfo of existing column
         #coldmi["NAME"] = 'CORRECTED_DATA'               # give it a unique name
         #tout.addcols(tables.maketabdesc(tables.makearrcoldesc("CORRECTED_DATA",0., ndim=2)),
@@ -289,6 +312,9 @@ class rfi:
         #tout.putcol('CORRECTED_DATA',vis)
         tout.putcol('FLAG',self.flag)
         tout.close()
+
+        print '... RFI flagged...\n'
+
 
         return 0
 

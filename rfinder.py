@@ -18,7 +18,7 @@ import warnings
 sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
 import rfi 
 import rfinder_beam as rfi_beam
-import rfinder_plots as rfi_plots
+import rfinder_plots as rfi_pl
 
 
 rfi = rfi.rfi()
@@ -126,34 +126,50 @@ class rfinder:
     def go(self,cfg_par):
         '''
         Automated pipeline to extract spectra from each continuum source in a given field.
-
-        Executes the whole spectrum extraction process as follows:
-        1: load_from_ms
-        2: baselines_from_ms 
-        3: priors_flag
-        4: rfi_flag
+        If cfg_par['rfi'] is enabled 
+            Executes the whole spectrum extraction process as follows:
+            1: load_from_ms
+            2: baselines_from_ms 
+            3: priors_flag
+            4: rfi_flag
+        If cfg_par['plots'] is enabled
+            1: 2d plot of RFI flagged by frequency and baseline lenght (plot_rfi_im)
+            2: 1d plot of RFI flagged by frequency channel (baselines_from_ms)
+            3: 1d plot of noise increase by frequency channel (for long and short baselines) (priors_flag)
+        If cfg_par['beam_shape'] is enabled
+            1: create FLAG column in MS file (rfi_flag)
+            2: determine psf using wsclean (make_psf)
         '''
-        catalog_table = str(self.cfg_par['general'].get('absdir')) + 'cat_src_sharpener.txt'
 
         # cont_sources
         task = 'rfi'
-        self.logger.info("########## STARTING RFI analysis ##########")
+        self.logger.info("------ STARTING RFI analysis ------")
 
         if self.enable_task(self.cfg_par,task)==True:
-            rfi.load_from_ms(self.cfg_par,catalog_table)
+            rfi.load_from_ms(self.cfg_par)
             rfi.baselines_from_ms(self.cfg_par)
-            self.logger.info("---- Baselines written -----")
-            rfi.priors_flag(self.cfg_par)
+            self.logger.info("---- Dataset sorted by baseline lenght -----")
+            datas = rfi.priors_flag(self.cfg_par)
             self.logger.info("---- Bad antennas and autocorrelations flagged ----")
-            rfi.rfi_flag(self.cfg_par)
-        self.logger.info("---- RFI found ----")
+            rfi.find_rfi(datas,self.cfg_par)
+            self.logger.info("---- RFI found ----")
         
         task = 'plots'
         if self.enable_task(self.cfg_par,task) == True:
-            rfi_plots.plot_rfi_im(self.cfg_par)
+            rfi_pl.plot_rfi_im(self.cfg_par)
+            rfi_pl.rfi_frequency(self.cfg_par)
+            rfi_pl.plot_noise_frequency(self.cfg_par)
+
+            self.cfg_par['plots']['long_short'] = True
+            self.cfg_par['plots']['plot_noise'] = 'noise'
+
+            rfi_pl.plot_noise_frequency(self.cfg_par)
+        self.logger.info("---- RFI plotted ----")
+
 
         task = 'beam_shape'
         if self.enable_task(self.cfg_par,task) == True:
+            rfi.rfi_flag(self.cfg_par)
             rfi_beam.make_psf(self.cfg_par)
 
     
