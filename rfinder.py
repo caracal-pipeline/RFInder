@@ -24,7 +24,7 @@ import rfinder_plots as rfi_plots
 rfi = rfi.rfi()
 
 __author__ = "Filippo Maccagni"
-__copyright__ = "RadioLife"
+__copyright__ = "Apertif"
 __version__ = "1.0.0"
 __email__ = "filippo.maccagni@gmail.com"
 __status__ = "Development"

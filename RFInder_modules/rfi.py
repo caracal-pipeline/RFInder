@@ -44,8 +44,8 @@ class rfi:
         '''
 
         self.logger.info("\t Loading file from MS\n")
-
-        t=tables.table(self.msfile)
+        print cfg_par['general']['msname'] 
+        t=tables.table(cfg_par['general']['msname'])
 
         self.fieldIDs=t.getcol('FIELD_ID')
         self.vis = t.getcol('DATA')
