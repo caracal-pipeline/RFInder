@@ -163,7 +163,7 @@ class rfinder:
                     datas = rfi.priors_flag(self.cfg_par)
 
                     #find rfi above threshold
-                    rfi.find_rfi(datas,self.cfg_par)
+                    rfi.find_rfi(datas,self.cfg_par,i)
 
                     rfi_pl.rfi_frequency(self.cfg_par,i)
                     rfi_pl.plot_rfi_im(self.cfg_par,i)

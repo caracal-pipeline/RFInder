@@ -7,7 +7,7 @@ general:
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
     enable: false #if True this module is enabled
-    bad_antenna: [4] #list of bad antennas: for no antennas try '[]'
+    bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
     polarization: 'xx' #xx, yy, xy, yx (also in CAPS)
     rms_clip: 5 #Threshold for RFI identification
     noise_measure_edges: [1.400e9, 1.420e9] #min frequency and maximum frequency where to measure average std of visibilities

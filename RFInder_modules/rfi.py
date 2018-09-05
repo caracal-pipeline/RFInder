@@ -42,8 +42,6 @@ class rfi:
         
 
         t=tables.table(self.msfile)
-        print t.info()
-
         self.time = t.getcol('TIME')
         starttime= self.time[0]
         endtime=self.time[-1]
@@ -186,7 +184,7 @@ class rfi:
 
 
         self.baselines_sort = sorted(baselines, key=lambda baselines: baselines[1])  
-        print self.baselines_sort
+        print len(self.baselines_sort)
         # Define matrix of indecese of baselines                                         
         self.blMatrix=np.zeros((self.nant,self.nant),dtype=int)
         for i in range(0,len(self.baselines_sort)) :

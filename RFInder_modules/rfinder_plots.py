@@ -127,7 +127,6 @@ def plot_rfi_im(cfg_par,time_step=-1):
                              stretch='normal', family='sans-serif', \
                              style='normal', variant='normal') 
     #titleplot = self.target+': '+self.aperfi_startime+' - '+self.aperfi_endtime
-    rfi_freq_base_plot = cfg_par['general']['plotdir']+'freq_base.png'
 
     plt.savefig(rfi_freq_base_plot,format='png' ,overwrite=True)
 
