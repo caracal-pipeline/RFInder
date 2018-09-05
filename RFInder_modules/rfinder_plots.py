@@ -1,3 +1,4 @@
+import os,string,sys
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib import ticker
@@ -9,14 +10,24 @@ import pyrap.tables as tables
 
 
 
-def rfi_frequency(cfg_par):
+def rfi_frequency(cfg_par,time_step=-1):
     '''
     Determines the rfi per frequency channel. Saves results in table rfi_table.fits
     For each channel the flag % and factor of noise increase are stored for all, long and short baselines
     Long and short baselines are separated in half, depending on the number of baselines
     '''
-    rfi_freq_base = cfg_par['general']['rfidir']+'freq_base.fits'
-    rfi_table = cfg_par['general']['rfidir']+'rfi_table.fits'
+    table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
+
+    if time_step != -1:
+        time_name = '0'+str(int(float(cfg_par['time_chunks']['time_step'])*time_step))+'m'
+    else:
+        time_name = 'full'
+    
+
+    table_name = str(table_tmp[0])+'_'+time_name+'.fits'
+    
+    rfi_table = cfg_par['general']['tabledir']+table_name
+    rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'   
 
     #open file
     #if os.path.exists(self.rfi_freq_base) == False:
@@ -76,7 +87,7 @@ def rfi_frequency(cfg_par):
     fits_table.writeto(rfi_table, overwrite = True)
         
 
-def plot_rfi_im(cfg_par):      
+def plot_rfi_im(cfg_par,time_step=-1):      
     '''
     
     Plots the .fits image output of rfi_im jpg format.
@@ -85,7 +96,15 @@ def plot_rfi_im(cfg_par):
     
     #check if image exists
     #plot image
-    rfi_freq_base = cfg_par['general']['rfidir']+'freq_base.fits'
+    if time_step != -1:
+        table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
+        time_name = '0'+str(int(float(cfg_par['time_chunks']['time_step'])*time_step))+'m'
+    else:
+        time_name = 'full' 
+
+    rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'   
+    rfi_freq_base_plot = cfg_par['general']['plotdir']+'freq_base_'+time_name+'_pl.png'
+    
 
 
     fig = aplpy.FITSFigure(rfi_freq_base,figsize=(12,8))
@@ -112,8 +131,9 @@ def plot_rfi_im(cfg_par):
 
     plt.savefig(rfi_freq_base_plot,format='png' ,overwrite=True)
 
+    print "... RFI in 2D plotted ----"
 
-def plot_noise_frequency(cfg_par):
+def plot_noise_frequency(cfg_par,time_step=-1):
     '''
     Plots the noise or % of rfi per frequency channel for all, long and short baselines.
     In default.cfga
@@ -127,7 +147,16 @@ def plot_noise_frequency(cfg_par):
     #    self.logger.error('### Run aperfi.rfi_frequency() first ###')  
     #else:  
 
-    rfi_table = cfg_par['general']['rfidir']+'rfi_table.fits'
+    table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
+
+    if time_step != -1: 
+        time_name ='0'+str(int(float(cfg_par['time_chunks']['time_step'])*time_step))+'m'
+    else:
+        time_name = 'full'
+
+    table_name = str(table_tmp[0])+'_'+time_name+'.fits'
+    rfi_table = cfg_par['general']['tabledir']+table_name
+    
 
     t = pyfits.open(rfi_table)
     data_vec = t[1].data
@@ -152,12 +181,12 @@ def plot_noise_frequency(cfg_par):
         noise_all = noise_factor
         noise_short = noise_factor_short
         noise_long = noise_factor_long    
-        out_plot = cfg_par['general']['plotdir']+'freq_noise_'
+        out_plot = cfg_par['general']['plotdir']+'freq_noise_'+time_name
     if cfg_par['plots']['plot_noise'] == 'flag':
         noise_all = flags
         noise_long = flags_long
         noise_short = flags_short
-        out_plot = cfg_par['general']['plotdir']+'freq_flags_'
+        out_plot = cfg_par['general']['plotdir']+'freq_flags_'+time_name
 
 
     # initialize plotting parameters
@@ -225,7 +254,8 @@ def plot_noise_frequency(cfg_par):
     legend.get_frame().set_edgecolor('black')
 
     # Save figure to file
-    rfi_freq_plot = out_plot+'.png'
+    rfi_freq_plot = out_plot+'_pl.png'
     plt.savefig(rfi_freq_plot,format='png',overwrite = True)      
 
-    
+    print "... RFI in 1D plotted ----"
+   

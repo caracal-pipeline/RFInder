@@ -4,14 +4,19 @@ import numpy as np
 import yaml
 import json
 import glob
-import pyrap.tables as tables
-
+#import pyrap.tables as tables
+import casacore.tables as tables
 import logging
+
+
+from astropy.time import Time
+import numpy as np
+from astropy import units as u
 
 from astropy.io import fits, ascii
 from astropy import units as u
 from astropy.table import Table, Column, MaskedColumn
-
+import rfinder
 
 
 
@@ -30,7 +35,38 @@ class rfi:
         self.logger = logging.getLogger('RFInder')
         self.logger.info("\t Initializing RFInder\n")
 
-    def load_from_ms(self,cfg_par):
+    def time_chunk(self,cfg_par):
+
+        self.logger.info("\t Loading file from MS\n")
+        self.msfile = cfg_par['general']['msfullpath']
+        
+
+        t=tables.table(self.msfile)
+        print t.info()
+
+        self.time = t.getcol('TIME')
+        starttime= self.time[0]
+        endtime=self.time[-1]
+        time_chunk = float(cfg_par['time_chunks']['time_step'])*60.
+        times=np.arange(starttime,endtime+time_chunk*1,time_chunk)
+        #dates = Time(times/3600./24.,format='mjd',scale='utc')
+        print times[-1]
+        startdate=Time(starttime/3600./24.,format='mjd',scale='utc')
+        startdate.format='iso'        
+        print 'Start date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(startdate.datetime)
+
+        enddate=Time(endtime/3600./24.,format='mjd',scale='utc')
+        enddate.format='iso'        
+        print 'End date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(enddate.datetime)
+
+        #self.half_time=self.time[0]+(self.time[-1]-self.time[0])/2.
+        #halfdate=Time(self.half_time/3600./24.,format='mjd',scale='utc')
+        #halfdate.format='iso'
+        #print 'time({0:%y}{0:%b}{0:%d}:{0:%X})'.format(halfdate.datetime)
+
+        return times
+
+    def load_from_ms(self,cfg_par,times=-1):
         '''
 
         Loads important columns from MS file
@@ -44,24 +80,17 @@ class rfi:
         '''
 
         self.logger.info("\t Loading file from MS\n")
-        self.msfile = cfg_par['general']['msname']
+        self.msfile = cfg_par['general']['msfullpath']
         self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
-        t=tables.table(self.msfile)
 
-        self.fieldIDs=t.getcol('FIELD_ID')
-        self.vis = t.getcol('DATA')
-        self.flag = t.getcol('FLAG')
-        self.ant1=t.getcol('ANTENNA1')
-        self.ant2=t.getcol('ANTENNA2')
-        
-        t.close()
-
-        #
         antennas = tables.table(self.msfile +'/ANTENNA')
         self.ant_pos = np.array(antennas.getcol('POSITION'))
         self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
+        
         self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
         self.nant = len(self.ant_names)
+        #print self.nant*(self.nant-1)/2.
+
         self.logger.info("\tTotal number of antennas\t:"+str(self.nant))
         self.logger.info("\tAntenna names\t"+str(self.ant_names))
 
@@ -86,18 +115,49 @@ class rfi:
         print "\tEnd Frequency [GHz]\t:"+str(self.channelFreqs[-1][-1]/1e9)
         spw.close()
 
-        print '... info from MS loaded ...\n'
 
+       
+
+        t=tables.table(self.msfile)
+
+
+        if times !=0:
+            value_end = times[1]
+            value_start = times[0]
+
+            t2 = tables.taql('select from $t where TIME < $value_end and TIME>$value_start')
+            self.fieldIDs=t2.getcol('FIELD_ID')
+            self.vis = t2.getcol('DATA')
+            #print self.vis.shape
+            self.flag = t2.getcol('FLAG')
+            self.ant1=t2.getcol('ANTENNA1')
+            self.ant2=t2.getcol('ANTENNA2')
+            t2.close()
+        
+        else:
+            self.fieldIDs=t.getcol('FIELD_ID')
+            self.vis = t.getcol('DATA')
+            #print self.vis.shape
+            self.flag = t.getcol('FLAG')
+            self.ant1=t.getcol('ANTENNA1')
+            self.ant2=t.getcol('ANTENNA2')          
+
+        t.close()
+
+        #
+
+
+
+
+        print '... info from MS loaded ...\n'
 
         return 
 
     def baselines_from_ms(self,cfg_par):
         '''
-
         Reads which baselines were used in the observations
         Stores them sorted by lenght in the array baselines_sort
         Creates the Matrix to analize visibilites on each baseline separately
-
         '''
 
         #sort baselines by length
@@ -126,7 +186,7 @@ class rfi:
 
 
         self.baselines_sort = sorted(baselines, key=lambda baselines: baselines[1])  
-
+        print self.baselines_sort
         # Define matrix of indecese of baselines                                         
         self.blMatrix=np.zeros((self.nant,self.nant),dtype=int)
         for i in range(0,len(self.baselines_sort)) :
@@ -146,7 +206,7 @@ class rfi:
         Flags YY,XY,YX polarizations
         Flags autocorrelations
         Flags bad antennas set by aperfi_badant = [ x, y, z ]
-        Stores them sorted by lenght in the array baselines_sort
+        Stores visibilities sorted by lenght in the array baselines_sort
 
         '''
 
@@ -154,9 +214,23 @@ class rfi:
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
 
         #flag unused polarizations
-        self.flag[:,:,1] = True #YY
-        self.flag[:,:,2] = True #XY
-        self.flag[:,:,3] = True #YX
+        pol = cfg_par['rfi']['polarization']
+        if (pol == 'xx' or pol == 'XX'):
+            self.flag[:,:,1] = True #YY
+            self.flag[:,:,2] = True #XY
+            self.flag[:,:,3] = True #YX
+        elif (pol == 'yy' or pol == 'YY'):
+            self.flag[:,:,0] = True #YY
+            self.flag[:,:,2] = True #XY
+            self.flag[:,:,3] = True #YX
+        elif (pol == 'xy' or pol == 'XY'):
+            self.flag[:,:,0] = True #YY
+            self.flag[:,:,1] = True #XY
+            self.flag[:,:,3] = True #YX      
+        elif (pol == 'yx' or pol == 'YX'):
+            self.flag[:,:,0] = True #YY
+            self.flag[:,:,1] = True #XY
+            self.flag[:,:,2] = True #YX  
 
         #flag autocorrelations and bad antennas
         for i in xrange(0,self.vis.shape[0]):
@@ -180,12 +254,13 @@ class rfi:
                 # Update the number of visibility in that baseline
                 baseline_counter[a1,a2]+=1
 
+
         #self.datacube = np.transpose(self.datacube, (1, 0, 2)) 
 
         print '... prior flagging done...\n'
         return self.datacube
 
-    def find_rfi(self,datas,cfg_par):
+    def find_rfi(self,datas,cfg_par,time_step=-1):
         '''
 
         For each baseline finds all signal above rms*aperfi_clip
@@ -208,6 +283,7 @@ class rfi:
 
         chan_min = np.argmin(np.abs(self.channelFreqs[0] - self.aperfi_rfifree_min))
         chan_max = np.argmin(np.abs(self.channelFreqs[0] - self.aperfi_rfifree_max))
+
         time_ax_len = int(self.datacube.shape[2])
 
         for i in xrange(0,self.datacube.shape[0]):
@@ -233,14 +309,14 @@ class rfi:
                     tmp_over = 0.
                 rms[i,j] = 100.*tmp_over/time_ax_len
 
-        self.write_freq_base(cfg_par,rms)
+        self.write_freq_base(cfg_par,rms,time_step)
 
         print '... RFI found...\n'
 
 
         return 0
 
-    def write_freq_base(self,cfg_par,rms) :
+    def write_freq_base(self,cfg_par,rms,time_step=-1) :
         '''
         
         Writes an image.fits of visibilities ordered by frequency, baseline.
@@ -248,10 +324,12 @@ class rfi:
         
         '''
         #reverse frequencies if going from high-to-low         
+        if time_step !=-1:
+            time_name = '0'+str(int(float(cfg_par['time_chunks']['time_step'])*time_step))+'m'  
+        else:
+            time_name = 'full'
         
-
-        self.rfi_freq_base = cfg_par['general']['rfidir']+'freq_base.fits'
-
+        self.rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'
         #set fits file
         hdu = fits.PrimaryHDU(rms)
         hdulist = fits.HDUList([hdu])
@@ -302,9 +380,7 @@ class rfi:
         tout = t.copy(self.rfifile)       # make deep copy
         tout.close()
         t.close()
-
-        #fr
-        #tout = tables.table(self.rfifile, readonly=False)
+        tout = tables.table(self.rfifile, readonly=False)
         #coldmi = tout.getdminfo('DATA')     # get dminfo of existing column
         #coldmi["NAME"] = 'CORRECTED_DATA'               # give it a unique name
         #tout.addcols(tables.maketabdesc(tables.makearrcoldesc("CORRECTED_DATA",0., ndim=2)),
@@ -312,6 +388,7 @@ class rfi:
         #tout.putcol('CORRECTED_DATA',vis)
         tout.putcol('FLAG',self.flag)
         tout.close()
+
 
         print '... RFI flagged...\n'
 

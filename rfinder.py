@@ -97,7 +97,7 @@ class rfinder:
         self.workdir  = self.cfg_par[key].get('workdir', None)
 
         self.msfile = self.workdir + self.cfg_par[key].get('msname', None)[0]
-        self.cfg_par[key]['msname'] = self.msfile      
+        self.cfg_par[key]['msfullpath'] = self.msfile      
 
         self.rfidir  = self.workdir+'rfi/'
         self.cfg_par[key]['rfidir'] = self.rfidir
@@ -105,18 +105,21 @@ class rfinder:
         self.rfifile = self.rfidir+'rfi_flagged_vis.MS'
         self.rfi_freq_base = self.rfidir+'freq_base.fits'
         self.rfimsfile = self.rfidir+'rfi_flagged.MS'
-        self.rfi_table = self.rfidir+'rfi_table.fits'
+        self.tabledir = self.rfidir+'tables/'
+        self.cfg_par[key]['tabledir'] = self.tabledir
+        self.rfi_table = self.tabledir+'rfi_table.fits'
     
-        self.rfiplotdir = self.rfidir+'plot/'
+        self.rfiplotdir = self.rfidir+'plots/'
         self.cfg_par[key]['plotdir'] = self.rfiplotdir 
 
-        self.rfi_freq_plot = self.rfiplotdir+'freq_fri.png'
-        self.rfi_freq_base_plot = self.rfiplotdir+'freq_base.png'
-
+        
 
 
         if os.path.exists(self.rfidir) == False:
              os.makedirs(self.rfidir)           
+
+        if os.path.exists(self.tabledir) == False:
+             os.makedirs(self.tabledir)
 
         if os.path.exists(self.rfiplotdir) == False:
              os.makedirs(self.rfiplotdir)
@@ -146,25 +149,49 @@ class rfinder:
         self.logger.info("------ STARTING RFI analysis ------")
 
         if self.enable_task(self.cfg_par,task)==True:
-            rfi.load_from_ms(self.cfg_par)
-            rfi.baselines_from_ms(self.cfg_par)
-            self.logger.info("---- Dataset sorted by baseline lenght -----")
-            datas = rfi.priors_flag(self.cfg_par)
-            self.logger.info("---- Bad antennas and autocorrelations flagged ----")
-            rfi.find_rfi(datas,self.cfg_par)
-            self.logger.info("---- RFI found ----")
+            if self.enable_task(self.cfg_par,'time_chunks')==True:
+
+                times = rfi.time_chunk(self.cfg_par)
+
+                for i in xrange(0,len(times)-1):
+                    timez = [times[i],times[i+1]] 
+                    rfi.load_from_ms(self.cfg_par,timez)
+                    #sort visibilities by baseline lenght
+                    rfi.baselines_from_ms(self.cfg_par)
+
+                    #flag bad antennas (from configuration file)
+                    datas = rfi.priors_flag(self.cfg_par)
+
+                    #find rfi above threshold
+                    rfi.find_rfi(datas,self.cfg_par)
+
+                    rfi_pl.rfi_frequency(self.cfg_par,i)
+                    rfi_pl.plot_rfi_im(self.cfg_par,i)
+                    rfi_pl.rfi_frequency(self.cfg_par,i)
+                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
+
+
+            else:
+
+                rfi.load_from_ms(self.cfg_par,0)
+                rfi.baselines_from_ms(self.cfg_par,0)
+                self.logger.info("---- Dataset sorted by baseline lenght -----")
+                datas = rfi.priors_flag(self.cfg_par)
+                self.logger.info("---- Bad antennas and autocorrelations flagged ----")
+                rfi.find_rfi(datas,self.cfg_par,0)
+                self.logger.info("---- RFI found ----")
         
-        task = 'plots'
-        if self.enable_task(self.cfg_par,task) == True:
-            rfi_pl.plot_rfi_im(self.cfg_par)
-            rfi_pl.rfi_frequency(self.cfg_par)
-            rfi_pl.plot_noise_frequency(self.cfg_par)
+                task = 'plots'
+                if self.enable_task(self.cfg_par,task) == True:
+                    rfi_pl.plot_rfi_im(self.cfg_par,0)
+                    rfi_pl.rfi_frequency(self.cfg_par,0)
+                    rfi_pl.plot_noise_frequency(self.cfg_par,0)
 
-            self.cfg_par['plots']['long_short'] = True
-            self.cfg_par['plots']['plot_noise'] = 'noise'
+                    self.cfg_par['plots']['long_short'] = True
+                    self.cfg_par['plots']['plot_noise'] = 'noise'
 
-            rfi_pl.plot_noise_frequency(self.cfg_par)
-        self.logger.info("---- RFI plotted ----")
+                    rfi_pl.plot_noise_frequency(self.cfg_par,0)
+                    self.logger.info("---- RFI plotted ----")
 
 
         task = 'beam_shape'
