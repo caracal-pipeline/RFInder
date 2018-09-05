@@ -19,7 +19,13 @@ def rfi_frequency(cfg_par,time_step=-1):
     table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
 
     if time_step != -1:
-        time_name = '0'+str(int(float(cfg_par['time_chunks']['time_step'])*time_step))+'m'
+        time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+        if time_tmp == 0:
+            time_name = '00'+str(time_tmp)+'m'
+        elif time_tmp <100:
+            time_name = '0'+str(time_tmp)+'m'
+        else:
+            time_name= str(time_tmp)+'m'
     else:
         time_name = 'full'
     
@@ -96,9 +102,15 @@ def plot_rfi_im(cfg_par,time_step=-1):
     
     #check if image exists
     #plot image
+
     if time_step != -1:
-        table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
-        time_name = '0'+str(int(float(cfg_par['time_chunks']['time_step'])*time_step))+'m'
+        time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+        if time_tmp == 0:
+            time_name = '00'+str(time_tmp)+'m'
+        elif time_tmp <100:
+            time_name = '0'+str(time_tmp)+'m'
+        else:
+            time_name= str(time_tmp)+'m'    
     else:
         time_name = 'full' 
 
@@ -148,10 +160,16 @@ def plot_noise_frequency(cfg_par,time_step=-1):
 
     table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
 
-    if time_step != -1: 
-        time_name ='0'+str(int(float(cfg_par['time_chunks']['time_step'])*time_step))+'m'
+    if time_step != -1:
+        time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+        if time_tmp == 0:
+            time_name = '00'+str(time_tmp)+'m'
+        elif time_tmp <100:
+            time_name = '0'+str(time_tmp)+'m'
+        else:
+            time_name= str(time_tmp)+'m'    
     else:
-        time_name = 'full'
+        time_name = 'full' 
 
     table_name = str(table_tmp[0])+'_'+time_name+'.fits'
     rfi_table = cfg_par['general']['tabledir']+table_name

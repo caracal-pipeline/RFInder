@@ -184,7 +184,7 @@ class rfi:
 
 
         self.baselines_sort = sorted(baselines, key=lambda baselines: baselines[1])  
-        print len(self.baselines_sort)
+        print self.baselines_sort
         # Define matrix of indecese of baselines                                         
         self.blMatrix=np.zeros((self.nant,self.nant),dtype=int)
         for i in range(0,len(self.baselines_sort)) :
@@ -322,10 +322,16 @@ class rfi:
         
         '''
         #reverse frequencies if going from high-to-low         
-        if time_step !=-1:
-            time_name = '0'+str(int(float(cfg_par['time_chunks']['time_step'])*time_step))+'m'  
+        if time_step != -1:
+            time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+            if time_tmp == 0:
+                time_name = '00'+str(time_tmp)+'m'
+            elif time_tmp <100:
+                time_name = '0'+str(time_tmp)+'m'
+            else:
+                time_name= str(time_tmp)+'m'    
         else:
-            time_name = 'full'
+            time_name = 'full' 
         
         self.rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'
         #set fits file
