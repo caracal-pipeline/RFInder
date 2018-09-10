@@ -1,26 +1,27 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /Users/maccagni/Projects/FornaX/ATCA/ # full path to working directory
-    msname: ['WSRTA110311_B000.MS'] #name of input ms file
+    workdir: /home/maccagni/RFI/RFI25_180824014/ # full path to working directory
+    msname: ['WSRTA180824014_B000.MS'] #name of input ms file
     verbose: False #if True warnings and Miriad outputs are printed on terminal
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
-    enable: false #if True this module is enabled
+    enable: true #if True this module is enabled
     bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
     polarization: 'xx' #xx, yy, xy, yx (also in CAPS)
     rms_clip: 5 #Threshold for RFI identification
     noise_measure_edges: [1.400e9, 1.420e9] #min frequency and maximum frequency where to measure average std of visibilities
+    baseline_cut: 615 #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
 
 time_chunks:
     __helpstr: separate visibilities in small time intervals 
-    enable: False
+    enable: true
     time_step: 10 #time chunks in minutes
 
 spw_average:
     __helpstr: averages % of RFI in spw specified by the user  (not enabled yet)
-    enable: True
-    spw_width: 3 #MHz
+    enable: true
+    spw_width: 3 #channel width of rebinned output table [MHz]
 
 beam_shape:
     __helpstr: estimate beam shape after RFI flagging 
@@ -28,7 +29,7 @@ beam_shape:
 
 plots:
     __helpstr: plot rfi over different axes
-    enable: false 
+    enable: true 
     plot_noise: 'flag' #choose to plot % of RFI, 'flag', or noise, 'noise', in 1D plots
     plot_long_short: True #plot all baselines, or only the short and the long
 
