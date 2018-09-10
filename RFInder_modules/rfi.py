@@ -47,14 +47,17 @@ class rfi:
         endtime=self.time[-1]
         time_chunk = float(cfg_par['time_chunks']['time_step'])*60.
         times=np.arange(starttime,endtime+time_chunk*1,time_chunk)
+        
         #dates = Time(times/3600./24.,format='mjd',scale='utc')
-        print times[-1]
         startdate=Time(starttime/3600./24.,format='mjd',scale='utc')
-        startdate.format='iso'        
+        startdate.format='iso' 
+        startdate.subformat='date_hm'       
         print 'Start date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(startdate.datetime)
 
         enddate=Time(endtime/3600./24.,format='mjd',scale='utc')
         enddate.format='iso'        
+        enddate.subformat='date_hm'       
+
         print 'End date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(enddate.datetime)
 
         #self.half_time=self.time[0]+(self.time[-1]-self.time[0])/2.
@@ -62,7 +65,7 @@ class rfi:
         #halfdate.format='iso'
         #print 'time({0:%y}{0:%b}{0:%d}:{0:%X})'.format(halfdate.datetime)
 
-        return times
+        return times,startdate,enddate
 
     def load_from_ms(self,cfg_par,times=-1):
         '''
@@ -87,7 +90,6 @@ class rfi:
         
         self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
         self.nant = len(self.ant_names)
-        #print self.nant*(self.nant-1)/2.
 
         self.logger.info("\tTotal number of antennas\t:"+str(self.nant))
         self.logger.info("\tAntenna names\t"+str(self.ant_names))
@@ -184,7 +186,9 @@ class rfi:
 
 
         self.baselines_sort = sorted(baselines, key=lambda baselines: baselines[1])  
-        print self.baselines_sort
+
+        cfg_par['rfi']['baseline_lenghts'] = np.array(self.baselines_sort)[:,1]
+
         # Define matrix of indecese of baselines                                         
         self.blMatrix=np.zeros((self.nant,self.nant),dtype=int)
         for i in range(0,len(self.baselines_sort)) :
@@ -230,6 +234,8 @@ class rfi:
             self.flag[:,:,1] = True #XY
             self.flag[:,:,2] = True #YX  
 
+
+
         #flag autocorrelations and bad antennas
         for i in xrange(0,self.vis.shape[0]):
             
@@ -248,7 +254,19 @@ class rfi:
                 counter=baseline_counter[a1,a2]
                 # Put amplitude of visibility
                 # In the right place in the new array
-                self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])
+                if (pol == 'xx' or pol == 'XX'):
+                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])
+                elif (pol == 'yy' or pol == 'YY'):
+                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,1])
+                elif (pol == 'xy' or pol == 'XY'):
+                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,2])
+                elif (pol == 'yx' or pol == 'YX'):
+                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,3])
+                elif (pol == 'q' or pol == 'Q'):
+                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])-np.abs(self.vis[i,:,1])/2.
+
+
+
                 # Update the number of visibility in that baseline
                 baseline_counter[a1,a2]+=1
 
