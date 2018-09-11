@@ -1,6 +1,6 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /home/maccagni/RFI/RFI25_180824014/ # full path to working directory
+    workdir: /Users/maccagni/Projects/RFI/data/RFI25_180824014/ # full path to working directory
     msname: ['WSRTA180824014_B000.MS'] #name of input ms file
     verbose: False #if True warnings and Miriad outputs are printed on terminal
 

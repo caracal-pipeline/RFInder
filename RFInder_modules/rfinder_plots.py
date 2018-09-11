@@ -385,8 +385,8 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     
     #plot
     label_all = 'All baselines' 
-    label_long = 'Baselines >'+cfg_par['rfi']['baseline_cut']+' m'
-    label_short = 'Baselines <'+cfg_par['rfi']['baseline_cut']+' m' 
+    label_long = r'Baselines $>$ '+str(cfg_par['rfi']['baseline_cut'])+' m'
+    label_short = r'Baselines $<$ '+str(cfg_par['rfi']['baseline_cut'])+' m' 
 
     if cfg_par['plots']['plot_long_short'] == True:
         ax1.step(freqs,noise_short, where= 'pre', color='red', linestyle='-',label=label_short)
@@ -421,6 +421,14 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     
     legend = plt.legend()
     legend.get_frame().set_edgecolor('black')
+
+    times, start, end = rfi.time_chunk(cfg_par)
+    start.format='iso' 
+    start.subformat='date_hm'   
+    end.format='iso'
+    end.subformat='date_hm'
+    title_plot = '{0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}'.format(start.datetime,end.datetime)
+    ax1.set_title(title_plot)
 
     # Save figure to file
     rfi_freq_plot = out_plot+'_pl.png'

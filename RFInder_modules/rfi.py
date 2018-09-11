@@ -208,9 +208,11 @@ class rfi:
         Flags YY,XY,YX polarizations
         Flags autocorrelations
         Flags bad antennas set by aperfi_badant = [ x, y, z ]
-        Stores visibilities sorted by lenght in the array baselines_sort
+        Stores information on baselines sorted by lenght in baselines_sort 
+        Stores visibilities in a cube (baselines[sorted by length], frequency, time_scans of each baseline)
 
         '''
+
 
         self.datacube = np.zeros([len(self.baselines_sort),self.vis.shape[1],self.vis.shape[0]/(len(self.baselines_sort))])
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
@@ -233,7 +235,9 @@ class rfi:
             self.flag[:,:,0] = True #YY
             self.flag[:,:,1] = True #XY
             self.flag[:,:,2] = True #YX  
-
+        elif (pol == 'q' or pol == 'QQ'):
+            self.flag[:,:,2] = True #XY
+            self.flag[:,:,3] = True #YX
 
 
         #flag autocorrelations and bad antennas

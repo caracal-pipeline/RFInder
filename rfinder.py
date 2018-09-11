@@ -15,7 +15,7 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
 import rfi 
 import rfinder_beam as rfi_beam
 import rfinder_plots as rfi_pl
@@ -59,12 +59,12 @@ class rfinder:
         self.logger = logging.getLogger('RFI_general')
 
 
-        file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
 
         if file != None:
             cfg = open(file)
 
         else:
+            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
             cfg = open(file_default) 
 
         self.cfg_par = yaml.load(cfg)
