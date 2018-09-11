@@ -81,7 +81,7 @@ class rfi:
 
         '''
 
-        self.logger.info("\t ... Loading MSfile ...\n")
+        self.logger.info("\t ... Bandwidth & Antenna Info ...\n")
         
         self.msfile = cfg_par['general']['msfullpath']
         self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
@@ -101,6 +101,8 @@ class rfi:
 
         spw=tables.table(self.msfile+'/SPECTRAL_WINDOW')
         self.channelWidths=spw.getcol('CHAN_WIDTH')
+        if np.unique(self.channelWidths).shape[0]==1: print 'Channel width = {0:.5e} Hz'.format(np.unique(self.channelWidths)[0])
+        else: print 'The channel width takes the following unique values:',np.unique(self.channelWidths),'Hz'
         self.channelFreqs=spw.getcol('CHAN_FREQ')
         cfg_par['rfi']['chan_widths'] = self.channelWidths[0][0]
         cfg_par['rfi']['lowfreq'] = float(self.channelFreqs[0][0])
@@ -108,9 +110,13 @@ class rfi:
 
         spw.close()
        
-        self.logger.info("\tBandwidth [kHz]:\t"+str(cfg_par['rfi']['chan_widths']/1e3))
-        self.logger.info("\tStart     [GHz]:\t"+str(cfg_par['rfi']['lowfreq']/1e9))
-        self.logger.info("\tEnd       [GHz]:\t"+str(cfg_par['rfi']['highfreq']/1e9)+'\n')
+        self.logger.info("\tChannel Width [kHz]:\t"+str(cfg_par['rfi']['chan_widths']/1e3))
+        self.logger.info("\tStart         [GHz]:\t"+str(cfg_par['rfi']['lowfreq']/1e9))
+        self.logger.info("\tEnd           [GHz]:\t"+str(cfg_par['rfi']['highfreq']/1e9)+'\n')
+
+
+        #determine start and end date
+        times_tm, start_tmp, end_tmp = self.time_chunk(cfg_par)
 
         t=tables.table(self.msfile)
 
@@ -133,10 +139,12 @@ class rfi:
             t2.close()
         
         else:
+
             self.fieldIDs=t.getcol('FIELD_ID')
             self.ant1=t.getcol('ANTENNA1')
             self.ant2=t.getcol('ANTENNA2')
 
+            #select from cross correlations of the correct field
             selection=self.fieldIDs==self.selectFieldID
             selection*=self.ant1!=self.ant2
 
@@ -158,6 +166,8 @@ class rfi:
         nrBaseline=(nrAnt-nrbadant)*(nrAnt-nrbadant-1)/2        
         cfg_par['rfi']['number_baseline'] = nrBaseline
 
+        #estimate noise
+        self.logger.info("\t ... Theoretical Noise Info ...\n")
         rfiST.predict_noise(cfg_par,self.channelWidths,self.interval,self.flag)
 
         self.logger.info("\t ... info from MS file loaded  \n\n")
@@ -280,7 +290,7 @@ class rfi:
                     self.datacube[indice,:,counter]=np.abs(self.vis[i,:,2])
                 elif (pol == 'yx' or pol == 'YX'):
                     self.datacube[indice,:,counter]=np.abs(self.vis[i,:,3])
-                #elif (pol == 'q' or pol == 'Q'):
+#                elif (pol == 'q' or pol == 'Q'):
                 #    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])-np.abs(self.vis[i,:,1])/2.
 
                 # Update the number of visibility in that baseline
@@ -377,7 +387,7 @@ class rfi:
 
         #reverse frequencies if going from high-to-low         
         if time_step != -1:
-            time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+            time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
             if time_tmp == 0:
                 time_name = '00'+str(time_tmp)+'m'
             elif time_tmp <100:

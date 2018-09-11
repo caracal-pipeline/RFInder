@@ -90,22 +90,26 @@ class rfi_stats:
         self.msfile = cfg_par['general']['msfullpath']
         
         # Derive quantities
-        kB=1380.6                                   # Boltzmann constant (Jy m^2 / K)
+        kB=1380.6  
+
+        STOKES = ['xx','yy','XX','YY','xy','yx','XY','YX']
+        if not cfg_par['rfi']['polarization'] in STOKES:                                # Boltzmann constant (Jy m^2 / K)
+            polnum = 1
+        else:
+            polnum = 2
+
         tele= cfg_par['rfi']['telescope']
 
         if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':
             tsyseff = 30.             # Tsys/eff(K)
             diam = 13.5               # m
-            polnum = 4
         elif tele == 'apertif' or tele == 'Apertif' or tele == 'APERTIF' or tele == 'wsrt':
             tsyseff = 93.
             diam = 25.
-            polnum = 2
         else:
             self.logger.error('\t Telescope not known or not specified, will use WSRT instead')
             tsyseff = 93.
             diam = 25.
-            polnum = 2
 
         Aant=np.pi*(diam/2)**2                      # collecting area of 1 antenna (m^2)
         SEFD=2*kB*tsyseff/Aant                  # frequency independent system equivalent flux density (Jy)
@@ -115,18 +119,18 @@ class rfi_stats:
         self.logger.info('\t\tDish diameter = {0:.1f} m'.format(diam))
         self.logger.info('\t\t ... and SEFD = {0:0f} Jy'.format(SEFD))
         self.logger.info('\t\t ... and Tsys = {0:.1f} K'.format(tsyseff))
-        self.logger.info('\t\t antenna diam = {0:.1f} m\n'.format(diam)) 
 
-        self.logger.info('\t Assumptions on {0:s} telescope'.format(tele))
+        self.logger.info('\t Properties of observation'.format(tele))
         nrBaseline = cfg_par['rfi']['number_baseline']
+        self.logger.info('\t\t Total number of baselines = '+ str(nrBaseline))
         self.logger.info('\t\t Total number of channels = '+ str(channelWidths.shape[1]))
         self.logger.info('\t\t Observing time on source = {0:.5f} h ({1:d} polarisations)\n'.format(interval.sum()/nrBaseline/3600.,polnum))
         
-        rms=np.sqrt(2)*kB*tsyseff/Aant/np.sqrt(channelWidths*interval.sum()*4)
+        rms=np.sqrt(2)*kB*tsyseff/Aant/np.sqrt(channelWidths*interval.sum()*polnum)
 
         if len(rms.shape)==2 and rms.shape[0]==1: rms=rms[0]
 
-        self.logger.info('\t Stokes I natural rms       = {0:.3e} mJy/b '.format(np.nanmedian(rms*1e3)))
+        self.logger.info('\t Stokes I natural r.m.s.       = {0:.3e} mJy/b '.format(np.nanmedian(rms*1e3)))
 
         cfg_par['rfi']['theo_rms'] = rms
 

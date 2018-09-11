@@ -30,7 +30,7 @@ def rfi_frequency(cfg_par,time_step=-1):
     table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
 
     if time_step != -1:
-        time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+        time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
         if time_tmp == 0:
             time_name = '00'+str(time_tmp)+'m'
         elif time_tmp <100:
@@ -168,7 +168,7 @@ def plot_rfi_im(cfg_par,time_step=-1):
     logger.info("\t ... Plotting RFI in 2D ... \n")
 
     if time_step != -1:
-        time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+        time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
         if time_tmp == 0:
             time_name = '00'+str(time_tmp)+'m'
         elif time_tmp <100:
@@ -222,7 +222,7 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
 
 
     if time_step != -1:
-        time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+        time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
         if time_tmp == 0:
             time_name = '00'+str(time_tmp)+'m'
         elif time_tmp <100:
@@ -313,6 +313,8 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
     end.subformat='date_hm'
     title_plot = '{0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}'.format(start.datetime,end.datetime)
     ax.set_title(title_plot)
+ 
+    plt.savefig(rfi_freq_base_plot,format='png' ,overwrite=True)
 
     logger.info("\t ... RFI per baseline lenght and frequency plotted ... \n\n")
 
@@ -330,13 +332,13 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     #    self.logger.error('### Run aperfi.rfi_frequency() first ###')  
     #else:  
 
-    logger.info("\t ... Plotting RFI in 2D ... \n")
+    logger.info("\t ... Plotting RFI in 1D ... \n")
 
 
     table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
 
     if time_step != -1:
-        time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
+        time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
         if time_tmp == 0:
             time_name = '00'+str(time_tmp)+'m'
         elif time_tmp <100:
@@ -363,13 +365,13 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     flags_short = np.array(data_vec['percentage_flags_short'],dtype=float)
 
    
-    #if self.aperfi_noise == 'noise':
-    #    self.predicted_noise_channel()
-    #    noise_all = noise_factor*self.noise_freq
-    #    noise_short = noise_factor_short*self.noise_freq
-    #    noise_long = noise_factor_long*self.noise_freq
-
     if cfg_par['plots']['plot_noise'] == 'noise':
+        rms = float(cfg_par['rfi']['theo_rms'])
+        noise_all = noise_factor*rms
+        noise_short = noise_factor_short*rms
+        noise_long = noise_factor_long*rms
+
+    if cfg_par['plots']['plot_noise'] == 'noise_factor':
         logger.info("\t ... Plotting factor of noise increas per frequency channel ...")
         noise_all = noise_factor
         noise_short = noise_factor_short
@@ -432,16 +434,16 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     #xticks_num = np.linspace(cfg_par['rfi']['lowfreq'],cfg_par['rfi']['highfreq'],10,dtype=int)
     #ax1.set_xticks(xticks_num)
 
-    if cfg_par['plots']['plot_noise']  == 'noise':
+    if cfg_par['plots']['plot_noise']  == 'noise_factor':
         ax1.set_yticks([1,round(np.sqrt(2),2),2,3,5,10,50]) 
         ax1.set_ylabel(r'Factor of noise increase')
         ax1.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
 
-    #if self.aperfi_noise == 'noise':
-    #    ax1.set_yticks([1,2,3,5,10,50]) 
-    #   ax1.set_ylabel(r'Predicted noise [mJy beam$^{-1}$]')     
-    #   out_plot = out_plot+'_noise'+self.aperfi_plot_format    
-    #   ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    if cfg_par['plots']['plot_noise'] == 'noise':
+        ax1.set_yticks([1,2,3,5,10,50]) 
+        ax1.set_ylabel(r'Predicted noise [mJy beam$^{-1}$]')     
+        out_plot = out_plot+'_noise'+self.aperfi_plot_format    
+        ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
     if cfg_par['plots']['plot_noise'] == 'flag':
         ax1.set_ylabel(r'$\% >$ '+str(cfg_par['rfi']['rms_clip'])+'*rms') 
@@ -461,5 +463,5 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     rfi_freq_plot = out_plot+'_pl.png'
     plt.savefig(rfi_freq_plot,format='png',overwrite = True)      
 
-    self.logger.info("\t ... RFI in 1D plotted ...\n\n")
+    logger.info("\t ... RFI in 1D plotted ...\n\n")
    

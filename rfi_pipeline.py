@@ -8,7 +8,6 @@ file = sys.argv[1]
 cfg = open(file)
 
 rfi_par=rfinder.rfinder(file)
-print rfi_par.cfg_par
 run = rfi_par.go(rfi_par.cfg_par)
 
 if run == 0: 

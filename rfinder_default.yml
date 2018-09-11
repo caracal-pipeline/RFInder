@@ -1,7 +1,7 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /home/maccagni/RFI/RFI91_180720006/ # full path to working directory
-    msname: ['WSRTA180720006_B000.MS'] #name of input ms file
+    workdir: /Users/maccagni/Projects/RFI/RFI25_180824014/ # full path to working directory
+    msname: ['WSRTA180824014_B000.MS'] #name of input ms file
     field: [0] #name of input ms file
     verbose: False #if True warnings and Miriad outputs are printed on terminal
 
@@ -10,13 +10,13 @@ rfi:
     enable: true #if True this module is enabled
     telescope: 'wsrt' #list of bad antennas: for no antennas try '[]'
     bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
-    polarization: 'q' #xx, yy, xy, yx, q (also in CAPS)
+    polarization: 'xx' #xx, yy, xy, yx, q (also in CAPS)
     rms_clip: 5 #Threshold for RFI identification
     noise_measure_edges: [1.40e9, 1.420e9] #min frequency and maximum frequency where to measure average std of visibilities
     baseline_cut: 615 #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
     time_chunks:
         __helpstr: separate visibilities in small time intervals 
-        enable: true
+        enable: false
         time_step: 10 #time chunks in minutes
     spw_average:
         __helpstr: averages % of RFI in spw specified by the user  (not enabled yet)
