@@ -15,8 +15,8 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-#sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
-sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+#sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
 
 import rfi 
 import rfinder_stats as rfi_stats
@@ -70,8 +70,8 @@ class rfinder:
             cfg = open(file)
 
         else:
-            #file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
-            file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
+            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            #file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
 
             cfg = open(file_default) 
 
@@ -153,7 +153,7 @@ class rfinder:
 
         # cont_sources
         task = 'rfi'
-        self.logger.info("------ STARTING RFI analysis ------")
+        self.logger.info(" ------ STARTING RFI analysis ------\n")
 
         if self.enable_task(self.cfg_par,task)==True:
             
@@ -174,20 +174,19 @@ class rfinder:
                     rfi.find_rfi(datas,self.cfg_par,i)
 
                     rfi_pl.rfi_frequency(self.cfg_par,i)
-                    rfi_pl.plot_rfi_im(self.cfg_par,i)
-                    rfi_pl.rfi_frequency(self.cfg_par,i)
+                    rfi_pl.plot_rfi_imshow(self.cfg_par,i)
                     rfi_pl.plot_noise_frequency(self.cfg_par,i)
 
 
             else:
 
                 rfi.load_from_ms(self.cfg_par,0)
+                self.logger.info("---- MSfile Loaded -----\n")
                 rfi.baselines_from_ms(self.cfg_par)
-                self.logger.info("---- Dataset sorted by baseline lenght -----")
+                self.logger.info("---- Dataset sorted by baseline lenght ----\n")
                 datas = rfi.priors_flag(self.cfg_par)
-                self.logger.info("---- Bad antennas and autocorrelations flagged ----")
+                self.logger.info("---- Bad antennas and autocorrelations flagged ----\n")
                 rfi.find_rfi(datas,self.cfg_par,0)
-                self.logger.info("---- RFI found ----")
         
         task = 'plots'
         if self.enable_task(self.cfg_par,task) == True:
@@ -195,22 +194,22 @@ class rfinder:
                 rfi.load_from_ms(self.cfg_par,0)
                 rfi.baselines_from_ms(self.cfg_par)
                 
-            self.logger.info("---- Plotting 2D RFI ----")
-            rfi_pl.plot_rfi_im(self.cfg_par,0)
-            self.logger.info("---- Saving RFI flags to table ----")
+            rfi_pl.plot_rfi_imshow(self.cfg_par,0)
+            self.logger.info("---- RFI in 2D plotted ----\n")
             rfi_pl.rfi_frequency(self.cfg_par,0)
-            self.logger.info("---- Plotting 1D RFI ----")
+            self.logger.info("---- RFI saved to table ----\n")
             rfi_pl.plot_noise_frequency(self.cfg_par,0)
             self.cfg_par['plots']['long_short'] = True
             self.cfg_par['plots']['plot_noise'] = 'noise'
             rfi_pl.plot_noise_frequency(self.cfg_par,0)
-            self.logger.info("---- RFI plotted ----")
+            self.logger.info("---- RFI in 1D plotted ----\n")
 
 
         task = 'beam_shape'
         if self.enable_task(self.cfg_par,task) == True:
             rfi.rfi_flag(self.cfg_par)
             rfi_beam.make_psf(self.cfg_par)
+        self.logger.info(" ------ End of RFI analysis ------ \n\n")
 
     
         return 0

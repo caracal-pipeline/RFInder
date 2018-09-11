@@ -16,6 +16,13 @@ These are the available functions:
 `rfinder` is run using a `.yml` [parameter file](https://github.com/Fil8/RFInder/wiki/Parameter-file) as `python rfinderpipeline.py <path_to_parameter_file.yml>`, or through a `IPython`
 [notebook](https://github.com/Fil8/RFInder/blob/master/tutorials/T2_rfinder_automated.ipynb). 
 
+To call `rfinder` automatically with the parameters stored in `rfinder_default.yml` add the following lines to your `.cshrc/.bashrc` file:
+
+```
+setenv RFI '<path_to_rfinder_pipeline.py>'
+alias rfinder 'python $RFI/rfi_pipeline.py $RFI/rfinder_default.yml'
+```
+
 These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) can guide you through the different capabilities of `rfinder`.
 
 ***
@@ -45,5 +52,6 @@ export PYTHONPATH=$PYTHONPATH:path_to_rfinder
 
 - change path at `line16` of `rfinder.py` as follows: `sys.path.append('/path-to-rfinder/RFInder_modules/')` 
  
+
  ***
  <p>&copy <sub> Filippo M. Maccagni 2018 </sub></p>
