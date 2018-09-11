@@ -15,13 +15,17 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+#sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+
 import rfi 
-import rfinder_beam as rfi_beam
+import rfinder_stats as rfi_stats
 import rfinder_plots as rfi_pl
 
 
 rfi = rfi.rfi()
+
+rfiST = rfi_stats.rfi_stats()
 
 __author__ = "Filippo Maccagni"
 __copyright__ = "Apertif"
@@ -49,22 +53,26 @@ class rfinder:
     def __init__(self, file=None):
         '''
     
-        Set logger for spectrum extraction
+        Set self.logger for spectrum extraction
         Find config file
         If not specified by user load rfinder_default.yml
     
         '''
 
-        #set logger
-        self.logger = logging.getLogger('RFI_general')
+        #set self.logger
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
 
-
+        self.logger.info('\t ... Reading parameter file ... \n')
+        # read database here
 
         if file != None:
             cfg = open(file)
 
         else:
-            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            #file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
+
             cfg = open(file_default) 
 
         self.cfg_par = yaml.load(cfg)
@@ -95,7 +103,6 @@ class rfinder:
         key = 'general'
 
         self.workdir  = self.cfg_par[key].get('workdir', None)
-
         self.msfile = self.workdir + self.cfg_par[key].get('msname', None)[0]
         self.cfg_par[key]['msfullpath'] = self.msfile      
 
@@ -149,7 +156,8 @@ class rfinder:
         self.logger.info("------ STARTING RFI analysis ------")
 
         if self.enable_task(self.cfg_par,task)==True:
-            if self.enable_task(self.cfg_par,'time_chunks')==True:
+            
+            if self.cfg_par[task]['time_chunks']['enable']==True:
 
                 times, start, end = rfi.time_chunk(self.cfg_par)
 

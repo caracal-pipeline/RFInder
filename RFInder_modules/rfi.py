@@ -18,6 +18,9 @@ from astropy import units as u
 from astropy.table import Table, Column, MaskedColumn
 import rfinder
 
+import rfinder_stats as rfi_stats
+
+rfiST = rfi_stats.rfi_stats()
 
 
 
@@ -31,39 +34,37 @@ class rfi:
 
     def __init__(self):
 
-       #set logger
-        self.logger = logging.getLogger('RFInder')
-        self.logger.info("\t Initializing RFInder\n")
+        #set logger
+        logging.basicConfig(level=logging.INFO)
+        self.logger = logging.getLogger(__name__)
+
+        #self.logger.info("\t ... Initializing rfi.py ... \n\n")
 
     def time_chunk(self,cfg_par):
 
-        self.logger.info("\t Loading file from MS\n")
+        self.logger.info("\t ...  Observing time Info ... \n")
         self.msfile = cfg_par['general']['msfullpath']
         
-
         t=tables.table(self.msfile)
         self.time = t.getcol('TIME')
+        t.close()
+
         starttime= self.time[0]
         endtime=self.time[-1]
-        time_chunk = float(cfg_par['time_chunks']['time_step'])*60.
+        time_chunk = float(cfg_par['rfi']['time_chunks']['time_step'])*60.
         times=np.arange(starttime,endtime+time_chunk*1,time_chunk)
         
-        #dates = Time(times/3600./24.,format='mjd',scale='utc')
         startdate=Time(starttime/3600./24.,format='mjd',scale='utc')
         startdate.format='iso' 
         startdate.subformat='date_hm'       
-        print 'Start date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(startdate.datetime)
 
         enddate=Time(endtime/3600./24.,format='mjd',scale='utc')
         enddate.format='iso'        
         enddate.subformat='date_hm'       
 
-        print 'End date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(enddate.datetime)
 
-        #self.half_time=self.time[0]+(self.time[-1]-self.time[0])/2.
-        #halfdate=Time(self.half_time/3600./24.,format='mjd',scale='utc')
-        #halfdate.format='iso'
-        #print 'time({0:%y}{0:%b}{0:%d}:{0:%X})'.format(halfdate.datetime)
+        self.logger.info('\t Start date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(startdate.datetime))
+        self.logger.info('\t End date  : {0:%y}{0:%b}{0:%d}:{0:%X} \n\n'.format(enddate.datetime))
 
         return times,startdate,enddate
 
@@ -80,10 +81,11 @@ class rfi:
 
         '''
 
-        self.logger.info("\t Loading file from MS\n")
+        self.logger.info("\t ... Loading MSfile ...\n")
+        
         self.msfile = cfg_par['general']['msfullpath']
         self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
-
+        self.selectFieldID = cfg_par['general']['field']
         antennas = tables.table(self.msfile +'/ANTENNA')
         self.ant_pos = np.array(antennas.getcol('POSITION'))
         self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
@@ -91,32 +93,24 @@ class rfi:
         self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
         self.nant = len(self.ant_names)
 
-        self.logger.info("\tTotal number of antennas\t:"+str(self.nant))
-        self.logger.info("\tAntenna names\t"+str(self.ant_names))
-
-        print "\tTotal number of antennas\t:"+str(self.nant)
-        print "\tAntenna names\t"+str(self.ant_names)
-        
+        #logging
+        self.logger.info("\tTotal number of antennas:\t"+str(self.nant))
+        self.logger.info("\tAntenna names:\t\t"+str(self.ant_names))
 
         antennas.close()
 
         spw=tables.table(self.msfile+'/SPECTRAL_WINDOW')
         self.channelWidths=spw.getcol('CHAN_WIDTH')
         self.channelFreqs=spw.getcol('CHAN_FREQ')
-        cfg_par['rfi']['lowfreq'] = int(self.channelFreqs[0][0])
-        cfg_par['rfi']['highfreq'] = int(self.channelFreqs[-1][0])
-       
-        self.logger.info("\tBandwidth\t:"+str(self.channelWidths))
-        self.logger.info("\tStart Frequency\t:"+str(self.channelFreqs[0][0]))
-        self.logger.info("\tEnd Frequency\t:"+str(self.channelFreqs[-1][0]))
+        cfg_par['rfi']['chan_widths'] = self.channelWidths[0][0]
+        cfg_par['rfi']['lowfreq'] = float(self.channelFreqs[0][0])
+        cfg_par['rfi']['highfreq'] = float(self.channelFreqs[-1][-1])
 
-        print "\tBandwidth [kHz]\t:"+str(self.channelWidths[0][0]/1e3)
-        print "\tStart Frequency [GHz]\t:"+str(self.channelFreqs[0][0]/1e9)
-        print "\tEnd Frequency [GHz]\t:"+str(self.channelFreqs[-1][-1]/1e9)
         spw.close()
-
-
        
+        self.logger.info("\tBandwidth [kHz]:\t"+str(cfg_par['rfi']['chan_widths']/1e3))
+        self.logger.info("\tStart     [GHz]:\t"+str(cfg_par['rfi']['lowfreq']/1e9))
+        self.logger.info("\tEnd       [GHz]:\t"+str(cfg_par['rfi']['highfreq']/1e9)+'\n')
 
         t=tables.table(self.msfile)
 
@@ -127,31 +121,48 @@ class rfi:
 
             t2 = tables.taql('select from $t where TIME < $value_end and TIME>$value_start')
             self.fieldIDs=t2.getcol('FIELD_ID')
-            self.vis = t2.getcol('DATA')
-            #print self.vis.shape
-            self.flag = t2.getcol('FLAG')
             self.ant1=t2.getcol('ANTENNA1')
             self.ant2=t2.getcol('ANTENNA2')
+
+            selection=self.fieldIDs==self.selectFieldID
+            selection*=self.ant1!=self.ant2
+
+            self.vis = t2.getcol('DATA')[selection]
+            self.flag = t2.getcol('FLAG')[selection]
+            self.interval = t2.getcol('INTERVAL')[selection]
             t2.close()
         
         else:
             self.fieldIDs=t.getcol('FIELD_ID')
-            self.vis = t.getcol('DATA')
-            #print self.vis.shape
-            self.flag = t.getcol('FLAG')
             self.ant1=t.getcol('ANTENNA1')
-            self.ant2=t.getcol('ANTENNA2')          
+            self.ant2=t.getcol('ANTENNA2')
+
+            selection=self.fieldIDs==self.selectFieldID
+            selection*=self.ant1!=self.ant2
+
+            self.vis = t.getcol('DATA')[selection]
+            self.interval = t.getcol('INTERVAL')[selection]
+            self.flag = t.getcol('FLAG')[selection]
 
         t.close()
 
-        #
+        #determine number of baselines
+        nrAnt=np.unique(np.concatenate((self.ant1,self.ant2))).shape[0]
+        
+        if not self.aperfi_badant:
+            nrbadant =len(int(self.aperfi_badant))
+        else:
+            nrbadant = 0.
 
+        
+        nrBaseline=(nrAnt-nrbadant)*(nrAnt-nrbadant-1)/2        
+        cfg_par['rfi']['number_baseline'] = nrBaseline
 
+        rfiST.predict_noise(cfg_par,self.channelWidths,self.interval,self.flag)
 
+        self.logger.info("\t ... info from MS file loaded  \n\n")
 
-        print '... info from MS loaded ...\n'
-
-        return 
+        return 0
 
     def baselines_from_ms(self,cfg_par):
         '''
@@ -159,6 +170,9 @@ class rfi:
         Stores them sorted by lenght in the array baselines_sort
         Creates the Matrix to analize visibilites on each baseline separately
         '''
+
+        self.logger.info('\t ... Sorting baselines ... \n')
+
 
         #sort baselines by length
         baselines = []
@@ -199,7 +213,7 @@ class rfi:
             self.blMatrix[ant2,ant1] = i
 
 
-        print '... baselines loaded...\n'
+        self.logger.info('\t ... Matrix of baselines sorted by length loaded ...\n\n')
 
 
     def priors_flag(self,cfg_par):
@@ -213,16 +227,17 @@ class rfi:
 
         '''
 
+        self.logger.info('\t ... Flagging a-prioris  ...\n')
+
 
         self.datacube = np.zeros([len(self.baselines_sort),self.vis.shape[1],self.vis.shape[0]/(len(self.baselines_sort))])
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
-
         #flag unused polarizations
         pol = cfg_par['rfi']['polarization']
         if (pol == 'xx' or pol == 'XX'):
             self.flag[:,:,1] = True #YY
-            self.flag[:,:,2] = True #XY
-            self.flag[:,:,3] = True #YX
+            #self.flag[:,:,2] = True #XY
+            #self.flag[:,:,3] = True #YX
         elif (pol == 'yy' or pol == 'YY'):
             self.flag[:,:,0] = True #YY
             self.flag[:,:,2] = True #XY
@@ -248,8 +263,7 @@ class rfi:
                 if (any(x == self.ant1[i] for x in self.aperfi_badant) or any(x == self.ant2[i] for x in self.aperfi_badant)):
                     self.flag[i,:,0] = True
             if self.ant1[i] == self.ant2[i]:
-                self.flag[i,:,0] = True
-            
+                self.flag[i,:,0] = True            
             else:
                 a1 = self.ant1[i]
                 a2 = self.ant2[i]
@@ -266,18 +280,19 @@ class rfi:
                     self.datacube[indice,:,counter]=np.abs(self.vis[i,:,2])
                 elif (pol == 'yx' or pol == 'YX'):
                     self.datacube[indice,:,counter]=np.abs(self.vis[i,:,3])
-                elif (pol == 'q' or pol == 'Q'):
-                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])-np.abs(self.vis[i,:,1])/2.
-
-
+                #elif (pol == 'q' or pol == 'Q'):
+                #    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])-np.abs(self.vis[i,:,1])/2.
 
                 # Update the number of visibility in that baseline
                 baseline_counter[a1,a2]+=1
 
-
+        #why is this here?
         #self.datacube = np.transpose(self.datacube, (1, 0, 2)) 
 
-        print '... prior flagging done...\n'
+ 
+
+        self.logger.info('\t ... Prior flagging done ...\n\n')
+
         return self.datacube
 
     def find_rfi(self,datas,cfg_par,time_step=-1):
@@ -290,6 +305,8 @@ class rfi:
 
         '''
         
+        self.logger.info('\t ... Searching for RFI ...\n')
+       
         self.datacube = datas
 
         rms = np.zeros([self.datacube.shape[0],self.datacube.shape[1]])
@@ -297,7 +314,19 @@ class rfi:
         self.flag_lim_array= np.zeros([self.datacube.shape[0]])
 
         self.aperfi_rfifree_min = float(cfg_par['rfi']['noise_measure_edges'][0])
+
+        if (self.aperfi_rfifree_min < float(cfg_par['rfi']['lowfreq']) or self.aperfi_rfifree_min > float(cfg_par['rfi']['highfreq'])):
+            self.aperfi_rfifree_min = float(cfg_par['rfi']['lowfreq'])
+            self.logger.warning('\t ### Minimum frequency for RFI free range outside of observed interval ')
+            self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
+
         self.aperfi_rfifree_max = float(cfg_par['rfi']['noise_measure_edges'][1])
+        if (self.aperfi_rfifree_max < float(cfg_par['rfi']['lowfreq']) or self.aperfi_rfifree_max > float(cfg_par['rfi']['highfreq'])):
+            self.aperfi_rfifree_max = float(cfg_par['rfi']['highfreq'])
+            self.logger.warning('\t ### Maximum frequency for RFI free range outside of observed interval ')
+            self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
+
+
         self.aperfi_rmsclip = float(cfg_par['rfi']['rms_clip'])
 
 
@@ -331,7 +360,7 @@ class rfi:
 
         self.write_freq_base(cfg_par,rms,time_step)
 
-        print '... RFI found...\n'
+        self.logger.info('\t ... RFI found ... \n\n')
 
 
         return 0
@@ -343,6 +372,9 @@ class rfi:
         Baselines are ordered by their length.
         
         '''
+        self.logger.info('\t ... Wrtiting RFI by frequency and baseline ...')
+
+
         #reverse frequencies if going from high-to-low         
         if time_step != -1:
             time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
@@ -377,6 +409,9 @@ class rfi:
         fits.writeto(self.rfi_freq_base,rms,header,overwrite=True)
         hdulist.close()
 
+        self.logger.info('\t ... RFI on fits file ...\n')
+
+
         return 0
 
     def rfi_flag(self,cfg_par):
@@ -385,6 +420,10 @@ class rfi:
         '''
 
         #self.flag_lim_array = np.zeros([self.vis.shape[0]])
+
+        self.logger.info('\t ... Flagging RFI ... \n')
+
+
         for i in xrange(0,self.vis.shape[0]):
             
             if any(x == self.ant1[i] for x in self.aperfi_badant) or any(x == self.ant2[i] for x in self.aperfi_badant):
@@ -416,7 +455,7 @@ class rfi:
         tout.close()
 
 
-        print '... RFI flagged...\n'
+        self.logger.info('\t ... RFI flagged ... \n\n')
 
 
         return 0

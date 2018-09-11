@@ -16,6 +16,10 @@ import pyrap.tables as tables
 import rfi
 rfi = rfi.rfi()
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def rfi_frequency(cfg_par,time_step=-1):
     '''
@@ -93,12 +97,12 @@ def rfi_frequency(cfg_par,time_step=-1):
 
     
     #rebin results
-    if cfg_par['spw_average']['enable'] == True:
+    if cfg_par['rfi']['spw_average']['enable'] == True:
 
         table_name_bin = str(table_tmp[0])+'_'+time_name+'_spwbin.fits'
         rfi_table_bin = cfg_par['general']['tabledir']+table_name_bin
 
-        step_bin = cfg_par['spw_average']['spw_width']
+        step_bin = cfg_par['rfi']['spw_average']['spw_width']
 
 
         freqs_bin=np.arange(freqs[0],freqs[-1]+step_bin,step_bin)
@@ -148,7 +152,9 @@ def rfi_frequency(cfg_par,time_step=-1):
     fits_table = pyfits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7])    
     
     fits_table.writeto(rfi_table, overwrite = True)
-        
+  
+    logger.info("\t ... RFI table saved ...\n")
+
 
 def plot_rfi_im(cfg_par,time_step=-1):      
     '''
@@ -159,6 +165,7 @@ def plot_rfi_im(cfg_par,time_step=-1):
     
     #check if image exists
     #plot image
+    logger.info("\t ... Plotting RFI in 2D ... \n")
 
     if time_step != -1:
         time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
@@ -199,7 +206,7 @@ def plot_rfi_im(cfg_par,time_step=-1):
 
     plt.savefig(rfi_freq_base_plot,format='png' ,overwrite=True)
 
-    print "... RFI in 2D plotted ----"
+    logger.info("\t ... RFI per baseline lenght and frequency plotted ... \n\n")
 
 def plot_rfi_imshow(cfg_par,time_step=-1):      
     '''
@@ -210,6 +217,9 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
     
     #check if image exists
     #plot image
+
+    logger.info("\t ... Plotting RFI in 2D ... \n")
+
 
     if time_step != -1:
         time_tmp = int(float(cfg_par['time_chunks']['time_step'])*time_step)
@@ -243,10 +253,20 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
         freqs_plot_idx[i]=idx
 
 
-    input_baselines = np.array([50,150,300,600,1200,2400])
+
+    input_baselines = np.zeros(7)
+    for i in xrange (0,len(input_baselines)):
+        input_baselines[i] = 50.*np.power(2,i)
+
+
+
     input_baselines_idx=np.zeros(input_baselines.shape)
 
     baselines = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+    
+    if input_baselines[-1] > baselines[0,-1]:
+        input_baselines[-1]=np.round(baselines[0,-1],0)
+
     for i in xrange(0, len(input_baselines)):
         idx = (np.abs(input_baselines[i] - baselines[0,:])).argmin()
         input_baselines_idx[i]=idx
@@ -294,7 +314,7 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
     title_plot = '{0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}'.format(start.datetime,end.datetime)
     ax.set_title(title_plot)
 
-    print "... RFI in 2D plotted ----"
+    logger.info("\t ... RFI per baseline lenght and frequency plotted ... \n\n")
 
 def plot_noise_frequency(cfg_par,time_step=-1):
     '''
@@ -309,6 +329,9 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     #    self.logger.error('### Table of RFI and flags of visibilities does not exist ###')    
     #    self.logger.error('### Run aperfi.rfi_frequency() first ###')  
     #else:  
+
+    logger.info("\t ... Plotting RFI in 2D ... \n")
+
 
     table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
 
@@ -347,11 +370,13 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     #    noise_long = noise_factor_long*self.noise_freq
 
     if cfg_par['plots']['plot_noise'] == 'noise':
+        logger.info("\t ... Plotting factor of noise increas per frequency channel ...")
         noise_all = noise_factor
         noise_short = noise_factor_short
         noise_long = noise_factor_long    
         out_plot = cfg_par['general']['plotdir']+'freq_noise_'+time_name
     if cfg_par['plots']['plot_noise'] == 'flag':
+        logger.info("\t ... Plotting percentage of flagged RFI per frequency channel ...")
         noise_all = flags
         noise_long = flags_long
         noise_short = flags_short
@@ -389,6 +414,8 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     label_short = r'Baselines $<$ '+str(cfg_par['rfi']['baseline_cut'])+' m' 
 
     if cfg_par['plots']['plot_long_short'] == True:
+        logger.info("\t ... Plotting RFI in long and short baselines ...")
+
         ax1.step(freqs,noise_short, where= 'pre', color='red', linestyle='-',label=label_short)
         ax1.step(freqs,noise_long, where= 'pre', color='blue', linestyle='-',label=label_long)
         out_plot = out_plot+'_sl'
@@ -405,16 +432,16 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     #xticks_num = np.linspace(cfg_par['rfi']['lowfreq'],cfg_par['rfi']['highfreq'],10,dtype=int)
     #ax1.set_xticks(xticks_num)
 
-    if cfg_par['plots']['plot_noise']  == 'rfi':
+    if cfg_par['plots']['plot_noise']  == 'noise':
         ax1.set_yticks([1,round(np.sqrt(2),2),2,3,5,10,50]) 
         ax1.set_ylabel(r'Factor of noise increase')
         ax1.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
 
-    # if self.aperfi_noise == 'noise':
-    #     ax1.set_yticks([1,2,3,5,10,50]) 
-    #     ax1.set_ylabel(r'Predicted noise [mJy beam$^{-1}$]')     
-    #     out_plot = out_plot+'_noise'+self.aperfi_plot_format    
-    #     ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    #if self.aperfi_noise == 'noise':
+    #    ax1.set_yticks([1,2,3,5,10,50]) 
+    #   ax1.set_ylabel(r'Predicted noise [mJy beam$^{-1}$]')     
+    #   out_plot = out_plot+'_noise'+self.aperfi_plot_format    
+    #   ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
     if cfg_par['plots']['plot_noise'] == 'flag':
         ax1.set_ylabel(r'$\% >$ '+str(cfg_par['rfi']['rms_clip'])+'*rms') 
@@ -434,5 +461,5 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     rfi_freq_plot = out_plot+'_pl.png'
     plt.savefig(rfi_freq_plot,format='png',overwrite = True)      
 
-    print "... RFI in 1D plotted ----"
+    self.logger.info("\t ... RFI in 1D plotted ...\n\n")
    
