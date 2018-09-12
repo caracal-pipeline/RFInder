@@ -45,7 +45,7 @@ def rfi_frequency(cfg_par,time_step=-1):
     
     rfi_table = cfg_par['general']['tabledir']+table_name
     rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'   
-
+    natural_rms = cfg_par['rms']['theo_rms']
     #open file
     #if os.path.exists(self.rfi_freq_base) == False:
     #    self.logger.error('### Image of RFI sorted by frequency over baseline lenght does not exist ###')    
@@ -112,6 +112,8 @@ def rfi_frequency(cfg_par,time_step=-1):
         rms_lin_bin_short=np.zeros(freqs_bin.shape)
         flag_lin_bin_long=np.zeros(freqs_bin.shape)
         rms_lin_bin_long=np.zeros(freqs_bin.shape)
+        # is this correct ???
+        natural_rms_bin=np.zeros(freqs_bin.shape)
 
 
 
@@ -125,6 +127,7 @@ def rfi_frequency(cfg_par,time_step=-1):
             rms_lin_bin_short[i] = np.nanmean(rms_lin_short[index])
             flag_lin_bin_long[i] = np.nanmean(flag_lin_long[index])
             rms_lin_bin_long[i] = np.nanmean(rms_lin_long[index])
+            natural_rms[i] = np.nanmean(natural_rms[index])
 
         # save fits table        
         c1 = pyfits.Column(name='frequency', format='D', unit='MHz', array=freqs_bin)
@@ -134,8 +137,9 @@ def rfi_frequency(cfg_par,time_step=-1):
         c5 = pyfits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_bin_short)
         c6 = pyfits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_bin_long)
         c7 = pyfits.Column(name='noise_factor_long', format='D', array=rms_lin_bin_long)        
+        c8 = pyfits.Column(name='noise_factor_long', format='D', array=natural_rms_bin)        
 
-        fits_table = pyfits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7])    
+        fits_table = pyfits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])    
 
         fits_table.writeto(rfi_table_bin, overwrite = True)
 
@@ -148,8 +152,9 @@ def rfi_frequency(cfg_par,time_step=-1):
     c5 = pyfits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_short)
     c6 = pyfits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_long)
     c7 = pyfits.Column(name='noise_factor_long', format='D', array=rms_lin_long)        
+    c8 = pyfits.Column(name='natural_rms', format='D', array=natural_rms)        
 
-    fits_table = pyfits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7])    
+    fits_table = pyfits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])    
     
     fits_table.writeto(rfi_table, overwrite = True)
   
@@ -366,18 +371,20 @@ def plot_noise_frequency(cfg_par,time_step=-1):
 
    
     if cfg_par['plots']['plot_noise'] == 'noise':
-        rms = float(cfg_par['rfi']['theo_rms'])
+        rms = np.array(cfg_par['rfi']['theo_rms'],dtype=float)
         noise_all = noise_factor*rms
         noise_short = noise_factor_short*rms
         noise_long = noise_factor_long*rms
-
+        out_plot = cfg_par['general']['plotdir']+'freq_noise_'+time_name
+    
     if cfg_par['plots']['plot_noise'] == 'noise_factor':
         logger.info("\t ... Plotting factor of noise increas per frequency channel ...")
         noise_all = noise_factor
         noise_short = noise_factor_short
         noise_long = noise_factor_long    
-        out_plot = cfg_par['general']['plotdir']+'freq_noise_'+time_name
-    if cfg_par['plots']['plot_noise'] == 'flag':
+        out_plot = cfg_par['general']['plotdir']+'freq_noise_factor_'+time_name
+    
+    if cfg_par['plots']['plot_noise'] == 'rfi':
         logger.info("\t ... Plotting percentage of flagged RFI per frequency channel ...")
         noise_all = flags
         noise_long = flags_long
@@ -405,7 +412,7 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     ax1 = fig.add_subplot(gs[0])
     ax1.set_xlabel(r'Frequency [MHz]',fontsize=20)
     
-    if cfg_par['plots']['plot_noise'] != 'flag':
+    if cfg_par['plots']['plot_noise'] != 'rfi':
         ax1.set_yscale('log', basey=10)
 
     #define title output                     
@@ -442,10 +449,9 @@ def plot_noise_frequency(cfg_par,time_step=-1):
     if cfg_par['plots']['plot_noise'] == 'noise':
         ax1.set_yticks([1,2,3,5,10,50]) 
         ax1.set_ylabel(r'Predicted noise [mJy beam$^{-1}$]')     
-        out_plot = out_plot+'_noise'+self.aperfi_plot_format    
         ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
-    if cfg_par['plots']['plot_noise'] == 'flag':
+    if cfg_par['plots']['plot_noise'] == 'rfi':
         ax1.set_ylabel(r'$\% >$ '+str(cfg_par['rfi']['rms_clip'])+'*rms') 
     
     legend = plt.legend()

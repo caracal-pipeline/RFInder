@@ -3,7 +3,6 @@ general:
     workdir: /Users/maccagni/Projects/RFI/RFI25_180824014/ # full path to working directory
     msname: ['WSRTA180824014_B000.MS'] #name of input ms file
     field: [0] #name of input ms file
-    verbose: False #if True warnings and Miriad outputs are printed on terminal
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
@@ -30,6 +29,6 @@ beam_shape:
 plots:
     __helpstr: plot rfi over different axes
     enable: true 
-    plot_noise: 'flag' #choose to plot % of RFI, 'flag', or noise, 'noise', in 1D plots
+    plot_noise: 'rfi' #choose to plot % of RFI, 'flag', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
     plot_long_short: True #plot all baselines, or only the short and the long
 

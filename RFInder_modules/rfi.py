@@ -24,7 +24,7 @@ rfiST = rfi_stats.rfi_stats()
 
 
 
-__author__ = "Filippo Maccagni, Tom Oosterloo"
+__author__ = "Filippo Maccagni, Tom Oosterloo, Paolo Serra"
 __copyright__ = "RadioLife"
 __version__ = "1.0.0"
 __email__ = "filippo.maccagni@gmail.com"
@@ -101,8 +101,8 @@ class rfi:
 
         spw=tables.table(self.msfile+'/SPECTRAL_WINDOW')
         self.channelWidths=spw.getcol('CHAN_WIDTH')
-        if np.unique(self.channelWidths).shape[0]==1: print 'Channel width = {0:.5e} Hz'.format(np.unique(self.channelWidths)[0])
-        else: print 'The channel width takes the following unique values:',np.unique(self.channelWidths),'Hz'
+        #if np.unique(self.channelWidths).shape[0]==1: print 'Channel width = {0:.5e} Hz'.format(np.unique(self.channelWidths)[0])
+        #else: print 'The channel width takes the following unique values:',np.unique(self.channelWidths),'Hz'
         self.channelFreqs=spw.getcol('CHAN_FREQ')
         cfg_par['rfi']['chan_widths'] = self.channelWidths[0][0]
         cfg_par['rfi']['lowfreq'] = float(self.channelFreqs[0][0])
@@ -117,6 +117,7 @@ class rfi:
 
         #determine start and end date
         times_tm, start_tmp, end_tmp = self.time_chunk(cfg_par)
+
 
         t=tables.table(self.msfile)
 
