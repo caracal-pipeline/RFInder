@@ -10,6 +10,7 @@ import logging
 
 
 from astropy.time import Time
+from astropy.coordinates import SkyCoord
 import numpy as np
 from astropy import units as u
 
@@ -19,6 +20,8 @@ from astropy.table import Table, Column, MaskedColumn
 import rfinder
 
 import rfinder_stats as rfi_stats
+import rfinder_files as rfi_files
+
 
 rfiST = rfi_stats.rfi_stats()
 
@@ -40,35 +43,7 @@ class rfi:
 
         #self.logger.info("\t ... Initializing rfi.py ... \n\n")
 
-    def time_chunk(self,cfg_par):
-
-        self.logger.info("\t ...  Observing time Info ... \n")
-        self.msfile = cfg_par['general']['msfullpath']
-        
-        t=tables.table(self.msfile)
-        self.time = t.getcol('TIME')
-        t.close()
-
-        starttime= self.time[0]
-        endtime=self.time[-1]
-        time_chunk = float(cfg_par['rfi']['time_chunks']['time_step'])*60.
-        times=np.arange(starttime,endtime+time_chunk*1,time_chunk)
-        
-        startdate=Time(starttime/3600./24.,format='mjd',scale='utc')
-        startdate.format='iso' 
-        startdate.subformat='date_hm'       
-
-        enddate=Time(endtime/3600./24.,format='mjd',scale='utc')
-        enddate.format='iso'        
-        enddate.subformat='date_hm'       
-
-
-        self.logger.info('\t Start date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(startdate.datetime))
-        self.logger.info('\t End date  : {0:%y}{0:%b}{0:%d}:{0:%X} \n\n'.format(enddate.datetime))
-
-        return times,startdate,enddate
-
-    def load_from_ms(self,cfg_par,times=-1):
+    def load_from_ms(self,cfg_par,times=0):
         '''
 
         Loads important columns from MS file
@@ -86,9 +61,24 @@ class rfi:
         self.msfile = cfg_par['general']['msfullpath']
         self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
         self.selectFieldID = cfg_par['general']['field']
+
         antennas = tables.table(self.msfile +'/ANTENNA')
         self.ant_pos = np.array(antennas.getcol('POSITION'))
         self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
+        
+        self.fieldNames=tables.table(self.msfile+'/FIELD').getcol('NAME')
+        selectFieldName= self.fieldNames[int(self.selectFieldID)]
+
+        tele= cfg_par['rfi']['telescope']
+
+        self.coords=tables.table(self.msfile+'/FIELD').getcol('REFERENCE_DIR')
+
+        self.coords =self.coords*180./np.pi
+
+        cfg_par['rfi']['coords'] = SkyCoord(self.coords[self.selectFieldID,:,0]*u.degree, self.coords[self.selectFieldID,:,1]*u.degree,  unit=(u.deg, u.deg))
+
+        self.logger.info("\tField with name {0:s} (Field ID = {1:d})".format(selectFieldName,self.selectFieldID))
+        #self.logger.info("\tCoordinates {}".format(selectFieldName,self.selectFieldID))
         
         self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
         self.nant = len(self.ant_names)
@@ -116,7 +106,8 @@ class rfi:
 
 
         #determine start and end date
-        times_tm, start_tmp, end_tmp = self.time_chunk(cfg_par)
+        times_tm, start_tmp, end_tmp = rfiST.time_chunk(cfg_par)
+
 
 
         t=tables.table(self.msfile)
@@ -125,7 +116,10 @@ class rfi:
         if times !=0:
             value_end = times[1]
             value_start = times[0]
-
+    
+            altaz = rfiST.alt_az(cfg_par,times[0])
+            cfg_par['rfi']['altaz'] = altaz
+            
             t2 = tables.taql('select from $t where TIME < $value_end and TIME>$value_start')
             self.fieldIDs=t2.getcol('FIELD_ID')
             self.ant1=t2.getcol('ANTENNA1')
@@ -133,8 +127,8 @@ class rfi:
 
             selection=self.fieldIDs==self.selectFieldID
             selection*=self.ant1!=self.ant2
-
-            self.vis = t2.getcol('DATA')[selection]
+            if cfg_par['rfi']['use_flags'] == False:
+                self.vis = t2.getcol('DATA')[selection]
             self.flag = t2.getcol('FLAG')[selection]
             self.interval = t2.getcol('INTERVAL')[selection]
             t2.close()
@@ -148,8 +142,14 @@ class rfi:
             #select from cross correlations of the correct field
             selection=self.fieldIDs==self.selectFieldID
             selection*=self.ant1!=self.ant2
+    
+            altaz = rfiST.alt_az(cfg_par,cfg_par['rfi']['startdate'])
+            cfg_par['rfi']['altaz'] = altaz
+            
 
-            self.vis = t.getcol('DATA')[selection]
+            if cfg_par['rfi']['use_flags'] == False:
+                self.vis = t.getcol('DATA')[selection]
+
             self.interval = t.getcol('INTERVAL')[selection]
             self.flag = t.getcol('FLAG')[selection]
 
@@ -163,12 +163,16 @@ class rfi:
         else:
             nrbadant = 0.
 
-        
+
+
         nrBaseline=(nrAnt-nrbadant)*(nrAnt-nrbadant-1)/2        
         cfg_par['rfi']['number_baseline'] = nrBaseline
 
+        #visibilities over all times per baseline
+        cfg_par['rfi']['vis_alltimes_baseline'] = self.flag.shape[0]/nrBaseline
+
+
         #estimate noise
-        self.logger.info("\t ... Theoretical Noise Info ...\n")
         rfiST.predict_noise(cfg_par,self.channelWidths,self.interval,self.flag)
 
         self.logger.info("\t ... info from MS file loaded  \n\n")
@@ -213,6 +217,9 @@ class rfi:
         self.baselines_sort = sorted(baselines, key=lambda baselines: baselines[1])  
 
         cfg_par['rfi']['baseline_lenghts'] = np.array(self.baselines_sort)[:,1]
+ 
+        #baseline statistics
+        rfiST.baseline_stats(cfg_par)
 
         # Define matrix of indecese of baselines                                         
         self.blMatrix=np.zeros((self.nant,self.nant),dtype=int)
@@ -240,15 +247,16 @@ class rfi:
 
         self.logger.info('\t ... Flagging a-prioris  ...\n')
 
+        self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
 
-        self.datacube = np.zeros([len(self.baselines_sort),self.vis.shape[1],self.vis.shape[0]/(len(self.baselines_sort))])
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
         #flag unused polarizations
         pol = cfg_par['rfi']['polarization']
         if (pol == 'xx' or pol == 'XX'):
             self.flag[:,:,1] = True #YY
-            #self.flag[:,:,2] = True #XY
-            #self.flag[:,:,3] = True #YX
+            if self.flag.shape[2]>2:
+                self.flag[:,:,2] = True #XY
+                self.flag[:,:,3] = True #YX
         elif (pol == 'yy' or pol == 'YY'):
             self.flag[:,:,0] = True #YY
             self.flag[:,:,2] = True #XY
@@ -267,7 +275,7 @@ class rfi:
 
 
         #flag autocorrelations and bad antennas
-        for i in xrange(0,self.vis.shape[0]):
+        for i in xrange(0,self.flag.shape[0]):
             
 
             if self.aperfi_badant != None:
@@ -283,17 +291,19 @@ class rfi:
                 counter=baseline_counter[a1,a2]
                 # Put amplitude of visibility
                 # In the right place in the new array
-                if (pol == 'xx' or pol == 'XX'):
-                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])
-                elif (pol == 'yy' or pol == 'YY'):
-                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,1])
-                elif (pol == 'xy' or pol == 'XY'):
-                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,2])
-                elif (pol == 'yx' or pol == 'YX'):
-                    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,3])
-#                elif (pol == 'q' or pol == 'Q'):
-                #    self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])-np.abs(self.vis[i,:,1])/2.
-
+                if cfg_par['rfi']['use_flags'] == True:
+                    self.datacube[indice,:,counter]=self.flag[i,:,0]
+                elif  cfg_par['rfi']['use_flags'] == False:
+                    if (pol == 'xx' or pol == 'XX'):
+                        self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])
+                    if (pol == 'yy' or pol == 'YY'):
+                        self.datacube[indice,:,counter]=np.abs(self.vis[i,:,1])
+                    if (pol == 'xy' or pol == 'XY'):
+                        self.datacube[indice,:,counter]=np.abs(self.vis[i,:,2])
+                    if (pol == 'yx' or pol == 'YX'):
+                        self.datacube[indice,:,counter]=np.abs(self.vis[i,:,3])
+                    elif (pol == 'q' or pol == 'Q'):
+                        self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])-np.abs(self.vis[i,:,1])/2.
                 # Update the number of visibility in that baseline
                 baseline_counter[a1,a2]+=1
 
@@ -346,30 +356,37 @@ class rfi:
 
         time_ax_len = int(self.datacube.shape[2])
 
-        for i in xrange(0,self.datacube.shape[0]):
-            tmp_rms = np.nanmedian(self.datacube[i, chan_min:chan_max, 0])
-            med2 = abs(self.datacube[i, chan_min:chan_max, 0] - tmp_rms)
-            madfm = np.ma.median(med2) / 0.6744888
-            flag_lim = self.aperfi_rmsclip*madfm  
-            self.flag_lim_array[i] = flag_lim    
+        if cfg_par['rfi']['use_flags'] == False: 
 
-            for j in xrange(0,self.datacube.shape[1]):
-                tmpar = self.datacube[i,j,:]
-                mean  = np.nanmean(tmpar)
-                tmpar = tmpar-mean
-                tmpar = abs(tmpar)
-                self.mean_array[i,j] = mean
-                #change masked values to very high number
-                #inds = np.where(np.isnan(tmpar))
-                tmpar[np.isnan(tmpar)]=np.inf
-                tmpar.sort()
-                index_rms = np.argmin(np.abs(tmpar - flag_lim))
-                tmp_over = len(tmpar[index_rms:-1])+1
-                if tmp_over == 1. :
-                    tmp_over = 0.
-                rms[i,j] = 100.*tmp_over/time_ax_len
+            for i in xrange(0,self.datacube.shape[0]):
+                tmp_rms = np.nanmedian(self.datacube[i, chan_min:chan_max, 0])
+                med2 = abs(self.datacube[i, chan_min:chan_max, 0] - tmp_rms)
+                madfm = np.ma.median(med2) / 0.6744888
+                flag_lim = self.aperfi_rmsclip*madfm  
+                self.flag_lim_array[i] = flag_lim    
 
-        self.write_freq_base(cfg_par,rms,time_step)
+                for j in xrange(0,self.datacube.shape[1]):
+                    tmpar = self.datacube[i,j,:]
+                    mean  = np.nanmean(tmpar)
+                    tmpar = tmpar-mean
+                    tmpar = abs(tmpar)
+                    self.mean_array[i,j] = mean
+                    #change masked values to very high number
+                    #inds = np.where(np.isnan(tmpar))
+                    tmpar[np.isnan(tmpar)]=np.inf
+                    tmpar.sort()
+                    index_rms = np.argmin(np.abs(tmpar - flag_lim))
+                    tmp_over = len(tmpar[index_rms:-1])+1
+                    if tmp_over == 1. :
+                        tmp_over = 0.
+                    rms[i,j] = 100.*tmp_over/time_ax_len
+        
+        elif cfg_par['rfi']['use_flags'] == True: 
+            for i in xrange(0,self.datacube.shape[0]):
+                for j in xrange(0,self.datacube.shape[1]):
+                    rms[i,j] = 100.*np.sum(self.datacube[i,j,:])/time_ax_len
+
+        rfi_files.write_freq_base(cfg_par,rms,time_step)
 
         self.logger.info('\t ... RFI found ... \n\n')
 
@@ -388,7 +405,7 @@ class rfi:
 
         #reverse frequencies if going from high-to-low         
         if time_step != -1:
-            time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
+            time_tmp = int(float(cfg_par['rfi']['chunks']['time_step'])*time_step)
             if time_tmp == 0:
                 time_name = '00'+str(time_tmp)+'m'
             elif time_tmp <100:

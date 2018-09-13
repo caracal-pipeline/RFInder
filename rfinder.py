@@ -15,13 +15,13 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
-#sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+#sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
 
 import rfi 
 import rfinder_stats as rfi_stats
 import rfinder_plots as rfi_pl
-
+import rfinder_files as rfi_files
 
 rfi = rfi.rfi()
 
@@ -70,8 +70,8 @@ class rfinder:
             cfg = open(file)
 
         else:
-            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
-            #file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
+            #file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
 
             cfg = open(file_default) 
 
@@ -119,7 +119,7 @@ class rfinder:
         self.rfiplotdir = self.rfidir+'plots/'
         self.cfg_par[key]['plotdir'] = self.rfiplotdir 
 
-        
+ 
 
 
         if os.path.exists(self.rfidir) == False:
@@ -131,7 +131,31 @@ class rfinder:
         if os.path.exists(self.rfiplotdir) == False:
              os.makedirs(self.rfiplotdir)
 
+        if self.cfg_par['rfi']['chunks']['time_enable'] == True:
 
+            self.rfitimedir = self.rfidir+'time_chunks/'
+            self.cfg_par[key]['rfitimedir'] = self.rfitimedir
+
+            if os.path.exists(self.rfitimedir) == False:
+                 os.makedirs(self.rfitimedir)
+
+            self.timetabledir = self.tabledir+'time_chunks/'
+            self.cfg_par[key]['timetabledir'] = self.timetabledir
+
+            if os.path.exists(self.timetabledir) == False:
+                 os.makedirs(self.timetabledir)
+
+            self.timeplotdir = self.rfiplotdir+'time_chunks/'
+            self.cfg_par[key]['timeplotdir'] = self.timeplotdir
+
+            if os.path.exists(self.timeplotdir) == False:
+                 os.makedirs(self.timeplotdir)
+
+            self.altazplotdir = self.rfidir+'plots/altaz/'
+            self.cfg_par[key]['altazplotdir'] = self.altazplotdir        
+
+            if os.path.exists(self.altazplotdir) == False:
+                 os.makedirs(self.altazplotdir)
 
     def go(self,cfg_par):
         '''
@@ -157,12 +181,15 @@ class rfinder:
 
         if self.enable_task(self.cfg_par,task)==True:
             
-            if self.cfg_par[task]['time_chunks']['enable']==True:
+            if self.cfg_par[task]['chunks']['time_enable']==True:
 
-                times, start, end = rfi.time_chunk(self.cfg_par)
+                times, start, end = rfiST.time_chunk(self.cfg_par)
+                self.logger.info(" ------ Working on time chunks ------\n")
 
                 for i in xrange(0,len(times)-1):
                     timez = [times[i],times[i+1]] 
+                    self.logger.info((" ------ Working on chunk #{0:d}: {1:d} minutes after begin of observation ------\n").format(i,int(cfg_par['rfi']['chunks']['time_step']*i)))
+
                     rfi.load_from_ms(self.cfg_par,timez)
                     #sort visibilities by baseline lenght
                     rfi.baselines_from_ms(self.cfg_par)
@@ -173,37 +200,75 @@ class rfinder:
                     #find rfi above threshold
                     rfi.find_rfi(datas,self.cfg_par,i)
 
-                    rfi_pl.rfi_frequency(self.cfg_par,i)
+                    rfi_files.rfi_frequency(self.cfg_par,i)
                     rfi_pl.plot_rfi_imshow(self.cfg_par,i)
                     rfi_pl.plot_noise_frequency(self.cfg_par,i)
 
+                rfi_pl.plot_altaz(self.cfg_par,i)
+
+                self.logger.info(" ------ End of RFI analysis on time chunks ------\n")
 
             else:
 
                 rfi.load_from_ms(self.cfg_par,0)
+                #determine alt/az
+
                 self.logger.info("---- MSfile Loaded -----\n")
                 rfi.baselines_from_ms(self.cfg_par)
                 self.logger.info("---- Dataset sorted by baseline lenght ----\n")
                 datas = rfi.priors_flag(self.cfg_par)
                 self.logger.info("---- Bad antennas and autocorrelations flagged ----\n")
-                rfi.find_rfi(datas,self.cfg_par,0)
+                rfi.find_rfi(datas,self.cfg_par,-1)
         
         task = 'plots'
         if self.enable_task(self.cfg_par,task) == True:
-            if self.enable_task(self.cfg_par,'rfi')==False:
-                rfi.load_from_ms(self.cfg_par,0)
-                rfi.baselines_from_ms(self.cfg_par)
-                
-            rfi_pl.plot_rfi_imshow(self.cfg_par,0)
-            self.logger.info("---- RFI in 2D plotted ----\n")
-            rfi_pl.rfi_frequency(self.cfg_par,0)
-            self.logger.info("---- RFI saved to table ----\n")
-            rfi_pl.plot_noise_frequency(self.cfg_par,0)
-            self.cfg_par['plots']['long_short'] = True
-            self.cfg_par['plots']['plot_noise'] = 'noise'
-            rfi_pl.plot_noise_frequency(self.cfg_par,0)
-            self.logger.info("---- RFI in 1D plotted ----\n")
+            
+            if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
+                times, start, end = rfiST.time_chunk(self.cfg_par)
+                self.logger.info(" ------ Working on time chunks ------\n")
+
+                for i in xrange(0,len(times)-1):
+                    timez = [times[i],times[i+1]]            
+
+                    if self.enable_task(self.cfg_par,'rfi')==False:
+
+                        rfi.load_from_ms(self.cfg_par,timez)
+                        self.logger.info("---- MSfile Loaded -----\n")                
+                        rfi.baselines_from_ms(self.cfg_par)
+                        self.logger.info("---- Dataset sorted by baseline lenght ----\n")
+            
+                    rfi_pl.plot_rfi_imshow(self.cfg_par,i)
+                    self.logger.info("---- RFI in 2D plotted ----\n")
+                    rfi_files.rfi_frequency(self.cfg_par,i)
+                    self.logger.info("---- RFI saved to table ----\n")
+                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
+                    self.cfg_par['plots']['long_short'] = True
+                    self.cfg_par['plots']['plot_noise'] = 'noise_factor'
+                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
+                    self.cfg_par['plots']['plot_noise'] = 'noise'
+                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
+                    self.cfg_par['plots']['long_short'] = False  
+                    rfi_pl.plot_noise_frequency(self.cfg_par,i)            
+                    self.logger.info("---- RFI in 1D plotted ----\n")
+                rfi_pl.plot_altaz(self.cfg_par,i)
+                self.logger.info("---- RFI in ALT/AZ plotted ----\n")
+
+            else:
+
+                rfi_pl.plot_rfi_imshow(self.cfg_par,-1)
+                self.logger.info("---- RFI in 2D plotted ----\n")
+                rfi_files.rfi_frequency(self.cfg_par,-1)
+                self.logger.info("---- RFI saved to table ----\n")
+                rfi_pl.plot_noise_frequency(self.cfg_par,-1)
+                self.cfg_par['plots']['long_short'] = True
+                self.cfg_par['plots']['plot_noise'] = 'noise_factor'
+                rfi_pl.plot_noise_frequency(self.cfg_par,-1)
+                self.cfg_par['plots']['plot_noise'] = 'noise'
+                rfi_pl.plot_noise_frequency(self.cfg_par,-1)
+                self.cfg_par['plots']['long_short'] = False  
+                rfi_pl.plot_noise_frequency(self.cfg_par,-1)            
+                self.logger.info("---- RFI in 1D plotted ----\n")
 
         task = 'beam_shape'
         if self.enable_task(self.cfg_par,task) == True:

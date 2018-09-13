@@ -11,12 +11,12 @@ import logging
 
 
 from astropy.time import Time
-import numpy as np
-from astropy import units as u
-
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.io import fits, ascii
 from astropy import units as u
 from astropy.table import Table, Column, MaskedColumn
+
+
 import rfinder
 
 
@@ -59,15 +59,20 @@ class rfi_stats:
         t.close()
 
         starttime= self.time[0]
-        endtime=self.time[-1]
-        time_chunk = float(cfg_par['rfi']['time_chunks']['time_step'])*60.
-        times=np.arange(starttime,endtime+time_chunk*1,time_chunk)
         
+        endtime=self.time[-1]
+        time_chunk = float(cfg_par['rfi']['chunks']['time_step'])*60.
+        
+        times=np.arange(starttime,endtime+time_chunk*1,time_chunk)
+
         startdate=Time(starttime/3600./24.,format='mjd',scale='utc')
+        cfg_par['rfi']['startdate'] = startdate
         startdate.format='iso' 
         startdate.subformat='date_hm'       
 
         enddate=Time(endtime/3600./24.,format='mjd',scale='utc')
+        cfg_par['rfi']['enddate'] = enddate
+
         enddate.format='iso'        
         enddate.subformat='date_hm'       
 
@@ -77,6 +82,39 @@ class rfi_stats:
 
         return times,startdate,enddate
 
+    def baseline_stats(self,cfg_par):
+
+        self.logger.info("\t ... Baseline info ... \n")
+
+
+        baseline_cutoff = float(cfg_par['rfi']['baseline_cut'])
+        lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+        index_baselines = (np.abs(lenghts - baseline_cutoff)).argmin()
+
+        nrBaseline = cfg_par['rfi']['number_baseline']
+        self.logger.info('\t\t Maximum baseline length     m = '+ str(np.round(lenghts[0][-1],0)))
+        self.logger.info('\t\t Minimum baseline length     m = '+ str(np.round(lenghts[0][0],0)))
+        self.logger.info('\t\t Total number of baselines     = '+ str(nrBaseline))
+
+
+        num_short = index_baselines+1
+        num_long = nrBaseline-num_short
+        cfg_par['rfi']['num_short'] = num_short 
+        cfg_par['rfi']['num_long'] = num_long
+
+        self.logger.info('\t\t Number of baselines < {0:d} m = {1:d}'.format(cfg_par['rfi']['baseline_cut'],int(num_short)))
+        self.logger.info('\t\t Number of baselines > {0:d} m = {1:d}\n'.format(cfg_par['rfi']['baseline_cut'],int(num_long)))
+
+
+        #outdir = cfg_par['general']['rfidir']
+        #basefile = outdir+str(cfg_par['rfi']['telescope'])+'_baselines.txt'
+
+        #if os.path.exists(basefile) == False:
+        #    ascii.write(baseline_array, overwrite=True)
+
+        #self.logger.info("\t ... Baselines saved to file ... \n")
+
+        return 0
 
     def predict_noise(self,cfg_par,channelWidths,interval,flag):
         '''
@@ -138,3 +176,28 @@ class rfi_stats:
 
 
         return 0
+
+
+    def alt_az(self,cfg_par,time):
+
+        self.logger.info("\t ... Altitude/Azimuth info ... \n")
+
+        #open miriad observation
+        tele= cfg_par['rfi']['telescope']
+        coord = cfg_par['rfi']['coords']
+
+        if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':
+            telescope = EarthLocation(lat= -30.712856*u.deg, lon=21.44377374*u.deg, height=1051.0*u.m)        
+        elif tele == 'apertif' or tele == 'Apertif' or tele == 'APERTIF' or tele == 'wsrt':
+            # Set position of Westerbork (source: http://www.sonel.org/spip.php?page=gps&idStation=884)
+            telescope = EarthLocation(lat= 52.91460037*u.deg, lon=6.60449982*u.deg, height=82.2786*u.m)        
+        else:
+            self.logger.error('\t Observing location unknown, impossible to estimate Alt/Az')
+        
+        time = Time(time/3600./24.,format='mjd',scale='utc')
+        frame = AltAz(obstime=time, location=telescope)
+        obs_altaz = coord.transform_to(frame)
+        
+        self.logger.info("\t ... Alt/Az done ... \n")
+
+        return obs_altaz

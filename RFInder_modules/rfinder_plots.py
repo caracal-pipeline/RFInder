@@ -7,158 +7,20 @@ from matplotlib import pyplot as plt
 from matplotlib import ticker
 
 import aplpy
-from astropy.io import fits as pyfits
+from astropy.io import fits as fits
 import numpy as np
 import os
+from astropy.table import Table
 import pyrap.tables as tables
-
-
+from astropy.time import Time, TimeDelta
 import rfi
 rfi = rfi.rfi()
 
 import logging
+
+
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-def rfi_frequency(cfg_par,time_step=-1):
-    '''
-    Determines the rfi per frequency channel. Saves results in table rfi_table.fits
-    For each channel the flag % and factor of noise increase are stored for all, long and short baselines
-    Long and short baselines are separated in half, depending on the number of baselines
-    '''
-    table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
-
-    if time_step != -1:
-        time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
-        if time_tmp == 0:
-            time_name = '00'+str(time_tmp)+'m'
-        elif time_tmp <100:
-            time_name = '0'+str(time_tmp)+'m'
-        else:
-            time_name= str(time_tmp)+'m'
-    else:
-        time_name = 'full'
-    
-
-    table_name = str(table_tmp[0])+'_'+time_name+'.fits'
-    
-    rfi_table = cfg_par['general']['tabledir']+table_name
-    rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'   
-    natural_rms = cfg_par['rms']['theo_rms']
-    #open file
-    #if os.path.exists(self.rfi_freq_base) == False:
-    #    self.logger.error('### Image of RFI sorted by frequency over baseline lenght does not exist ###')    
-    #    self.logger.error('### Run aperfi.rfi_im() first ###')  
-    #else:    
-        
-    # read data and header
-    hdulist = pyfits.open(rfi_freq_base)  # read input                
-    datacube = hdulist[0].data    
-    prihdr = hdulist[0].header
-
-    #set array of frequencies
-    freqs = (np.linspace(1, datacube.shape[1], datacube.shape[1])\
-                 - prihdr['CRPIX1'])*prihdr['CDELT1'] + prihdr['CRVAL1']
-    
-    # set y-array
-    rms_lin = np.zeros([datacube.shape[1]])    
-    flag_lin = np.zeros([datacube.shape[1]])    
-    rms_lin_long = np.zeros([datacube.shape[1]]) + np.sqrt(2.)          
-    rms_lin_short = np.zeros([datacube.shape[1]]) + np.sqrt(2.)   
-    flag_lin_long = np.zeros([datacube.shape[1]]) + 50.          
-    flag_lin_short = np.zeros([datacube.shape[1]]) + 50.
-
-    for i in xrange(0,datacube.shape[1]):
-        
-        flag_lin_tmp = np.divide(np.sum(datacube[:,i]),datacube.shape[0])
-        flag_lin[i] = flag_lin_tmp
-
-
-        baseline_cutoff = float(cfg_par['rfi']['baseline_cut'])
-        lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
-        idx = (np.abs(lenghts - baseline_cutoff)).argmin()
-
-        shortbase=datacube[:idx,i]
-        longbase = datacube[idx:,i]               
-        
-        rms_lin_tmp = 1.-np.divide(np.divide(np.sum(datacube[:,i]),datacube.shape[0]),100.)
-        rms_lin[i] = np.divide(1.,np.sqrt(rms_lin_tmp))
-
-        flag_lin_tmp = np.divide(np.sum(shortbase),len(shortbase))
-        flag_lin_short[i] = flag_lin_tmp
-        rms_lin_tmp_short = 1.-np.divide(np.divide(np.sum(shortbase),len(shortbase)),100.)
-        rms_lin_short[i] *= np.divide(1.,np.sqrt(rms_lin_tmp_short))
-
-        flag_lin_tmp = np.divide(np.sum(longbase),len(longbase))
-        flag_lin_long[i] = flag_lin_tmp
-        rms_lin_tmp_long = 1.-np.divide(np.divide(np.sum(longbase),len(longbase)),100.)
-        rms_lin_long[i] *= np.divide(1.,np.sqrt(rms_lin_tmp_long))
-
-    
-    #rebin results
-    if cfg_par['rfi']['spw_average']['enable'] == True:
-
-        table_name_bin = str(table_tmp[0])+'_'+time_name+'_spwbin.fits'
-        rfi_table_bin = cfg_par['general']['tabledir']+table_name_bin
-
-        step_bin = cfg_par['rfi']['spw_average']['spw_width']
-
-
-        freqs_bin=np.arange(freqs[0],freqs[-1]+step_bin,step_bin)
-        flag_lin_bin=np.zeros(freqs_bin.shape)
-        rms_lin_bin=np.zeros(freqs_bin.shape)
-        flag_lin_bin_short=np.zeros(freqs_bin.shape)
-        rms_lin_bin_short=np.zeros(freqs_bin.shape)
-        flag_lin_bin_long=np.zeros(freqs_bin.shape)
-        rms_lin_bin_long=np.zeros(freqs_bin.shape)
-        # is this correct ???
-        natural_rms_bin=np.zeros(freqs_bin.shape)
-
-
-
-        for i in xrange(0, len(freqs_bin)-1):
-            #look for the right velocity bin
-            index = (freqs_bin[i] <= freqs) & (freqs < freqs_bin[i+1])
-
-            flag_lin_bin[i] = np.nanmean(flag_lin[index])
-            rms_lin_bin[i] = np.nanmean(rms_lin[index])
-            flag_lin_bin_short[i] = np.nanmean(flag_lin_short[index])
-            rms_lin_bin_short[i] = np.nanmean(rms_lin_short[index])
-            flag_lin_bin_long[i] = np.nanmean(flag_lin_long[index])
-            rms_lin_bin_long[i] = np.nanmean(rms_lin_long[index])
-            natural_rms[i] = np.nanmean(natural_rms[index])
-
-        # save fits table        
-        c1 = pyfits.Column(name='frequency', format='D', unit='MHz', array=freqs_bin)
-        c2 = pyfits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin_bin)
-        c3 = pyfits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin_bin)
-        c4 = pyfits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_bin_short)
-        c5 = pyfits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_bin_short)
-        c6 = pyfits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_bin_long)
-        c7 = pyfits.Column(name='noise_factor_long', format='D', array=rms_lin_bin_long)        
-        c8 = pyfits.Column(name='noise_factor_long', format='D', array=natural_rms_bin)        
-
-        fits_table = pyfits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])    
-
-        fits_table.writeto(rfi_table_bin, overwrite = True)
-
-
-    # save fits table        
-    c1 = pyfits.Column(name='frequency', format='D', unit='MHz', array=freqs)
-    c2 = pyfits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin)
-    c3 = pyfits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin)
-    c4 = pyfits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_short)
-    c5 = pyfits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_short)
-    c6 = pyfits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_long)
-    c7 = pyfits.Column(name='noise_factor_long', format='D', array=rms_lin_long)        
-    c8 = pyfits.Column(name='natural_rms', format='D', array=natural_rms)        
-
-    fits_table = pyfits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])    
-    
-    fits_table.writeto(rfi_table, overwrite = True)
-  
-    logger.info("\t ... RFI table saved ...\n")
+logger = logging.getLogger('PLOT')
 
 
 def plot_rfi_im(cfg_par,time_step=-1):      
@@ -173,7 +35,9 @@ def plot_rfi_im(cfg_par,time_step=-1):
     logger.info("\t ... Plotting RFI in 2D ... \n")
 
     if time_step != -1:
-        time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
+        outputdir = str(cfg_par['general']['rfitimedir'])
+        plotdir = cfg_par['general']['timeplotdir']
+        time_tmp = int(float(cfg_par['rfi']['chunks']['time_step'])*time_step)
         if time_tmp == 0:
             time_name = '00'+str(time_tmp)+'m'
         elif time_tmp <100:
@@ -181,10 +45,12 @@ def plot_rfi_im(cfg_par,time_step=-1):
         else:
             time_name= str(time_tmp)+'m'    
     else:
+        outputdir = str(cfg_par['general']['rfidir'])
+        plotdir = str(cfg_par['general']['plotdir'])        
         time_name = 'full' 
 
-    rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'   
-    rfi_freq_base_plot = cfg_par['general']['plotdir']+'freq_base_'+time_name+'_pl.png'
+    rfi_freq_base = outputdir+'freq_base_'+time_name+'_im.fits'   
+    rfi_freq_base_plot = plotdir+'freq_base_'+time_name+'_pl.png'
     
 
 
@@ -227,7 +93,10 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
 
 
     if time_step != -1:
-        time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
+        outputdir = cfg_par['general']['rfitimedir']
+        plotdir = cfg_par['general']['timeplotdir']
+        time_delta = float(cfg_par['rfi']['chunks']['time_step'])*time_step
+        time_tmp = int(time_delta)
         if time_tmp == 0:
             time_name = '00'+str(time_tmp)+'m'
         elif time_tmp <100:
@@ -235,14 +104,22 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
         else:
             time_name= str(time_tmp)+'m'    
     else:
+        outputdir = cfg_par['general']['rfidir']
+        plotdir = cfg_par['general']['plotdir']        
         time_name = 'full' 
 
     rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'   
-    rfi_freq_base_plot = cfg_par['general']['plotdir']+'freq_base_'+time_name+'_pl.png'
+
+    if cfg_par['rfi']['use_flags']== True:
+        rfi_freq_base =outputdir+'freq_base_'+time_name+'_flags.fits'
+        rfi_freq_base_plot = plotdir+'freq_base_'+time_name+'_flags.png'
+    if cfg_par['rfi']['use_flags']== False:
+        rfi_freq_base =outputdir+'freq_base_'+time_name+'_rfi.fits'
+        rfi_freq_base_plot = plotdir+'freq_base_'+time_name+'_rfi.png'
     
 
     # open file
-    t = pyfits.open(rfi_freq_base)
+    t = fits.open(rfi_freq_base)
     data = t[0].data
     prihdr= t[0].header
     freqs = (np.linspace(1, data.shape[1], data.shape[1])- prihdr['CRPIX1'])*prihdr['CDELT1'] + prihdr['CRVAL1']
@@ -258,11 +135,15 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
         freqs_plot_idx[i]=idx
 
 
-
-    input_baselines = np.zeros(7)
-    for i in xrange (0,len(input_baselines)):
-        input_baselines[i] = 50.*np.power(2,i)
-
+    tele= cfg_par['rfi']['telescope']
+    if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':    
+        input_baselines = np.zeros(6)
+        for i in xrange (0,len(input_baselines)):
+            input_baselines[i] = 100.*np.power(2,i)
+    elif tele == 'apertif' or tele == 'Apertif' or tele == 'APERTIF' or tele == 'wsrt':
+        input_baselines = np.zeros(7)
+        for i in xrange (0,len(input_baselines)):
+            input_baselines[i] = 50.*np.power(2,i)
 
 
     input_baselines_idx=np.zeros(input_baselines.shape)
@@ -307,16 +188,32 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
     
     # colorbar
     cbar = fig.colorbar(im,ticks=[10, 20, 30,40,50,60,70,80,90,100]) 
-    cbar.set_label(r'$\% > 5 \times$ r.m.s.',size=20)
+    if cfg_par['rfi']['use_flags'] == False:
+        cbar.set_label(r'$\% > 5 \times$ r.m.s.',size=20)
+    if cfg_par['rfi']['use_flags'] == True:
+        cbar.set_label(r'$\%$ flagged visibilites',size=20)
+
+    #times, start, end = rfi.time_chunk(cfg_par)
+    #start.format='iso' 
+    #start.subformat='date_hm'   
+    #end.format='iso'
+    #end.subformat='date_hm'
 
 
+    if cfg_par['rfi']['chunks']['time_enable']== False:
+        start = cfg_par['rfi']['startdate']
+        end = cfg_par['rfi']['enddate']
 
-    times, start, end = rfi.time_chunk(cfg_par)
-    start.format='iso' 
-    start.subformat='date_hm'   
-    end.format='iso'
-    end.subformat='date_hm'
-    title_plot = '{0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}'.format(start.datetime,end.datetime)
+    elif cfg_par['rfi']['chunks']['time_enable'] == True:
+        time_delta = dt2 = TimeDelta(time_delta*60., format='sec')
+        start = cfg_par['rfi']['startdate']
+        end = start+ time_delta
+
+    if cfg_par['rfi']['use_flags'] == False:
+        title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('RFI clip',start.datetime,end.datetime)
+    if cfg_par['rfi']['use_flags'] == True:
+        title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
+    
     ax.set_title(title_plot)
  
     plt.savefig(rfi_freq_base_plot,format='png' ,overwrite=True)
@@ -341,9 +238,15 @@ def plot_noise_frequency(cfg_par,time_step=-1):
 
 
     table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
+    if len(table_tmp) == 1:
+        table_tmp = string.split(cfg_par['general']['msname'][0],'.ms')
 
     if time_step != -1:
-        time_tmp = int(float(cfg_par['rfi']['time_chunks']['time_step'])*time_step)
+        tabledir = cfg_par['general']['timetabledir'] 
+        plotdir = cfg_par['general']['timeplotdir']
+        time_delta = float(cfg_par['rfi']['chunks']['time_step'])*time_step
+        time_tmp = int(time_delta)
+        #name file according to WSRT beams
         if time_tmp == 0:
             time_name = '00'+str(time_tmp)+'m'
         elif time_tmp <100:
@@ -351,13 +254,19 @@ def plot_noise_frequency(cfg_par,time_step=-1):
         else:
             time_name= str(time_tmp)+'m'    
     else:
+        tabledir = cfg_par['general']['tabledir']        
+        plotdir = cfg_par['general']['plotdir']        
         time_name = 'full' 
 
-    table_name = str(table_tmp[0])+'_'+time_name+'.fits'
-    rfi_table = cfg_par['general']['tabledir']+table_name
+    if cfg_par['rfi']['use_flags']== True:
+        table_name = str(table_tmp[0])+'_'+time_name+'_flags.fits'
+    elif cfg_par['rfi']['use_flags']== False:
+        table_name = str(table_tmp[0])+'_'+time_name+'_rfi.fits'
+
+    rfi_table = tabledir+table_name
     
 
-    t = pyfits.open(rfi_table)
+    t = fits.open(rfi_table)
     data_vec = t[1].data
     cols = t[1].columns
     
@@ -375,21 +284,21 @@ def plot_noise_frequency(cfg_par,time_step=-1):
         noise_all = noise_factor*rms
         noise_short = noise_factor_short*rms
         noise_long = noise_factor_long*rms
-        out_plot = cfg_par['general']['plotdir']+'freq_noise_'+time_name
+        out_plot = plotdir+'freq_noise_'+time_name
     
     if cfg_par['plots']['plot_noise'] == 'noise_factor':
         logger.info("\t ... Plotting factor of noise increas per frequency channel ...")
         noise_all = noise_factor
         noise_short = noise_factor_short
         noise_long = noise_factor_long    
-        out_plot = cfg_par['general']['plotdir']+'freq_noise_factor_'+time_name
+        out_plot = plotdir+'freq_noise_factor_'+time_name
     
     if cfg_par['plots']['plot_noise'] == 'rfi':
         logger.info("\t ... Plotting percentage of flagged RFI per frequency channel ...")
         noise_all = flags
         noise_long = flags_long
         noise_short = flags_short
-        out_plot = cfg_par['general']['plotdir']+'freq_flags_'+time_name
+        out_plot = plotdir+'freq_flags_'+time_name
 
 
     # initialize plotting parameters
@@ -424,7 +333,6 @@ def plot_noise_frequency(cfg_par,time_step=-1):
 
     if cfg_par['plots']['plot_long_short'] == True:
         logger.info("\t ... Plotting RFI in long and short baselines ...")
-
         ax1.step(freqs,noise_short, where= 'pre', color='red', linestyle='-',label=label_short)
         ax1.step(freqs,noise_long, where= 'pre', color='blue', linestyle='-',label=label_long)
         out_plot = out_plot+'_sl'
@@ -443,31 +351,171 @@ def plot_noise_frequency(cfg_par,time_step=-1):
 
     if cfg_par['plots']['plot_noise']  == 'noise_factor':
         ax1.set_yticks([1,round(np.sqrt(2),2),2,3,5,10,50]) 
+        ax1.set_yscale('linear')     
         ax1.set_ylabel(r'Factor of noise increase')
         ax1.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
 
     if cfg_par['plots']['plot_noise'] == 'noise':
-        ax1.set_yticks([1,2,3,5,10,50]) 
+        ax1.set_yscale('linear')     
         ax1.set_ylabel(r'Predicted noise [mJy beam$^{-1}$]')     
         ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
     if cfg_par['plots']['plot_noise'] == 'rfi':
-        ax1.set_ylabel(r'$\% >$ '+str(cfg_par['rfi']['rms_clip'])+'*rms') 
+        if cfg_par['rfi']['use_flags'] == False:
+            ax1.set_ylabel(r'$\% > 5 \times$ r.m.s.',size=20)
+        if cfg_par['rfi']['use_flags'] == True:
+            ax1.set_ylabel(r'$\%$ flagged visibilites',size=20)    
     
     legend = plt.legend()
     legend.get_frame().set_edgecolor('black')
 
-    times, start, end = rfi.time_chunk(cfg_par)
-    start.format='iso' 
-    start.subformat='date_hm'   
-    end.format='iso'
-    end.subformat='date_hm'
-    title_plot = '{0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}'.format(start.datetime,end.datetime)
+    if cfg_par['rfi']['chunks']['time_enable']== False:
+        start = cfg_par['rfi']['startdate']
+        end = cfg_par['rfi']['enddate']
+
+    elif cfg_par['rfi']['chunks']['time_enable'] == True:
+        time_delta = dt2 = TimeDelta(time_delta*60., format='sec')
+        start = cfg_par['rfi']['startdate']
+        end = start+ time_delta
+
+    if cfg_par['rfi']['use_flags'] == False:
+        title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('RFI clip',start.datetime,end.datetime)
+    if cfg_par['rfi']['use_flags'] == True:
+        title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
+    
     ax1.set_title(title_plot)
 
     # Save figure to file
-    rfi_freq_plot = out_plot+'_pl.png'
+    if cfg_par['rfi']['use_flags']== True:
+        rfi_freq_plot = out_plot+'_flags.png'
+    if cfg_par['rfi']['use_flags']== False:
+        rfi_freq_plot = out_plot+'_rfi.png'
+
     plt.savefig(rfi_freq_plot,format='png',overwrite = True)      
 
     logger.info("\t ... RFI in 1D plotted ...\n\n")
    
+
+def plot_altaz(cfg_par,number_chunks):
+    '''
+    Plots the elevation/azimuth of the observation scan binned by time chunks, for every binned spectral window
+    '''
+
+
+    logger.info("\t ... Plotting Alt/Az for binned dataset ... \n")
+  
+
+
+    if os.path.exists(cfg_par['general']['timetabledir']) == False:
+        logger.error("\t Folder with time subsets missing")
+
+    table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
+    if len(table_tmp) == 1:
+        table_tmp = string.split(cfg_par['general']['msname'][0],'.ms')
+
+    freq_S = cfg_par['rfi']['lowfreq']/1e6
+    freq_E = cfg_par['rfi']['highfreq']/1e6
+
+    step_bin = cfg_par['rfi']['chunks']['spw_width']
+    
+    freqs_bin=np.arange(freq_S,freq_E+step_bin,step_bin)
+
+
+    for j in xrange(0,len(freqs_bin)):
+        spw = []
+        az = []
+        alt = []
+        flags =[]
+
+
+        for i in xrange(0,number_chunks):
+        
+            tabledir = cfg_par['general']['timetabledir'] 
+            plotdir = cfg_par['general']['plotdir']
+            time_delta = float(cfg_par['rfi']['chunks']['time_step'])*i
+            time_tmp = int(time_delta)
+
+            #name file according to WSRT beams
+            if time_tmp == 0:
+                time_name = '00'+str(time_tmp)+'m'
+            elif time_tmp <100:
+                time_name = '0'+str(time_tmp)+'m'
+            else:
+                time_name= str(time_tmp)+'m'    
+
+            if cfg_par['rfi']['use_flags']== True:
+                table_name = str(table_tmp[0])+'_'+time_name+'_spwbin_flags.fits'
+            elif cfg_par['rfi']['use_flags']== False:
+                table_name = str(table_tmp[0])+'_'+time_name+'_spwbin_rfi.fits'
+
+            rfi_table = tabledir+table_name
+
+            table = Table.read(rfi_table)
+
+            spw.append(table['frequency'][j])
+            az.append(table['azimuth'][j])
+            alt.append(table['elevation'][j])
+            flags.append(table['percentage_flags'][j])
+
+        plotdir = cfg_par['general']['altazplotdir']
+
+        start_freq = int(np.round(freq_S+float(cfg_par['rfi']['chunks']['spw_width'])*j,0))
+        end_freq = int(np.round(start_freq+float(cfg_par['rfi']['chunks']['spw_width']),0))
+
+        spwname= str(start_freq)+'-'+str(end_freq)
+        # Save figure to file
+        if cfg_par['rfi']['use_flags']== True:
+           altazplot = plotdir+'AltAZ_'+spwname+'MHZ_flags.png'
+        if cfg_par['rfi']['use_flags']== False:
+           altazplot = plotdir+'AltAZ_'+spwname+'_rfi.png'
+
+
+        start = cfg_par['rfi']['startdate']
+        end = cfg_par['rfi']['enddate']
+
+
+        # initialize plotting parameters
+        params = {'font.family'         :' serif',
+                  'font.style'          : 'normal',
+                  'font.weight'         : 'medium',
+                  'font.size'           : 18.0,
+                  'text.usetex': True,
+                  'text.latex.unicode': True
+                   }
+        plt.rcParams.update(params)
+        
+        # initialize figure
+        fig = plt.figure(figsize =(8,8))
+        fig.subplots_adjust(hspace=0.0)
+        gs = gridspec.GridSpec(1, 1)
+        plt.rc('xtick', labelsize=20)
+
+        # Initialize subplots
+        ax1 = fig.add_subplot(gs[0])
+        ax1.set_xlabel(r'Azimuth [$^{\circ}$]',fontsize=20)
+        ax1.set_ylabel(r'Elevation [$^{\circ}$]',fontsize=20)
+        ax1.set_ylim([0,90])
+        ax1.set_xlim([0,360])
+        
+        asse = ax1.scatter(az,alt,c=flags,cmap='nipy_spectral_r',vmin=0,vmax=100.)
+
+         # colorbar
+        cbar = plt.colorbar(asse,ticks=[10, 20, 30,40,50,60,70,80,90,100]) 
+        if cfg_par['rfi']['use_flags'] == False:
+            cbar.set_label(r'$\% > 5 \times$ r.m.s.',size=20)
+        if cfg_par['rfi']['use_flags'] == True:
+            cbar.set_label(r'$\%$ flagged visibilites',size=20)       
+
+        if cfg_par['rfi']['use_flags'] == False:
+            title_plot = 'SPW {0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,'RFI clip',start.datetime,end.datetime)
+        if cfg_par['rfi']['use_flags'] == True:
+            title_plot = 'SPW {0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,'Flags',start.datetime,end.datetime)        
+
+        ax1.set_title(title_plot)
+
+        plt.savefig(altazplot,format='png',overwrite = True)      
+
+        logger.info(('\t ... ALT/AZ for spw: {0:d}-{1:d} MHz  ...').format(start_freq,end_freq))
+   
+
+    return 0
