@@ -35,7 +35,6 @@ def write_freq_base(cfg_par,rms,time_step=-1) :
 
     #reverse frequencies if going from high-to-low         
     if time_step != -1:
-        print 'imhere'
         outputdir = cfg_par['general']['rfitimedir']
         time_tmp = int(float(cfg_par['rfi']['chunks']['time_step'])*time_step)
         if time_tmp == 0:

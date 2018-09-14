@@ -200,11 +200,11 @@ class rfinder:
                     #find rfi above threshold
                     rfi.find_rfi(datas,self.cfg_par,i)
 
-                    rfi_files.rfi_frequency(self.cfg_par,i)
-                    rfi_pl.plot_rfi_imshow(self.cfg_par,i)
-                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
+                    #rfi_files.rfi_frequency(self.cfg_par,i)
+                    #rfi_pl.plot_rfi_imshow(self.cfg_par,i)
+                    #rfi_pl.plot_noise_frequency(self.cfg_par,i)
 
-                rfi_pl.plot_altaz(self.cfg_par,i)
+                #rfi_pl.plot_altaz(self.cfg_par,i)
 
                 self.logger.info(" ------ End of RFI analysis on time chunks ------\n")
 
@@ -251,6 +251,7 @@ class rfinder:
                     self.cfg_par['plots']['long_short'] = False  
                     rfi_pl.plot_noise_frequency(self.cfg_par,i)            
                     self.logger.info("---- RFI in 1D plotted ----\n")
+                
                 rfi_pl.plot_altaz(self.cfg_par,i)
                 self.logger.info("---- RFI in ALT/AZ plotted ----\n")
 

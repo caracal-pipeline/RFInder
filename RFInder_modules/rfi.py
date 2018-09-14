@@ -56,29 +56,27 @@ class rfi:
 
         '''
 
-        self.logger.info("\t ... Bandwidth & Antenna Info ...\n")
+        self.logger.info("\t ... Field, Antenna & Bandwidth Info ...\n")
         
         self.msfile = cfg_par['general']['msfullpath']
         self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
         self.selectFieldID = cfg_par['general']['field']
 
-        antennas = tables.table(self.msfile +'/ANTENNA')
-        self.ant_pos = np.array(antennas.getcol('POSITION'))
-        self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
+
         
-        self.fieldNames=tables.table(self.msfile+'/FIELD').getcol('NAME')
+        fields=tables.table(self.msfile+'/FIELD')
+        self.fieldNames = fields.getcol('NAME')
         selectFieldName= self.fieldNames[int(self.selectFieldID)]
-
-        tele= cfg_par['rfi']['telescope']
-
-        self.coords=tables.table(self.msfile+'/FIELD').getcol('REFERENCE_DIR')
-
+        self.coords=fields.getcol('REFERENCE_DIR')
         self.coords =self.coords*180./np.pi
-
         cfg_par['rfi']['coords'] = SkyCoord(self.coords[self.selectFieldID,:,0]*u.degree, self.coords[self.selectFieldID,:,1]*u.degree,  unit=(u.deg, u.deg))
 
         self.logger.info("\tField with name {0:s} (Field ID = {1:d})".format(selectFieldName,self.selectFieldID))
         #self.logger.info("\tCoordinates {}".format(selectFieldName,self.selectFieldID))
+  
+        antennas = tables.table(self.msfile +'/ANTENNA')
+        self.ant_pos = np.array(antennas.getcol('POSITION'))
+        self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
         
         self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
         self.nant = len(self.ant_names)

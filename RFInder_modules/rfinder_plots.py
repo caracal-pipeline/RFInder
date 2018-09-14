@@ -492,8 +492,8 @@ def plot_altaz(cfg_par,number_chunks):
 
         # Initialize subplots
         ax1 = fig.add_subplot(gs[0])
-        ax1.set_xlabel(r'Azimuth [$^{\circ}$]',fontsize=20)
-        ax1.set_ylabel(r'Elevation [$^{\circ}$]',fontsize=20)
+        ax1.set_xlabel(r'Azimuth [deg]',fontsize=20)
+        ax1.set_ylabel(r'Elevation [deg]',fontsize=20)
         ax1.set_ylim([0,90])
         ax1.set_xlim([0,360])
         
