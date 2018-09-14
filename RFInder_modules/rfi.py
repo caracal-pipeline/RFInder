@@ -141,10 +141,9 @@ class rfi:
             selection=self.fieldIDs==self.selectFieldID
             selection*=self.ant1!=self.ant2
     
-            altaz = rfiST.alt_az(cfg_par,cfg_par['rfi']['startdate'])
+            altaz = rfiST.alt_az(cfg_par,times_tm[0])
             cfg_par['rfi']['altaz'] = altaz
             
-
             if cfg_par['rfi']['use_flags'] == False:
                 self.vis = t.getcol('DATA')[selection]
 
@@ -246,7 +245,8 @@ class rfi:
         self.logger.info('\t ... Flagging a-prioris  ...\n')
 
         self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
-
+        print self.datacube.shape
+        print 'ZZZZZZZZZZZZZZZZZZZZZZZ'
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
         #flag unused polarizations
         pol = cfg_par['rfi']['polarization']
@@ -268,8 +268,9 @@ class rfi:
             self.flag[:,:,1] = True #XY
             self.flag[:,:,2] = True #YX  
         elif (pol == 'q' or pol == 'QQ'):
-            self.flag[:,:,2] = True #XY
-            self.flag[:,:,3] = True #YX
+            if self.flag.shape[2]>2:
+                self.flag[:,:,2] = True #XY
+                self.flag[:,:,3] = True #YX
 
 
         #flag autocorrelations and bad antennas
@@ -357,27 +358,32 @@ class rfi:
         if cfg_par['rfi']['use_flags'] == False: 
 
             for i in xrange(0,self.datacube.shape[0]):
-                tmp_rms = np.nanmedian(self.datacube[i, chan_min:chan_max, 0])
-                med2 = abs(self.datacube[i, chan_min:chan_max, 0] - tmp_rms)
-                madfm = np.ma.median(med2) / 0.6744888
-                flag_lim = self.aperfi_rmsclip*madfm  
-                self.flag_lim_array[i] = flag_lim    
+                
+                if self.datacube.shape[2] == 0:
+                    rms[i,:] = 100.
+                else:
+                    tmp_rms = np.nanmedian(self.datacube[i, chan_min:chan_max, 0])
+                    med2 = abs(self.datacube[i, chan_min:chan_max, 0] - tmp_rms)
+                    madfm = np.ma.median(med2) / 0.6744888
+                    flag_lim = self.aperfi_rmsclip*madfm  
+                
+                    self.flag_lim_array[i] = flag_lim    
 
-                for j in xrange(0,self.datacube.shape[1]):
-                    tmpar = self.datacube[i,j,:]
-                    mean  = np.nanmean(tmpar)
-                    tmpar = tmpar-mean
-                    tmpar = abs(tmpar)
-                    self.mean_array[i,j] = mean
-                    #change masked values to very high number
-                    #inds = np.where(np.isnan(tmpar))
-                    tmpar[np.isnan(tmpar)]=np.inf
-                    tmpar.sort()
-                    index_rms = np.argmin(np.abs(tmpar - flag_lim))
-                    tmp_over = len(tmpar[index_rms:-1])+1
-                    if tmp_over == 1. :
-                        tmp_over = 0.
-                    rms[i,j] = 100.*tmp_over/time_ax_len
+                    for j in xrange(0,self.datacube.shape[1]):
+                        tmpar = self.datacube[i,j,:]
+                        mean  = np.nanmean(tmpar)
+                        tmpar = tmpar-mean
+                        tmpar = abs(tmpar)
+                        self.mean_array[i,j] = mean
+                        #change masked values to very high number
+                        #inds = np.where(np.isnan(tmpar))
+                        tmpar[np.isnan(tmpar)]=np.inf
+                        tmpar.sort()
+                        index_rms = np.argmin(np.abs(tmpar - flag_lim))
+                        tmp_over = len(tmpar[index_rms:-1])+1
+                        if tmp_over == 1. :
+                            tmp_over = 0.
+                        rms[i,j] = 100.*tmp_over/time_ax_len
         
         elif cfg_par['rfi']['use_flags'] == True: 
             for i in xrange(0,self.datacube.shape[0]):

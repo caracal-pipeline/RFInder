@@ -205,9 +205,10 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
         end = cfg_par['rfi']['enddate']
 
     elif cfg_par['rfi']['chunks']['time_enable'] == True:
-        time_delta = dt2 = TimeDelta(time_delta*60., format='sec')
-        start = cfg_par['rfi']['startdate']
-        end = start+ time_delta
+        time_del = TimeDelta(time_delta*time_step*60., format='sec')
+        time_delta_plus = TimeDelta((time_delta*time_step+time_step)*60., format='sec')
+        start = cfg_par['rfi']['startdate']+time_del
+        end = start+time_delta_plus
 
     if cfg_par['rfi']['use_flags'] == False:
         title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('RFI clip',start.datetime,end.datetime)
@@ -280,7 +281,7 @@ def plot_noise_frequency(cfg_par,time_step=-1):
 
    
     if cfg_par['plots']['plot_noise'] == 'noise':
-        rms = np.array(cfg_par['rfi']['theo_rms'],dtype=float)
+        rms = np.array(cfg_par['rfi']['theo_rms']*1e3,dtype=float)
         noise_all = noise_factor*rms
         noise_short = noise_factor_short*rms
         noise_long = noise_factor_long*rms
@@ -374,9 +375,10 @@ def plot_noise_frequency(cfg_par,time_step=-1):
         end = cfg_par['rfi']['enddate']
 
     elif cfg_par['rfi']['chunks']['time_enable'] == True:
-        time_delta = dt2 = TimeDelta(time_delta*60., format='sec')
-        start = cfg_par['rfi']['startdate']
-        end = start+ time_delta
+        time_del = TimeDelta(time_delta*time_step*60., format='sec')
+        time_delta_plus = TimeDelta((time_delta*time_step+time_step)*60., format='sec')
+        start = cfg_par['rfi']['startdate']+time_del
+        end = start+time_delta_plus
 
     if cfg_par['rfi']['use_flags'] == False:
         title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('RFI clip',start.datetime,end.datetime)
@@ -499,6 +501,10 @@ def plot_altaz(cfg_par,number_chunks):
         
         asse = ax1.scatter(az,alt,c=flags,cmap='nipy_spectral_r',vmin=0,vmax=100.)
 
+
+        start = cfg_par['rfi']['startdate']
+        end = cfg_par['rfi']['enddate']
+        
          # colorbar
         cbar = plt.colorbar(asse,ticks=[10, 20, 30,40,50,60,70,80,90,100]) 
         if cfg_par['rfi']['use_flags'] == False:
