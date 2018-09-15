@@ -13,10 +13,15 @@ These are the available functions:
 - visualize the increase in noice due to RFI per frequency channel.
 - estimate the shape of the PSF after flagging of RFI.
 
+check out the `WiKi` for a complete illustration of `RFInder`.
+
+***
+### Usage
+
 `rfinder` is run using a `.yml` [parameter file](https://github.com/Fil8/RFInder/wiki/Parameter-file) as `python rfinderpipeline.py <path_to_parameter_file.yml>`, or through a `IPython`
 [notebook](https://github.com/Fil8/RFInder/blob/master/tutorials/T2_rfinder_automated.ipynb). 
 
-To call `rfinder` automatically with the parameters stored in `rfinder_default.yml` add the following lines to your `.cshrc/.bashrc` file:
+To call `RFInder` as `rfinder` from anywhere in your shell (using the parameters stored in `rfinder_default.yml`) add the following lines to your `.cshrc` file:
 
 ```
 setenv RFI '<path_to_rfinder_pipeline.py>'
