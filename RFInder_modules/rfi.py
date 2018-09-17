@@ -245,8 +245,7 @@ class rfi:
         self.logger.info('\t ... Flagging a-prioris  ...\n')
 
         self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
-        print self.datacube.shape
-        print 'ZZZZZZZZZZZZZZZZZZZZZZZ'
+
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
         #flag unused polarizations
         pol = cfg_par['rfi']['polarization']

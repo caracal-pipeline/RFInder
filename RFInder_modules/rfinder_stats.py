@@ -197,7 +197,11 @@ class rfi_stats:
         time = Time(time/3600./24.,format='mjd',scale='utc')
         frame = AltAz(obstime=time, location=telescope)
         obs_altaz = coord.transform_to(frame)
-        
+        cfg_par['rfi']['altaz'] = obs_altaz
+       
+        self.logger.info(('\t\t ... Altitude = {0:s}').format(cfg_par['rfi']['altaz'].alt))
+        self.logger.info(('\t\t ... Azimuth = {0:s}\n').format(cfg_par['rfi']['altaz'].az))
+
         self.logger.info("\t ... Alt/Az done ... \n")
 
         return obs_altaz

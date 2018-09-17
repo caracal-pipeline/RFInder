@@ -224,7 +224,7 @@ def rfi_frequency(cfg_par,time_step=-1):
         c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_bin_long)
         c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_bin_long)        
         c8 = fits.Column(name='natural_rms', format='D', array=natural_rms_bin)        
-        c9 = fits.Column(name='elevation', format='D', unit='deg', array=elevation_bin)        
+        c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation_bin)        
         c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth_bin)        
 
         fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10])    
@@ -241,7 +241,7 @@ def rfi_frequency(cfg_par,time_step=-1):
     c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_long)
     c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_long)        
     c8 = fits.Column(name='natural_rms', format='D', array=natural_rms)        
-    c9 = fits.Column(name='elevation', format='D', unit='deg', array=elevation)        
+    c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation)        
     c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth)        
     
     fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])    

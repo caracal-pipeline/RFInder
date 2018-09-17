@@ -456,7 +456,7 @@ def plot_altaz(cfg_par,number_chunks):
 
             spw.append(table['frequency'][j])
             az.append(table['azimuth'][j])
-            alt.append(table['elevation'][j])
+            alt.append(table['altitude'][j])
             flags.append(table['percentage_flags'][j])
 
         plotdir = cfg_par['general']['altazplotdir']
@@ -495,12 +495,11 @@ def plot_altaz(cfg_par,number_chunks):
         # Initialize subplots
         ax1 = fig.add_subplot(gs[0])
         ax1.set_xlabel(r'Azimuth [deg]',fontsize=20)
-        ax1.set_ylabel(r'Elevation [deg]',fontsize=20)
+        ax1.set_ylabel(r'Altitude [deg]',fontsize=20)
         ax1.set_ylim([0,90])
         ax1.set_xlim([0,360])
         
         asse = ax1.scatter(az,alt,c=flags,cmap='nipy_spectral_r',vmin=0,vmax=100.)
-
 
         start = cfg_par['rfi']['startdate']
         end = cfg_par['rfi']['enddate']
