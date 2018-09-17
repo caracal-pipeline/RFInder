@@ -205,8 +205,8 @@ def plot_rfi_imshow(cfg_par,time_step=-1):
         end = cfg_par['rfi']['enddate']
 
     elif cfg_par['rfi']['chunks']['time_enable'] == True:
-        time_del = TimeDelta(time_delta*time_step*60., format='sec')
-        time_delta_plus = TimeDelta((time_delta*time_step+time_step)*60., format='sec')
+        time_del = TimeDelta(time_delta*60., format='sec')
+        time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
         start = cfg_par['rfi']['startdate']+time_del
         end = start+time_delta_plus
 
@@ -375,8 +375,8 @@ def plot_noise_frequency(cfg_par,time_step=-1):
         end = cfg_par['rfi']['enddate']
 
     elif cfg_par['rfi']['chunks']['time_enable'] == True:
-        time_del = TimeDelta(time_delta*time_step*60., format='sec')
-        time_delta_plus = TimeDelta((time_delta*time_step+time_step)*60., format='sec')
+        time_del = TimeDelta(time_delta*60., format='sec')
+        time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
         start = cfg_par['rfi']['startdate']+time_del
         end = start+time_delta_plus
 

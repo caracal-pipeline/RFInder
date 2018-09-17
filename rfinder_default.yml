@@ -2,7 +2,7 @@ general:
     __helpstr: General INPUT directories and filenames
     workdir: /Users/maccagni/Projects/RFI/rfinder_test/ #full path to working directory
     msname: ['fa1_conc.ms'] #name of input ms file
-    field: 0 #field ID of target of file
+    field: 1 #field ID of target of file
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold 

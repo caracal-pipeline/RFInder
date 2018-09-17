@@ -191,7 +191,7 @@ class rfinder:
                     self.logger.info((" ------ Working on chunk #{0:d}: {1:d} minutes after begin of observation ------\n").format(i,int(cfg_par['rfi']['chunks']['time_step']*i)))
 
                     rfi.load_from_ms(self.cfg_par,timez)
-                     self.logger.info("---- MSfile Loaded -----\n")
+                    self.logger.info("---- MSfile Loaded -----\n")
 
                     #sort visibilities by baseline lenght
                     rfi.baselines_from_ms(self.cfg_par)
