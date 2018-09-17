@@ -21,13 +21,15 @@ check out the `WiKi` for a complete illustration of `RFInder`.
 `rfinder` is run using a `.yml` [parameter file](https://github.com/Fil8/RFInder/wiki/Parameter-file) as `python rfinderpipeline.py <path_to_parameter_file.yml>`, or through a `IPython`
 [notebook](https://github.com/Fil8/RFInder/blob/master/tutorials/T2_rfinder_automated.ipynb). 
 
-To call `RFInder` as `rfinder` from anywhere in your shell (using the parameters stored in `rfinder_default.yml`) add the following lines to your `.cshrc` file:
+To call `RFInder` as `rfinder` from anywhere in your shell (using the parameters stored in `rfinder_default.yml`) add the following lines to your `.cshrc/.bashrc` file:
 
 ```
 setenv RFI '<path_to_rfinder_pipeline.py>'
-export RFI="path_to_rfinder_pipeline.py>:$RFI"
-
 alias rfinder 'python $RFI/rfi_pipeline.py $RFI/rfinder_default.yml'
+
+export RFI="path_to_rfinder_pipeline.py>:$RFI"
+alias rfinder='python $RFI/rfi_pipeline.py $RFI/rfinder_default.yml'
+
 ```
 
 These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) can guide you through the different capabilities of `rfinder`.
