@@ -24,6 +24,7 @@ import rfinder_files as rfi_files
 
 
 rfiST = rfi_stats.rfi_stats()
+#rfiPLOT = rfi_plots.rfi_plots()
 
 
 

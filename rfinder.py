@@ -11,6 +11,7 @@ import logging
 
 from astropy.io import fits, ascii
 from astropy import units as u
+from astropy.time import Time, TimeDelta
 from astropy.table import Table, Column, MaskedColumn
 
 import warnings
@@ -20,12 +21,13 @@ sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
 
 import rfi 
 import rfinder_stats as rfi_stats
-import rfinder_plots as rfi_pl
+import rfinder_plots as rfi_plots
 import rfinder_files as rfi_files
 
 rfi = rfi.rfi()
-
 rfiST = rfi_stats.rfi_stats()
+rfiPLOT = rfi_plots.rfi_plots()
+
 
 __author__ = "Filippo Maccagni"
 __copyright__ = "Apertif"
@@ -145,11 +147,22 @@ class rfinder:
             if os.path.exists(self.timetabledir) == False:
                  os.makedirs(self.timetabledir)
 
-            self.timeplotdir = self.rfiplotdir+'time_chunks/'
-            self.cfg_par[key]['timeplotdir'] = self.timeplotdir
+            timeplotdir_tmp = self.rfiplotdir+'time_chunks/'
+            
+            if os.path.exists(timeplotdir_tmp) == False:
+                 os.makedirs(timeplotdir_tmp)
 
-            if os.path.exists(self.timeplotdir) == False:
-                 os.makedirs(self.timeplotdir)
+            self.timeplotdir1d = timeplotdir_tmp+'1D/'
+            self.cfg_par[key]['timeplotdir1D'] = self.timeplotdir1d
+
+            if os.path.exists(self.timeplotdir1d) == False:
+                 os.makedirs(self.timeplotdir1d)
+
+            self.timeplotdir2d = timeplotdir_tmp+'2D/'
+            self.cfg_par[key]['timeplotdir2D'] = self.timeplotdir2d
+
+            if os.path.exists(self.timeplotdir2d) == False:
+                 os.makedirs(self.timeplotdir2d)
 
             self.altazplotdir = self.rfidir+'plots/altaz/'
             self.cfg_par[key]['altazplotdir'] = self.altazplotdir        
@@ -191,7 +204,16 @@ class rfinder:
 
                 for i in xrange(0,len(times)-1):
                     timez = [times[i],times[i+1]] 
-                    self.logger.info((" ------ Working on chunk #{0:d}: {1:d} minutes after begin of observation ------\n").format(i,int(cfg_par['rfi']['chunks']['time_step']*i)))
+                    
+                    #time chunk properties
+                    time_delta = float(self.cfg_par['rfi']['chunks']['time_step'])*i
+                    time_del = TimeDelta(time_delta*60., format='sec')
+                    time_delta_plus = TimeDelta(float(self.cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
+                    start = self.cfg_par['rfi']['startdate']+time_del
+                    end = start+time_delta_plus
+
+                    self.logger.info((" ------ Working on chunk #{0:d}:").format(i))
+                    self.logger.info(("\t \t between {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}").format(start.datetime,end.datetime))
 
                     rfi.load_from_ms(self.cfg_par,timez)
                     self.logger.info("---- MSfile Loaded -----\n")
@@ -226,7 +248,7 @@ class rfinder:
                 self.logger.info("---- Bad antennas and autocorrelations flagged ----\n")
                 rfi.find_rfi(datas,self.cfg_par,-1)
                 self.logger.info(" ------  RFI found  ------\n")
-                rfi_files.rfi_frequency(self.cfg_par,i)
+                rfi_files.rfi_frequency(self.cfg_par,-1)
                 self.logger.info("---- RFI saved to table ----\n")
                 self.logger.info(" ------ End of RFI analysis  ------\n")
       
@@ -248,35 +270,37 @@ class rfinder:
                         rfi.baselines_from_ms(self.cfg_par)
                         self.logger.info("---- Dataset sorted by baseline lenght ----\n")
             
-                    rfi_pl.plot_rfi_imshow(self.cfg_par,i)
+                    rfiPLOT.plot_rfi_imshow(self.cfg_par,i)
                     self.logger.info("---- RFI in 2D plotted ----\n")
                     self.cfg_par['plots']['plot_noise'] = 'rfi'
                     self.cfg_par['plots']['long_short'] = False
-                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
+                    rfiPLOT.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['long_short'] = True
-                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
+                    rfiPLOT.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['plot_noise'] = 'noise_factor'
-                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
+                    rfiPLOT.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['plot_noise'] = 'noise'
-                    rfi_pl.plot_noise_frequency(self.cfg_par,i)         
+                    rfiPLOT.plot_noise_frequency(self.cfg_par,i)         
                     self.logger.info("---- RFI in 1D plotted ----\n")
                 
-                rfi_pl.plot_altaz(self.cfg_par,i)
+                rfiPLOT.plot_altaz(self.cfg_par,i)
+                rfiPLOT.gif_me_up(self.cfg_par,self.cfg_par['general']['altazplotdir'])
+
                 self.logger.info("---- RFI in ALT/AZ plotted ----\n")
 
             else:
 
-                rfi_pl.plot_rfi_imshow(self.cfg_par,-1)
+                rfiPLOT.plot_rfi_imshow(self.cfg_par,-1)
                 self.logger.info("---- RFI in 2D plotted ----\n")
                 self.cfg_par['plots']['plot_noise'] = 'rfi'
                 self.cfg_par['plots']['long_short'] = False
-                rfi_pl.plot_noise_frequency(self.cfg_par,-1)
+                rfiPLOT.plot_noise_frequency(self.cfg_par,-1)
                 self.cfg_par['plots']['long_short'] = True
-                rfi_pl.plot_noise_frequency(self.cfg_par,-1)
+                rfiPLOT.plot_noise_frequency(self.cfg_par,-1)
                 self.cfg_par['plots']['plot_noise'] = 'noise_factor'
-                rfi_pl.plot_noise_frequency(self.cfg_par,-1)
+                rfiPLOT.plot_noise_frequency(self.cfg_par,-1)
                 self.cfg_par['plots']['plot_noise'] = 'noise'
-                rfi_pl.plot_noise_frequency(self.cfg_par,-1)
+                rfiPLOT.plot_noise_frequency(self.cfg_par,-1)
          
                 self.logger.info("---- RFI in 1D plotted ----\n")
 

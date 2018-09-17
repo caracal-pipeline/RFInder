@@ -48,9 +48,9 @@ def write_freq_base(cfg_par,rms,time_step=-1) :
         time_name = 'full' 
 
     if cfg_par['rfi']['use_flags']== True:
-        rfi_freq_base =outputdir+'freq_base_'+time_name+'_flags.fits'
+        rfi_freq_base =outputdir+'flags_base_'+time_name+'.fits'
     if cfg_par['rfi']['use_flags']== False:
-        rfi_freq_base =outputdir+'freq_base_'+time_name+'_rfi.fits'
+        rfi_freq_base =outputdir+'rfi_base_'+time_name+'.fits'
 
     #set fits file
     hdu = fits.PrimaryHDU(rms)
@@ -106,11 +106,11 @@ def rfi_frequency(cfg_par,time_step=-1):
         time_name = 'full'
     
     if cfg_par['rfi']['use_flags']== True:
-        rfi_freq_base =outputdir+'freq_base_'+time_name+'_flags.fits'
-        table_name = str(table_tmp[0])+'_'+time_name+'_flags.fits'
+        rfi_freq_base =outputdir+'flags_base_'+time_name+'.fits'
+        table_name = str(table_tmp[0])+'_flags_'+time_name+'.fits'
     elif cfg_par['rfi']['use_flags']== False:
-        rfi_freq_base =outputdir+'freq_base_'+time_name+'_rfi.fits'
-        table_name = str(table_tmp[0])+'_'+time_name+'_rfi.fits'
+        rfi_freq_base =outputdir+'rfi_base_'+time_name+'.fits'
+        table_name = str(table_tmp[0])+'_rfi_'+time_name+'.fits'
     
     rfi_table = tabledir+table_name
 
@@ -180,9 +180,9 @@ def rfi_frequency(cfg_par,time_step=-1):
 
         
         if cfg_par['rfi']['use_flags']== True:
-            table_name_bin = str(table_tmp[0])+'_'+time_name+'_spwbin_flags.fits'
+            table_name_bin = str(table_tmp[0])+'_flags_'+time_name+'_spwbin.fits'
         elif cfg_par['rfi']['use_flags']== False:
-            table_name_bin = str(table_tmp[0])+'_'+time_name+'_spwbin_rfi.fits'
+            table_name_bin = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
 
 
         rfi_table_bin = tabledir+table_name_bin
