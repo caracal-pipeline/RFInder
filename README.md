@@ -25,6 +25,8 @@ To call `RFInder` as `rfinder` from anywhere in your shell (using the parameters
 
 ```
 setenv RFI '<path_to_rfinder_pipeline.py>'
+export RFI="path_to_rfinder_pipeline.py>:$RFI"
+
 alias rfinder 'python $RFI/rfi_pipeline.py $RFI/rfinder_default.yml'
 ```
 
