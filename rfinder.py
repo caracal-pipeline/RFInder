@@ -15,8 +15,8 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
-#sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+#sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
 
 import rfi 
 import rfinder_stats as rfi_stats
@@ -70,8 +70,8 @@ class rfinder:
             cfg = open(file)
 
         else:
-            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
-            #file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
+            #file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
 
             cfg = open(file_default) 
 
@@ -170,6 +170,9 @@ class rfinder:
             1: 2d plot of RFI flagged by frequency and baseline lenght (plot_rfi_im)
             2: 1d plot of RFI flagged by frequency channel (baselines_from_ms)
             3: 1d plot of noise increase by frequency channel (for long and short baselines) (priors_flag)
+        If cfg_par['rfi']['chunks']['time_chunks'] is enabled
+            1: executes 'rfi' and 'plots' procedure dividing the observation in time-steps given by cfg_par['rfi']['chunks']['time_step']
+            2: collects the info about the % of RFI for each time step in Alt/Az plots 
         If cfg_par['beam_shape'] is enabled
             1: create FLAG column in MS file (rfi_flag)
             2: determine psf using wsclean (make_psf)
@@ -247,14 +250,15 @@ class rfinder:
             
                     rfi_pl.plot_rfi_imshow(self.cfg_par,i)
                     self.logger.info("---- RFI in 2D plotted ----\n")
+                    self.cfg_par['plots']['plot_noise'] = 'rfi'
+                    self.cfg_par['plots']['long_short'] = False
                     rfi_pl.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['long_short'] = True
+                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['plot_noise'] = 'noise_factor'
                     rfi_pl.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['plot_noise'] = 'noise'
-                    rfi_pl.plot_noise_frequency(self.cfg_par,i)
-                    self.cfg_par['plots']['long_short'] = False  
-                    rfi_pl.plot_noise_frequency(self.cfg_par,i)            
+                    rfi_pl.plot_noise_frequency(self.cfg_par,i)         
                     self.logger.info("---- RFI in 1D plotted ----\n")
                 
                 rfi_pl.plot_altaz(self.cfg_par,i)
@@ -264,16 +268,16 @@ class rfinder:
 
                 rfi_pl.plot_rfi_imshow(self.cfg_par,-1)
                 self.logger.info("---- RFI in 2D plotted ----\n")
-                rfi_files.rfi_frequency(self.cfg_par,-1)
-                self.logger.info("---- RFI saved to table ----\n")
+                self.cfg_par['plots']['plot_noise'] = 'rfi'
+                self.cfg_par['plots']['long_short'] = False
                 rfi_pl.plot_noise_frequency(self.cfg_par,-1)
                 self.cfg_par['plots']['long_short'] = True
+                rfi_pl.plot_noise_frequency(self.cfg_par,-1)
                 self.cfg_par['plots']['plot_noise'] = 'noise_factor'
                 rfi_pl.plot_noise_frequency(self.cfg_par,-1)
                 self.cfg_par['plots']['plot_noise'] = 'noise'
                 rfi_pl.plot_noise_frequency(self.cfg_par,-1)
-                self.cfg_par['plots']['long_short'] = False  
-                rfi_pl.plot_noise_frequency(self.cfg_par,-1)            
+         
                 self.logger.info("---- RFI in 1D plotted ----\n")
 
         task = 'beam_shape'
