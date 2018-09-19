@@ -18,8 +18,8 @@ check out the `WiKi` for a complete illustration of `RFInder`.
 ***
 ### Usage
 
-`rfinder` is run using a `.yml` [parameter file](https://github.com/Fil8/RFInder/wiki/Parameter-file) as `python rfinderpipeline.py <path_to_parameter_file.yml>`, or through a `IPython`
-[notebook](https://github.com/Fil8/RFInder/blob/master/tutorials/T2_rfinder_automated.ipynb). 
+All `rfinder` can be run in an automated way as `python rfi_pipeline.py <path_to_parameter_file.yml>`, or via an `IPython`
+[notebook](https://github.com/Fil8/RFInder/blob/master/tutorials/T2_rfinder_automated.ipynb). Commands and options of `RFInder` must be specified in a `.yml` [parameter file](https://github.com/Fil8/RFInder/wiki/Parameter-file)
 
 To call `RFInder` as `rfinder` from anywhere in your shell (using the parameters stored in `rfinder_default.yml`) add the following lines to your `.cshrc/.bashrc` file:
 
@@ -32,7 +32,7 @@ alias rfinder='python $RFI/rfi_pipeline.py $RFI/rfinder_default.yml'
 
 ```
 
-These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) can guide you through the different capabilities of `rfinder`.
+These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show the different capabilities of `rfinder`.
 
 ***
 
@@ -42,6 +42,7 @@ These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) can gui
 - RFInder makes use of the most common `python` packages (e.g. `numpy`, `scipy`, `astropy`). 
 - The parameter file is in `yaml` format, hence [`pyaml`](https://anaconda.org/anaconda/pyyaml), and [`json`](https://anaconda.org/conda-forge/json-c) packages should be installed,
 - The `logging` module is used to print out warnings.
+- `.gif` file of multiple plots can be created if `ffmpeg` is installed.
 - **beam_shape** uses [`wsclean`] option `wcclean --psf-only`. Instructions to download and install `wsclean` [(Offringa et al. 2014)](https://arxiv.org/abs/1407.1943) can be found [here](https://sourceforge.net/projects/wsclean/).
 
 **Insallation instructions**
