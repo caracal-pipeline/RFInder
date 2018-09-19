@@ -1,8 +1,8 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /Users/maccagni/Projects/RFI/rfinder_test/ #full path to working directory
-    msname: ['fa1_conc.ms'] #name of input ms file
-    field: 1 #field ID of target of file
+    workdir: /home/maccagni/FornaxA/MeerKAT/fa3/msdir/ #full path to working directory
+    msname: ['fa3_conc.ms'] #name of input ms file
+    field: 2 #field ID of target of file
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
@@ -19,7 +19,7 @@ rfi:
         time_enable: true
         time_step: 10 #time chunks in minutes
         spw_enable: true
-        spw_width: 10 #channel width of rebinned output table [MHz]
+        spw_width: 20 #channel width of rebinned output table [MHz]
 
 beam_shape:
     __helpstr: estimate beam shape after RFI flagging 
@@ -28,7 +28,9 @@ beam_shape:
 plots:
     __helpstr: plot rfi over different axes
     enable: true 
-    plot_noise: 'rfi' #choose to plot % of RFI, 'flag', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
+    plot_noise: 'rfi' #choose to plot % of RFI, 'rfi', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
     plot_long_short: True #plot all baselines, or only the short and the long
-    altaz_gif: True #plot all baselines, or only the short and the long
+    2d_gif: True 
+    1d_gif: True 
+    altaz_gif: True
 

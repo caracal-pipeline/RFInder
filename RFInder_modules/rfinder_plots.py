@@ -1,29 +1,22 @@
 import os,string,sys, glob
+import numpy as np
+
 import matplotlib
-#matplotlib.use('Qt5Agg')
-#matplotlib.rcParams['backend']='template'
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
-from matplotlib import ticker
+from matplotlib import ticker, rc
 from matplotlib.ticker import NullFormatter
 import matplotlib.animation as animation
 import matplotlib.image as mgimg
 
-import subprocess
-
-
-import aplpy
 from astropy.io import fits as fits
-import numpy as np
-import os
 from astropy.table import Table
-import pyrap.tables as tables
 from astropy.time import Time, TimeDelta
-import rfi
-rfi = rfi.rfi()
 
 import logging
 
+import rfi
+rfi = rfi.rfi()
 
 class rfi_plots:
     
@@ -182,7 +175,8 @@ class rfi_plots:
             end = start+time_delta_plus
 
         if cfg_par['rfi']['use_flags'] == False:
-            title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('RFI clip',start.datetime,end.datetime)
+            rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'
+            title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
         if cfg_par['rfi']['use_flags'] == True:
             title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
         
@@ -263,7 +257,7 @@ class rfi_plots:
             noise_all = noise_factor
             noise_short = noise_factor_short
             noise_long = noise_factor_long    
-            out_plot = plotdir+'noise_factor_'+time_name
+            out_plot = plotdir+'noisefactor_'+time_name
         
         if cfg_par['plots']['plot_noise'] == 'rfi':
             self.logger.info("\t ... Plotting percentage of flagged RFI per frequency channel ...")
@@ -373,8 +367,8 @@ class rfi_plots:
             start = cfg_par['rfi']['startdate']+time_del
             end = start+time_delta_plus
 
-        if cfg_par['rfi']['use_flags'] == False:
-            title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('RFI clip',start.datetime,end.datetime)
+            rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'
+            title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
         if cfg_par['rfi']['use_flags'] == True:
             title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
         
@@ -498,15 +492,17 @@ class rfi_plots:
 
              # Format axes
             nullfmt        = NullFormatter() 
-            left, width    = 0.12, 0.54                                                                     #|These determine where the subplots go
+            left, width    = 0.12, 0.64                                                                     #|These determine where the subplots go
             bottom, height = 0.12, 0.54
-            bottom_h       = left_h = left+width+0.015
-            box_centre    = [left, bottom, width, height]
-            box_x      = [left, bottom_h, width, 0.15]
-            box_y      = [left_h, bottom, 0.12, height]
-            box_cbar       = [left_h+0.16, bottom, 0.05, height]
+            left_h = left+width+0.015
+            bottom_h = left+height+0.015
 
-            fig = plt.figure(1, figsize=(8,8))
+            box_centre    = [left, bottom, width, height]
+            box_x      = [left, bottom_h, width, 0.12]
+            box_y      = [left_h, bottom, 0.12, height]
+            box_cbar       = [left_h+0.13, bottom, 0.05, height]
+
+            fig = plt.figure(1, figsize=(10,8))
 
             ax_centre = plt.axes(box_centre)
             ax_x = plt.axes(box_x)
@@ -538,11 +534,11 @@ class rfi_plots:
             ax_centre.set_ylabel(r'Altitude [deg]')
             ax_centre.set_ylim([0,90])
             ax_centre.set_xlim([0,360])
-            ax_centre.set_xticks([0,30,60,90,120,150,180,210,240,270,300,330,0])        
-            ax_centre.set_xticklabels(['0','30','60','90','120','150','180','210','240','270','300','330','0'])
+            ax_centre.set_xticks([0,45,90,135,180,225,270,315,360])        
+            ax_centre.set_xticklabels(['0','45','90','135','180','225','270','315','0'])
             ax_centre.set_yticks([0,10,20,30,40,50,60,70,80,90])
 
-            asse = ax_centre.scatter(az,alt,c=flags,cmap='nipy_spectral_r',vmin=0,vmax=100.)
+            asse = ax_centre.scatter(az,alt,c=flags,cmap='jet_r',vmin=0,vmax=100.)
 
             start = cfg_par['rfi']['startdate']
             end = cfg_par['rfi']['enddate']
@@ -555,9 +551,9 @@ class rfi_plots:
                 cbar.set_label(r'$\%$ flagged visibilites')       
             #title
             if cfg_par['rfi']['use_flags'] == False:
-                title_plot = 'SPW {0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,'RFI clip',start.datetime,end.datetime)
+                title_plot = '{0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,'RFI clip',start.datetime,end.datetime)
             if cfg_par['rfi']['use_flags'] == True:
-                title_plot = 'SPW {0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,'Flags',start.datetime,end.datetime)        
+                title_plot = '{0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,'Flags',start.datetime,end.datetime)        
 
             #x plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
@@ -567,11 +563,11 @@ class rfi_plots:
                 ax_x.set_ylabel(r'$\%$ flagged')                
             ax_x.set_ylim([-5,100])
             ax_x.set_xlim([0,360])
-            ax_x.set_yticks([0,20,40,60,80,100])
-                    
+            ax_x.set_yticks([0,25,50,75,100])
+   
             ax_x.set_title(title_plot)
            
-            ax_x.scatter(az,flags,c=flags,cmap='nipy_spectral_r',vmin=0,vmax=100.)
+            ax_x.scatter(az,flags,c=flags,cmap='jet_r',vmin=0,vmax=100.)
             
             #y plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
@@ -582,60 +578,48 @@ class rfi_plots:
 
             ax_y.set_xlim([-5,100])
             ax_y.set_ylim([0,90])
-            ax_y.set_xticks([0,20,40,60,80,100])
-            ax_y.scatter(flags,alt,c=flags,cmap='nipy_spectral_r',vmin=0,vmax=100.)
+            ax_y.set_xticks([0,25,50,75,100])
+            ax_y.scatter(flags,alt,c=flags,cmap='jet_r',vmin=0,vmax=100.)
 
 
             # Finish everything up
             plt.savefig(altazplot,format='png',overwrite = True)
             plt.close()
-            self.logger.info(('\t ... ALT/AZ for spw: {0:d}-{1:d} MHz  ...').format(start_freq,end_freq))
+            self.logger.info(('\t ... ALT/AZ for spw: {0:d}-{1:d} MHz  ...\n').format(start_freq,end_freq))
 
         return 0
     
 
-    # def gif_me_up(self,cfg_par,filenames):
+    def gif_me_up(self,cfg_par,filenames,outmovie):
         
-    #     fig = plt.figure(figsize=(8,8))
-    #     plt.axis('off')
+        self.logger.info(('\t ... Creating movie ...'))
+       
 
-    #     # initiate an empty  list of "plotted" images 
-    #     myimages = []
+        fig = plt.figure(figsize=(8,8))
+        plt.axis('off')
 
-    #     #loops through available png:s
-    #     for p in xrange(0, len(filenames)):
+        # initiate an empty  list of "plotted" images 
+        myimages = []
 
-    #         ## Read in picture
-    #         img = mgimg.imread(filenames[p])
-    #         imgplot = plt.imshow(img)
+        #loops through available png:s
+        for p in xrange(0, len(filenames)):
+            ## Read in picture
+            img = mgimg.imread(filenames[p])
+            imgplot = plt.imshow(img)
+            #plt.show()
+            # append AxesImage object to the list
+            myimages.append([imgplot])
 
-    #         # append AxesImage object to the list
-    #         myimages.append([imgplot])
+            ## create an instance of animation
 
-    #     ## create an instance of animation
-    #     my_anim = animation.ArtistAnimation(fig, myimages, interval=500, blit=True, repeat_delay=1000)
+        Writer = animation.writers['ffmpeg']
+        writer = Writer(fps=5, metadata=dict(artist='XY'), bitrate=3600)
+        my_anim = animation.ArtistAnimation(fig, myimages, interval=1000, blit=True, repeat_delay=1000)
 
-    #     ## NB: The 'save' method here belongs to the object you created above
-    #     out_animation = cfg_par['general']['moviedir']+'AltAz_movie.mp4'
-    #     my_anim.save(out_animation)
+        my_anim.save(outmovie,writer=writer)
+        plt.close()
+        self.logger.info(('\t ... Movie written to file ...\n'))
 
-    #     ## Showtime!
+        return my_anim
 
-    #     return 0
-    
-        # self.logger.info("\t... Creating gifs ... \n" )      
-        
-        # command="ffmpeg -f image2 -r %s -i %s%s" % (str(fps), self.workingDirectory+'temp/', self.universe.description)
-        # command+="%04d.png"
-        # command+=" -c:v libx264 -r 30 %s.mp4" % (cfg_par['general']['plotdir']+'altaz_movie.gif')
-        # self.logger.info("Running command:")
-        # self.loggger.info(command)
-        # p = subprocess.Popen(command, shell=True, stdout = subprocess.PIPE, stderr=subprocess.STDOUT)
-        # output = p.communicate()[0]
-        # print "output\n"+"*"*10+"\n"
-        # print output
-        # print "*"*10
-        # print "\t ... Video file has been written .. "
-        # self.logger.info('\t ... GIF done ...\n')
 
-        # return 0

@@ -1,18 +1,8 @@
 import os,string,sys
-import matplotlib
-#matplotlib.use('Qt5Agg')
-#matplotlib.rcParams['backend']='template'
-from matplotlib import gridspec
-from matplotlib import pyplot as plt
-from matplotlib import ticker
-
-import aplpy
+import numpy as np
 from astropy.io import fits as fits
 from astropy import units as u
 
-import numpy as np
-import os
-import pyrap.tables as tables
 
 
 import rfinder_stats as rfi_stats 
