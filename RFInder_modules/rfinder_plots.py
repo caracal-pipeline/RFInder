@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from matplotlib import ticker
 from matplotlib.ticker import NullFormatter
 import matplotlib.animation as animation
+import matplotlib.image as mgimg
 
 import subprocess
 
@@ -415,7 +416,6 @@ class rfi_plots:
         
         freqs_bin=np.arange(freq_S,freq_E+step_bin,step_bin)
 
-
         for j in xrange(0,len(freqs_bin)):
             spw = []
             az = []
@@ -423,10 +423,10 @@ class rfi_plots:
             flags =[]
 
 
+
             for i in xrange(0,number_chunks):
             
                 tabledir = cfg_par['general']['timetabledir'] 
-                plotdir = cfg_par['general']['plotdir']
                 time_delta = float(cfg_par['rfi']['chunks']['time_step'])*i
                 time_tmp = int(time_delta)
 
@@ -461,9 +461,9 @@ class rfi_plots:
 
             # Save figure to file
             if cfg_par['rfi']['use_flags']== True:
-               altazplot = plotdir+'AltAZ_flags'+spwname+'MHZ.jpg'
+               altazplot = plotdir+'AltAZ_flags'+spwname+'MHz.png'
             if cfg_par['rfi']['use_flags']== False:
-               altazplot = plotdir+'AltAZ_rfi'+spwname+'MHz.jpg'
+               altazplot = plotdir+'AltAZ_rfi'+spwname+'MHz.png'
 
 
 
@@ -585,20 +585,57 @@ class rfi_plots:
             ax_y.set_xticks([0,20,40,60,80,100])
             ax_y.scatter(flags,alt,c=flags,cmap='nipy_spectral_r',vmin=0,vmax=100.)
 
+
             # Finish everything up
-            plt.savefig(altazplot,format='jpeg',overwrite = True)
+            plt.savefig(altazplot,format='png',overwrite = True)
             plt.close()
             self.logger.info(('\t ... ALT/AZ for spw: {0:d}-{1:d} MHz  ...').format(start_freq,end_freq))
-       
 
         return 0
+    
 
-    def gif_me_up(self,outfile,infolder):
+    # def gif_me_up(self,cfg_par,filenames):
         
-    #    ani = animation.ArtistAnimation(outfile, files, interval=100, blit=True, repeat_delay=1000)
-        command = 'convert -delay 25 -loop 0'+infolder+"/*.jpg"+ outfile    #|This part requires ImageMagick to function
-        os.system(command)
-         
-        self.logger.info('\t ... GIF done ...\n')
+    #     fig = plt.figure(figsize=(8,8))
+    #     plt.axis('off')
 
-        return 0
+    #     # initiate an empty  list of "plotted" images 
+    #     myimages = []
+
+    #     #loops through available png:s
+    #     for p in xrange(0, len(filenames)):
+
+    #         ## Read in picture
+    #         img = mgimg.imread(filenames[p])
+    #         imgplot = plt.imshow(img)
+
+    #         # append AxesImage object to the list
+    #         myimages.append([imgplot])
+
+    #     ## create an instance of animation
+    #     my_anim = animation.ArtistAnimation(fig, myimages, interval=500, blit=True, repeat_delay=1000)
+
+    #     ## NB: The 'save' method here belongs to the object you created above
+    #     out_animation = cfg_par['general']['moviedir']+'AltAz_movie.mp4'
+    #     my_anim.save(out_animation)
+
+    #     ## Showtime!
+
+    #     return 0
+    
+        # self.logger.info("\t... Creating gifs ... \n" )      
+        
+        # command="ffmpeg -f image2 -r %s -i %s%s" % (str(fps), self.workingDirectory+'temp/', self.universe.description)
+        # command+="%04d.png"
+        # command+=" -c:v libx264 -r 30 %s.mp4" % (cfg_par['general']['plotdir']+'altaz_movie.gif')
+        # self.logger.info("Running command:")
+        # self.loggger.info(command)
+        # p = subprocess.Popen(command, shell=True, stdout = subprocess.PIPE, stderr=subprocess.STDOUT)
+        # output = p.communicate()[0]
+        # print "output\n"+"*"*10+"\n"
+        # print output
+        # print "*"*10
+        # print "\t ... Video file has been written .. "
+        # self.logger.info('\t ... GIF done ...\n')
+
+        # return 0

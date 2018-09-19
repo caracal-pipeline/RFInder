@@ -1,6 +1,6 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /home/maccagni/FornaxA/MeerKAT/fa1/msdir/ #full path to working directory
+    workdir: /Users/maccagni/Projects/RFI/rfinder_test/ #full path to working directory
     msname: ['fa1_conc.ms'] #name of input ms file
     field: 1 #field ID of target of file
 
@@ -30,4 +30,5 @@ plots:
     enable: true 
     plot_noise: 'rfi' #choose to plot % of RFI, 'flag', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
     plot_long_short: True #plot all baselines, or only the short and the long
+    altaz_gif: True #plot all baselines, or only the short and the long
 
