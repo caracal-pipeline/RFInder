@@ -37,9 +37,9 @@ def write_freq_base(cfg_par,rms,time_step=-1) :
         outputdir = str(cfg_par['general']['rfidir'])
         time_name = 'full' 
 
-    if cfg_par['rfi']['use_flags']== True:
+    if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
         rfi_freq_base =outputdir+'flags_base_'+time_name+'.fits'
-    if cfg_par['rfi']['use_flags']== False:
+    if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
         rfi_freq_base =outputdir+'rfi_base_'+time_name+'.fits'
 
     #set fits file
@@ -95,10 +95,10 @@ def rfi_frequency(cfg_par,time_step=-1):
         tabledir = cfg_par['general']['tabledir']        
         time_name = 'full'
     
-    if cfg_par['rfi']['use_flags']== True:
+    if cfg_par['rfi']['RFInder_mode']== 'use_flags':
         rfi_freq_base =outputdir+'flags_base_'+time_name+'.fits'
         table_name = str(table_tmp[0])+'_flags_'+time_name+'.fits'
-    elif cfg_par['rfi']['use_flags']== False:
+    if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
         rfi_freq_base =outputdir+'rfi_base_'+time_name+'.fits'
         table_name = str(table_tmp[0])+'_rfi_'+time_name+'.fits'
     
@@ -169,9 +169,9 @@ def rfi_frequency(cfg_par,time_step=-1):
     if cfg_par['rfi']['chunks']['spw_enable'] == True:
 
         
-        if cfg_par['rfi']['use_flags']== True:
+        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
             table_name_bin = str(table_tmp[0])+'_flags_'+time_name+'_spwbin.fits'
-        elif cfg_par['rfi']['use_flags']== False:
+        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
             table_name_bin = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
 
 

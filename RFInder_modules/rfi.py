@@ -126,9 +126,13 @@ class rfi:
 
             selection=self.fieldIDs==self.selectFieldID
             selection*=self.ant1!=self.ant2
-            if cfg_par['rfi']['use_flags'] == False:
-                self.vis = t2.getcol('DATA')[selection]
-            self.flag = t2.getcol('FLAG')[selection]
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                if np.sum(selection) !=0. :
+                    self.flag = t2.getcol('FLAG')[selection]
+                    self.vis = t2.getcol('DATA')[selection]
+                else:
+                    self.flag = t2.getcol('FLAG')[selection]
+                    self.vis = np.zeros(self.flag.shape)+np.inf
             self.interval = t2.getcol('INTERVAL')[selection]
             t2.close()
         
@@ -145,7 +149,7 @@ class rfi:
             altaz = rfiST.alt_az(cfg_par,times_tm[0])
             cfg_par['rfi']['altaz'] = altaz
             
-            if cfg_par['rfi']['use_flags'] == False:
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                 self.vis = t.getcol('DATA')[selection]
 
             self.interval = t.getcol('INTERVAL')[selection]
@@ -290,9 +294,9 @@ class rfi:
                 counter=baseline_counter[a1,a2]
                 # Put amplitude of visibility
                 # In the right place in the new array
-                if cfg_par['rfi']['use_flags'] == True:
+                if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
                     self.datacube[indice,:,counter]=self.flag[i,:,0]
-                elif  cfg_par['rfi']['use_flags'] == False:
+                elif cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                     if (pol == 'xx' or pol == 'XX'):
                         self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])
                     if (pol == 'yy' or pol == 'YY'):
@@ -355,7 +359,7 @@ class rfi:
 
         time_ax_len = int(self.datacube.shape[2])
 
-        if cfg_par['rfi']['use_flags'] == False: 
+        if cfg_par['rfi']['RFInder_mode'] == 'rms_clip': 
 
             for i in xrange(0,self.datacube.shape[0]):
                 
@@ -385,7 +389,7 @@ class rfi:
                             tmp_over = 0.
                         rms[i,j] = 100.*tmp_over/time_ax_len
         
-        elif cfg_par['rfi']['use_flags'] == True: 
+        elif cfg_par['rfi']['RFInder_mode'] == 'use_flags': 
             for i in xrange(0,self.datacube.shape[0]):
                 for j in xrange(0,self.datacube.shape[1]):
                     rms[i,j] = 100.*np.sum(self.datacube[i,j,:])/time_ax_len

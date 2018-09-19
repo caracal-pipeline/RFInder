@@ -6,6 +6,8 @@ from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib import ticker, rc
 from matplotlib.ticker import NullFormatter
+from IPython.display import HTML, display
+
 import matplotlib.animation as animation
 import matplotlib.image as mgimg
 
@@ -58,10 +60,10 @@ class rfi_plots:
 
         rfi_freq_base = cfg_par['general']['rfidir']+'freq_base_'+time_name+'_im.fits'   
 
-        if cfg_par['rfi']['use_flags']== True:
+        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
             rfi_freq_base =outputdir+'flags_base_'+time_name+'.fits'
             rfi_freq_base_plot = plotdir+'flags_base_'+time_name+'.png'
-        if cfg_par['rfi']['use_flags']== False:
+        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
             rfi_freq_base =outputdir+'rfi_base_'+time_name+'.fits'
             rfi_freq_base_plot = plotdir+'rfi_base_'+time_name+'.png'
         
@@ -152,9 +154,9 @@ class rfi_plots:
         
         # colorbar
         cbar = fig.colorbar(im,ticks=[10,20, 30,40,50,60,70,80,90,100]) 
-        if cfg_par['rfi']['use_flags'] == False:
+        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
             cbar.set_label(r'$\% > 5 \times$ r.m.s.')
-        if cfg_par['rfi']['use_flags'] == True:
+        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
             cbar.set_label(r'$\%$ flagged visibilites')
 
         #times, start, end = rfi.time_chunk(cfg_par)
@@ -174,10 +176,10 @@ class rfi_plots:
             start = cfg_par['rfi']['startdate']+time_del
             end = start+time_delta_plus
 
-        if cfg_par['rfi']['use_flags'] == False:
+        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
             rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'
             title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
-        if cfg_par['rfi']['use_flags'] == True:
+        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
             title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
         
         ax.set_title(title_plot)
@@ -224,9 +226,9 @@ class rfi_plots:
             plotdir = cfg_par['general']['plotdir']        
             time_name = 'full' 
 
-        if cfg_par['rfi']['use_flags']== True:
+        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
             table_name = str(table_tmp[0])+'_flags_'+time_name+'.fits'
-        elif cfg_par['rfi']['use_flags']== False:
+        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
             table_name = str(table_tmp[0])+'_rfi_'+time_name+'.fits'
 
         rfi_table = tabledir+table_name
@@ -347,9 +349,9 @@ class rfi_plots:
             ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
         if cfg_par['plots']['plot_noise'] == 'rfi':
-            if cfg_par['rfi']['use_flags'] == False:
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                 ax1.set_ylabel(r'$\% > 5 \times$ r.m.s.')
-            if cfg_par['rfi']['use_flags'] == True:
+            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
                 ax1.set_ylabel(r'$\%$ flagged visibilites')    
             ax1.set_ylim([-5,105]) 
             ax1.set_yticks([0,20,40,60,80,100]) 
@@ -366,19 +368,19 @@ class rfi_plots:
             time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
             start = cfg_par['rfi']['startdate']+time_del
             end = start+time_delta_plus
-
-            rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'
-            title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
-        if cfg_par['rfi']['use_flags'] == True:
-            title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'        
+                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
+            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
+                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
         
         ax1.set_title(title_plot)
         ax1.minorticks_on()
         ax1.minorticks_on()
         # Save figure to file
-        if cfg_par['rfi']['use_flags']== True:
+        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
             rfi_freq_plot = out_plot+'_flags.png'
-        if cfg_par['rfi']['use_flags']== False:
+        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
             rfi_freq_plot = out_plot+'_rfi.png'
 
         plt.savefig(rfi_freq_plot,format='png',overwrite = True)      
@@ -432,9 +434,9 @@ class rfi_plots:
                 else:
                     time_name= str(time_tmp)+'m'    
 
-                if cfg_par['rfi']['use_flags']== True:
+                if cfg_par['rfi']['RFInder_mode']== 'use_flags':
                     table_name = str(table_tmp[0])+'_flags_'+time_name+'_spwbin.fits'
-                elif cfg_par['rfi']['use_flags']== False:
+                elif cfg_par['rfi']['RFInder_mode']== 'rms_clip':
                     table_name = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
 
                 rfi_table = tabledir+table_name
@@ -454,9 +456,9 @@ class rfi_plots:
             spwname= str(start_freq)+'-'+str(end_freq)
 
             # Save figure to file
-            if cfg_par['rfi']['use_flags']== True:
+            if cfg_par['rfi']['RFInder_mode']== 'use_flags':
                altazplot = plotdir+'AltAZ_flags'+spwname+'MHz.png'
-            if cfg_par['rfi']['use_flags']== False:
+            if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
                altazplot = plotdir+'AltAZ_rfi'+spwname+'MHz.png'
 
 
@@ -545,21 +547,22 @@ class rfi_plots:
             
              # colorbar
             cbar = plt.colorbar(asse,ax=ax_cbar, fraction=1.0,ticks=[0,20,40,60,80,100]) 
-            if cfg_par['rfi']['use_flags'] == False:
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                 cbar.set_label(r'$\% > 5 \times$ r.m.s.')
-            if cfg_par['rfi']['use_flags'] == True:
+            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
                 cbar.set_label(r'$\%$ flagged visibilites')       
             #title
-            if cfg_par['rfi']['use_flags'] == False:
-                title_plot = '{0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,'RFI clip',start.datetime,end.datetime)
-            if cfg_par['rfi']['use_flags'] == True:
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'        
+                title_plot = '{0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,rfi_clip,start.datetime,end.datetime)
+            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
                 title_plot = '{0:d}-{1:d} MHz / {2:s} / {3:%d}{3:%b}{3:%y}: {3:%H}:{3:%M} - {4:%H}:{4:%M}'.format(start_freq,end_freq,'Flags',start.datetime,end.datetime)        
 
             #x plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
-            if cfg_par['rfi']['use_flags'] == False:
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                 ax_x.set_ylabel(r'$\%$ RFI')
-            if cfg_par['rfi']['use_flags'] == True:
+            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
                 ax_x.set_ylabel(r'$\%$ flagged')                
             ax_x.set_ylim([-5,100])
             ax_x.set_xlim([0,360])
@@ -571,9 +574,9 @@ class rfi_plots:
             
             #y plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
-            if cfg_par['rfi']['use_flags'] == False:
-                ax_y.set_xlabel(r'$\%$ RFI ')
-            if cfg_par['rfi']['use_flags'] == True:
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                ax_y.set_xSlabel(r'$\%$ RFI ')
+            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
                 ax_y.set_xlabel(r'$\%$ flagged')          
 
             ax_y.set_xlim([-5,100])
