@@ -291,56 +291,56 @@ class rfinder:
                     rfiPL.plot_noise_frequency(self.cfg_par,i)         
                     self.logger.info("---- RFI in 1D plotted ----\n")
                 
-                rfiPLOT.plot_altaz(self.cfg_par,i)
+                rfiPL.plot_altaz(self.cfg_par,i)
                 self.logger.info("---- RFI in ALT/AZ plotted ----\n")
 
                 self.logger.info("---- Making movies ----\n")
 
 
-                if self.cfg_par['plots']['altaz_gif']== True:
+                # if self.cfg_par['plots']['altaz_gif']== True:
                     
-                    filenames = glob.glob(self.cfg_par['general']['altazplotdir']+'/*.png')
+                #     filenames = glob.glob(self.cfg_par['general']['altazplotdir']+'/*.png')
 
-                    if rfi_par.cfg_par['rfi']['use_flags']== True:
-                        filenames = sorted(filenames, key = lambda x: x.split('flags')[1])
-                    elif cfg_par['rfi']['use_flags']== False:
-                        filenames = sorted(filenames, key = lambda x: x.split('rfi')[1])
+                #     if rfi_par.cfg_par['rfi']['use_flags']== True:
+                #         filenames = sorted(filenames, key = lambda x: x.split('flags')[1])
+                #     elif cfg_par['rfi']['use_flags']== False:
+                #         filenames = sorted(filenames, key = lambda x: x.split('rfi')[1])
 
-                    out_animation = self.cfg_par['general']['moviedir']+'AltAz.mp4'
+                #     out_animation = self.cfg_par['general']['moviedir']+'AltAz.mp4'
                         
-                    animation_altaz = rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
+                #     animation_altaz = rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
 
-                    self.logger.info("---- AltAz movie done ----\n")
+                #     self.logger.info("---- AltAz movie done ----\n")
 
-                elif self.cfg_par['plots']['2d_gif']== True:
+                # elif self.cfg_par['plots']['2d_gif']== True:
                     
-                    filenames = glob.glob(rfi_par.cfg_par['general']['timeplotdir2D']+'/*.png')
+                #     filenames = glob.glob(rfi_par.cfg_par['general']['timeplotdir2D']+'/*.png')
 
-                    out_animation = rfi_par.cfg_par['general']['moviedir']+'Time_2Dplot.mp4'
+                #     out_animation = rfi_par.cfg_par['general']['moviedir']+'Time_2Dplot.mp4'
                         
-                    animation_2d = rfiPL.gif_me_up(rfi_par,filenames,out_animation)
+                #     animation_2d = rfiPL.gif_me_up(rfi_par,filenames,out_animation)
 
-                    self.logger.info("---- 2D movie done ----\n")
+                #     self.logger.info("---- 2D movie done ----\n")
 
-                elif self.cfg_par['plots']['1d_gif']== True:
-                    #select files
-                    filenames_flags = glob.glob(rfi_par.cfg_par['general']['timeplotdir1D']+'/flags_*')
+                # elif self.cfg_par['plots']['1d_gif']== True:
+                #     #select files
+                #     filenames_flags = glob.glob(rfi_par.cfg_par['general']['timeplotdir1D']+'/flags_*')
 
-                    out_animation = rfi_par.cfg_par['general']['moviedir']+'TimeChunks_1D_flags.mp4'
-                    animation_flags = rfiPL.gif_me_up(rfi_par,filenames_flags,out_animation)
+                #     out_animation = rfi_par.cfg_par['general']['moviedir']+'TimeChunks_1D_flags.mp4'
+                #     animation_flags = rfiPL.gif_me_up(rfi_par,filenames_flags,out_animation)
 
-                    #select files
-                    filenames_noise = glob.glob(rfi_par.cfg_par['general']['timeplotdir1D']+'/noise_*')
+                #     #select files
+                #     filenames_noise = glob.glob(rfi_par.cfg_par['general']['timeplotdir1D']+'/noise_*')
 
-                    out_animation = rfi_par.cfg_par['general']['moviedir']+'TimeChunks_1D_noise.mp4'
-                    animation_noise = rfiPL.gif_me_up(rfi_par,filenames_noise,out_animation)
+                #     out_animation = rfi_par.cfg_par['general']['moviedir']+'TimeChunks_1D_noise.mp4'
+                #     animation_noise = rfiPL.gif_me_up(rfi_par,filenames_noise,out_animation)
 
-                    filenames_noisefactor = glob.glob(rfi_par.cfg_par['general']['timeplotdir1D']+'/noisefactor_*')
+                #     filenames_noisefactor = glob.glob(rfi_par.cfg_par['general']['timeplotdir1D']+'/noisefactor_*')
 
-                    out_animation = rfi_par.cfg_par['general']['moviedir']+'TimeChunks_1Dnoisefactor.mp4'
-                    animation_noisefactor = rfiPL.gif_me_up(rfi_par,filenames_noisefactor,out_animation)
+                #     out_animation = rfi_par.cfg_par['general']['moviedir']+'TimeChunks_1Dnoisefactor.mp4'
+                #     animation_noisefactor = rfiPL.gif_me_up(rfi_par,filenames_noisefactor,out_animation)
 
-                    self.logger.info("---- 1D movies done ----\n")
+                #     self.logger.info("---- 1D movies done ----\n")
 
                                     
             else:

@@ -126,12 +126,15 @@ class rfi:
 
             selection=self.fieldIDs==self.selectFieldID
             selection*=self.ant1!=self.ant2
+            
+            self.flag = t2.getcol('FLAG')[selection]
+
             if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                 if np.sum(selection) !=0. :
-                    self.flag = t2.getcol('FLAG')[selection]
                     self.vis = t2.getcol('DATA')[selection]
+            
                 else:
-                    self.flag = t2.getcol('FLAG')[selection]
+            #        self.flag = t2.getcol('FLAG')[selection]
                     self.vis = np.zeros(self.flag.shape)+np.inf
             self.interval = t2.getcol('INTERVAL')[selection]
             t2.close()

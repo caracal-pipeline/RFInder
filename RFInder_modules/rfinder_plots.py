@@ -2,13 +2,14 @@ import os,string,sys, glob
 import numpy as np
 
 import matplotlib
+print matplotlib.matplotlib_fname()
+
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib import ticker, rc
 from matplotlib.ticker import NullFormatter
 from IPython.display import HTML, display
 
-import matplotlib.animation as animation
 import matplotlib.image as mgimg
 
 from astropy.io import fits as fits
@@ -111,7 +112,7 @@ class rfi_plots:
         plt.rcParams['image.interpolation']='nearest'
         plt.rcParams['image.origin']='lower'
         plt.rcParams['image.aspect']='auto'
-        
+
         params = {'font.family'         :' serif',
                   'font.style'          : 'normal',
                   'font.weight'         : 'book',
@@ -122,10 +123,10 @@ class rfi_plots:
                   'ytick.labelsize'     : 16, 
                   'xtick.direction'     :'in',
                   'ytick.direction'     :'in',
-                  'xtick.top'           : True,   # draw ticks on the top side
-                  'xtick.bottom'        : True,   # draw ticks on the bottom side    
-                  'ytick.left'          : True,   # draw ticks on the top side
-                  'ytick.right'         : True,   # draw ticks on the bottom side  
+                  #'xtick.top'           : True,   # draw ticks on the top side
+                  #'xtick.bottom'        : True,   # draw ticks on the bottom side    
+                  #'ytick.left'          : True,   # draw ticks on the top side
+                  #'ytick.right'         : True,   # draw ticks on the bottom side  
                   'xtick.major.size'    : 4,
                   'xtick.major.width'   : 1,
                   'xtick.minor.size'    : 2,
@@ -280,10 +281,10 @@ class rfi_plots:
                   'ytick.labelsize'     : 16, 
                   'xtick.direction'     :'in',
                   'ytick.direction'     :'in',
-                  'xtick.top'           : True,   # draw ticks on the top side
-                  'xtick.bottom'        : True,   # draw ticks on the bottom side    
-                  'ytick.left'          : True,   # draw ticks on the top side
-                  'ytick.right'         : True,   # draw ticks on the bottom side  
+                  #'xtick.top'           : True,   # draw ticks on the top side
+                  #'xtick.bottom'        : True,   # draw ticks on the bottom side    
+                  #'ytick.left'          : True,   # draw ticks on the top side
+                  #'ytick.right'         : True,   # draw ticks on the bottom side  
                   'xtick.major.size'    : 4,
                   'xtick.major.width'   : 1,
                   'xtick.minor.size'    : 2,
@@ -311,6 +312,13 @@ class rfi_plots:
         
         if cfg_par['plots']['plot_noise'] != 'rfi':
             ax1.set_yscale('log', basey=10)
+            print np.sum(noise_all), np.sum(noise_short), np.sum(noise_long)
+            if np.isnan(np.sum(noise_all)):
+                noise_all=np.zeros([len(freqs)])+100.
+            if np.isnan(np.sum(noise_short)):
+                noise_short=np.zeros([len(freqs)])+100.
+            if np.isnan(np.sum(noise_long)):
+                noise_long= np.zeros([len(freqs)])+100.
 
         #define title output                     
         
@@ -474,10 +482,10 @@ class rfi_plots:
                       'ytick.labelsize'     : 16, 
                       'xtick.direction'     :'in',
                       'ytick.direction'     :'in',
-                      'xtick.top'           : True,   # draw ticks on the top side
-                      'xtick.bottom'        : True,   # draw ticks on the bottom side    
-                      'ytick.left'          : True,   # draw ticks on the top side
-                      'ytick.right'         : True,   # draw ticks on the bottom side  
+                      #'xtick.top'           : True,   # draw ticks on the top side
+                      #'xtick.bottom'        : True,   # draw ticks on the bottom side    
+                      #'ytick.left'          : True,   # draw ticks on the top side
+                      #'ytick.right'         : True,   # draw ticks on the bottom side  
                       'xtick.major.size'    : 4,
                       'xtick.major.width'   : 1,
                       'xtick.minor.size'    : 2,
@@ -575,7 +583,7 @@ class rfi_plots:
             #y plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
             if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
-                ax_y.set_xSlabel(r'$\%$ RFI ')
+                ax_y.set_xlabel(r'$\%$ RFI ')
             if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
                 ax_y.set_xlabel(r'$\%$ flagged')          
 
@@ -595,6 +603,8 @@ class rfi_plots:
 
     def gif_me_up(self,cfg_par,filenames,outmovie):
         
+        import matplotlib.animation as animation
+
         self.logger.info(('\t ... Creating movie ...'))
        
 
