@@ -90,8 +90,7 @@ class rfi:
 
         spw=tables.table(self.msfile+'/SPECTRAL_WINDOW')
         self.channelWidths=spw.getcol('CHAN_WIDTH')
-        #if np.unique(self.channelWidths).shape[0]==1: print 'Channel width = {0:.5e} Hz'.format(np.unique(self.channelWidths)[0])
-        #else: print 'The channel width takes the following unique values:',np.unique(self.channelWidths),'Hz'
+
         self.channelFreqs=spw.getcol('CHAN_FREQ')
         cfg_par['rfi']['chan_widths'] = self.channelWidths[0][0]
         cfg_par['rfi']['lowfreq'] = float(self.channelFreqs[0][0])
@@ -107,10 +106,7 @@ class rfi:
         #determine start and end date
         times_tm, start_tmp, end_tmp = rfiST.time_chunk(cfg_par)
 
-
-
         t=tables.table(self.msfile)
-
 
         if times !=0:
             value_end = times[1]
@@ -121,22 +117,21 @@ class rfi:
             
             t2 = tables.taql('select from $t where TIME < $value_end and TIME>$value_start')
             self.fieldIDs=t2.getcol('FIELD_ID')
-            self.ant1=t2.getcol('ANTENNA1')
-            self.ant2=t2.getcol('ANTENNA2')
+            self.ant1 = t2.getcol('ANTENNA1')
+            self.ant2 = t2.getcol('ANTENNA2')
 
-            selection=self.fieldIDs==self.selectFieldID
-            selection*=self.ant1!=self.ant2
-            
-            self.flag = t2.getcol('FLAG')[selection]
-
-            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
-                if np.sum(selection) !=0. :
-                    self.vis = t2.getcol('DATA')[selection]
-            
-                else:
-            #        self.flag = t2.getcol('FLAG')[selection]
-                    self.vis = np.zeros(self.flag.shape)+np.inf
-            self.interval = t2.getcol('INTERVAL')[selection]
+            selection  = self.fieldIDs==self.selectFieldID
+            selection *= self.ant1!=self.ant2
+            if np.sum(selection) !=0. :
+                if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                    self.vis  = t2.getcol('DATA')[selection]
+                self.flag = t2.getcol('FLAG')[selection]
+                self.interval = t2.getcol('INTERVAL')[selection]
+                empty_table=0     
+            else:
+                self.logger.warning('\t ### Table of selected interval is empty ')
+                self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
+                empty_table=1
             t2.close()
         
         else:
@@ -154,35 +149,31 @@ class rfi:
             
             if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                 self.vis = t.getcol('DATA')[selection]
-
             self.interval = t.getcol('INTERVAL')[selection]
             self.flag = t.getcol('FLAG')[selection]
 
         t.close()
 
-        #determine number of baselines
-        nrAnt=np.unique(np.concatenate((self.ant1,self.ant2))).shape[0]
+
         
         if not self.aperfi_badant:
             nrbadant =len(int(self.aperfi_badant))
         else:
             nrbadant = 0.
 
-
-
-        nrBaseline=(nrAnt-nrbadant)*(nrAnt-nrbadant-1)/2        
-        cfg_par['rfi']['number_baseline'] = nrBaseline
-
         #visibilities over all times per baseline
-        cfg_par['rfi']['vis_alltimes_baseline'] = self.flag.shape[0]/nrBaseline
-
-
         #estimate noise
-        rfiST.predict_noise(cfg_par,self.channelWidths,self.interval,self.flag)
+        if empty_table!=1:
+            #determine number of baselines
+            nrAnt=np.unique(np.concatenate((self.ant1,self.ant2))).shape[0]
+            nrBaseline=(nrAnt-nrbadant)*(nrAnt-nrbadant-1)/2        
+            cfg_par['rfi']['number_baseline'] = nrBaseline
+            rfiST.predict_noise(cfg_par,self.channelWidths,self.interval,self.flag)
+            cfg_par['rfi']['vis_alltimes_baseline'] = self.flag.shape[0]/nrBaseline
 
         self.logger.info("\t ... info from MS file loaded  \n\n")
 
-        return 0
+        return empty_table
 
     def baselines_from_ms(self,cfg_par):
         '''
@@ -251,12 +242,16 @@ class rfi:
         '''
 
         self.logger.info('\t ... Flagging a-prioris  ...\n')
+        pol = cfg_par['rfi']['polarization']
 
-        self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
+
+        if (pol != 'q' and pol != 'Q' and pol != 'i' and pol != 'I'):
+            self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
+        else:
+            self.datacube = np.zeros([len(self.baselines_sort),2*self.flag.shape[1],2*self.flag.shape[0]/(len(self.baselines_sort))])
 
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
         #flag unused polarizations
-        pol = cfg_par['rfi']['polarization']
         if (pol == 'xx' or pol == 'XX'):
             self.flag[:,:,1] = True #YY
             if self.flag.shape[2]>2:
@@ -282,7 +277,6 @@ class rfi:
 
         #flag autocorrelations and bad antennas
         for i in xrange(0,self.flag.shape[0]):
-            
 
             if self.aperfi_badant != None:
                 if (any(x == self.ant1[i] for x in self.aperfi_badant) or any(x == self.ant2[i] for x in self.aperfi_badant)):
@@ -298,7 +292,16 @@ class rfi:
                 # Put amplitude of visibility
                 # In the right place in the new array
                 if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
-                    self.datacube[indice,:,counter]=self.flag[i,:,0]
+                    if (pol == 'xx' or pol == 'XX'):
+                        self.datacube[indice,:,counter]=self.flag[i,:,0]
+                    if (pol == 'yy' or pol == 'YY'):
+                        self.datacube[indice,:,counter]=self.flag[i,:,1]
+                    if (pol == 'xy' or pol == 'XY'):
+                        self.datacube[indice,:,counter]=self.flag[i,:,2]
+                    if (pol == 'yx' or pol == 'YX'):
+                        self.datacube[indice,:,counter]=self.flag[i,:,3]
+                    elif (pol == 'q' or pol == 'Q' or pol == 'I' or pol == 'i'):
+                        self.datacube[indice,:,counter]=np.concatenate((self.flag[i,:,0],self.flag[i,:,1]))                    
                 elif cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                     if (pol == 'xx' or pol == 'XX'):
                         self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])
@@ -391,7 +394,7 @@ class rfi:
                         if tmp_over == 1. :
                             tmp_over = 0.
                         rms[i,j] = 100.*tmp_over/time_ax_len
-        
+
         elif cfg_par['rfi']['RFInder_mode'] == 'use_flags': 
             for i in xrange(0,self.datacube.shape[0]):
                 for j in xrange(0,self.datacube.shape[1]):

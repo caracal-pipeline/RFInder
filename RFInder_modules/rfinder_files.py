@@ -105,139 +105,138 @@ def rfi_frequency(cfg_par,time_step=-1):
     rfi_table = tabledir+table_name
 
     #open file
-    #if os.path.exists(rfi_freq_base) == False:
-    #    logger.error('### Image of RFI sorted by frequency over baseline lenght does not exist ###')    
-    #    logger.error('### Run aperfi.rfi_im() first ###')  
-    #else:    
+    if os.path.exists(rfi_freq_base) == False:
+        logger.error('### Image of RFI sorted by frequency over baseline lenght does not exist ###')    
+    else:    
         
-    # read data and header
-    hdulist = fits.open(rfi_freq_base)  # read input                
-    datacube = hdulist[0].data    
-    prihdr = hdulist[0].header
+        # read data and header
+        hdulist = fits.open(rfi_freq_base)  # read input                
+        datacube = hdulist[0].data    
+        prihdr = hdulist[0].header
 
-    #set array of frequencies
-    freqs = (np.linspace(1, datacube.shape[1], datacube.shape[1])\
-                 - prihdr['CRPIX1'])*prihdr['CDELT1'] + prihdr['CRVAL1']
-    
-    # set y-array
-    rms_lin = np.zeros([datacube.shape[1]])    
-    flag_lin = np.zeros([datacube.shape[1]])   
-
-    more_long = float(cfg_par['rfi']['number_baseline'])/float(cfg_par['rfi']['num_long'])
-    more_short = float(cfg_par['rfi']['number_baseline'])/float(cfg_par['rfi']['num_short'])
-
-    rms_lin_long = np.zeros([datacube.shape[1]]) + np.sqrt(more_long)          
-    rms_lin_short = np.zeros([datacube.shape[1]]) + np.sqrt(more_short)
-
-    flag_lin_long = np.zeros([datacube.shape[1]]) + (100.-100./more_long)    
-    flag_lin_short = np.zeros([datacube.shape[1]]) + (100.-100./more_short)
-
-    natural_rms = cfg_par['rfi']['theo_rms'] 
-
-    elevation = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].alt*u.deg
-    azimuth = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].az*u.deg
-
-
-    for i in xrange(0,datacube.shape[1]):
+        #set array of frequencies
+        freqs = (np.linspace(1, datacube.shape[1], datacube.shape[1])\
+                     - prihdr['CRPIX1'])*prihdr['CDELT1'] + prihdr['CRVAL1']
         
-        flag_lin_tmp = np.divide(np.sum(datacube[:,i]),datacube.shape[0])
-        flag_lin[i] = flag_lin_tmp
+        # set y-array
+        rms_lin = np.zeros([datacube.shape[1]])    
+        flag_lin = np.zeros([datacube.shape[1]])   
+
+        more_long = float(cfg_par['rfi']['number_baseline'])/float(cfg_par['rfi']['num_long'])
+        more_short = float(cfg_par['rfi']['number_baseline'])/float(cfg_par['rfi']['num_short'])
+
+        rms_lin_long = np.zeros([datacube.shape[1]]) + np.sqrt(more_long)          
+        rms_lin_short = np.zeros([datacube.shape[1]]) + np.sqrt(more_short)
+
+        flag_lin_long = np.zeros([datacube.shape[1]]) + (100.-100./more_long)    
+        flag_lin_short = np.zeros([datacube.shape[1]]) + (100.-100./more_short)
+
+        natural_rms = cfg_par['rfi']['theo_rms'] 
+
+        elevation = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].alt*u.deg
+        azimuth = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].az*u.deg
 
 
-        baseline_cutoff = float(cfg_par['rfi']['baseline_cut'])
-        lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
-        idx = (np.abs(lenghts - baseline_cutoff)).argmin()
+        for i in xrange(0,datacube.shape[1]):
+            
+            flag_lin_tmp = np.divide(np.sum(datacube[:,i]),datacube.shape[0])
+            flag_lin[i] = flag_lin_tmp
 
-        shortbase=datacube[:idx,i]
-        longbase = datacube[idx:,i]               
-        
-        rms_lin_tmp = 1.-np.divide(np.divide(np.sum(datacube[:,i]),datacube.shape[0]),100.)
-        rms_lin[i] = np.divide(1.,np.sqrt(rms_lin_tmp))
 
-        flag_lin_tmp = np.divide(np.sum(shortbase),len(shortbase))
-        flag_lin_short[i] = flag_lin_tmp
-        rms_lin_tmp_short = 1.-np.divide(np.divide(np.sum(shortbase),len(shortbase)),100.)
-        rms_lin_short[i] *= np.divide(1.,np.sqrt(rms_lin_tmp_short))
+            baseline_cutoff = float(cfg_par['rfi']['baseline_cut'])
+            lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+            idx = (np.abs(lenghts - baseline_cutoff)).argmin()
 
-        flag_lin_tmp = np.divide(np.sum(longbase),len(longbase))
-        flag_lin_long[i] = flag_lin_tmp
-        rms_lin_tmp_long = 1.-np.divide(np.divide(np.sum(longbase),len(longbase)),100.)
-        rms_lin_long[i] *= np.divide(1.,np.sqrt(rms_lin_tmp_long))
+            shortbase=datacube[:idx,i]
+            longbase = datacube[idx:,i]               
+            
+            rms_lin_tmp = 1.-np.divide(np.divide(np.sum(datacube[:,i]),datacube.shape[0]),100.)
+            rms_lin[i] = np.divide(1.,np.sqrt(rms_lin_tmp))
 
-    
-    #rebin results
-    if cfg_par['rfi']['chunks']['spw_enable'] == True:
+            flag_lin_tmp = np.divide(np.sum(shortbase),len(shortbase))
+            flag_lin_short[i] = flag_lin_tmp
+            rms_lin_tmp_short = 1.-np.divide(np.divide(np.sum(shortbase),len(shortbase)),100.)
+            rms_lin_short[i] *= np.divide(1.,np.sqrt(rms_lin_tmp_short))
+
+            flag_lin_tmp = np.divide(np.sum(longbase),len(longbase))
+            flag_lin_long[i] = flag_lin_tmp
+            rms_lin_tmp_long = 1.-np.divide(np.divide(np.sum(longbase),len(longbase)),100.)
+            rms_lin_long[i] *= np.divide(1.,np.sqrt(rms_lin_tmp_long))
 
         
-        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
-            table_name_bin = str(table_tmp[0])+'_flags_'+time_name+'_spwbin.fits'
-        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
-            table_name_bin = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
+        #rebin results
+        if cfg_par['rfi']['chunks']['spw_enable'] == True:
+
+            
+            if cfg_par['rfi']['RFInder_mode']== 'use_flags':
+                table_name_bin = str(table_tmp[0])+'_flags_'+time_name+'_spwbin.fits'
+            if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
+                table_name_bin = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
 
 
-        rfi_table_bin = tabledir+table_name_bin
+            rfi_table_bin = tabledir+table_name_bin
 
-        step_bin = cfg_par['rfi']['chunks']['spw_width']
+            step_bin = cfg_par['rfi']['chunks']['spw_width']
 
-        freqs_bin=np.arange(freqs[0],freqs[-1]+step_bin,step_bin)
+            freqs_bin=np.arange(freqs[0],freqs[-1]+step_bin,step_bin)
 
-        flag_lin_bin=np.zeros(freqs_bin.shape)
-        rms_lin_bin=np.zeros(freqs_bin.shape)
-        flag_lin_bin_short=np.zeros(freqs_bin.shape)
-        rms_lin_bin_short=np.zeros(freqs_bin.shape)
-        flag_lin_bin_long=np.zeros(freqs_bin.shape)
-        rms_lin_bin_long=np.zeros(freqs_bin.shape)
-        # is this correct ???
-        natural_rms_bin=np.zeros(freqs_bin.shape)
+            flag_lin_bin=np.zeros(freqs_bin.shape)
+            rms_lin_bin=np.zeros(freqs_bin.shape)
+            flag_lin_bin_short=np.zeros(freqs_bin.shape)
+            rms_lin_bin_short=np.zeros(freqs_bin.shape)
+            flag_lin_bin_long=np.zeros(freqs_bin.shape)
+            rms_lin_bin_long=np.zeros(freqs_bin.shape)
+            # is this correct ???
+            natural_rms_bin=np.zeros(freqs_bin.shape)
 
-        elevation_bin = np.zeros(freqs_bin.shape)+cfg_par['rfi']['altaz'].alt*u.deg
-        azimuth_bin = np.zeros(freqs_bin.shape)+cfg_par['rfi']['altaz'].az*u.deg
+            elevation_bin = np.zeros(freqs_bin.shape)+cfg_par['rfi']['altaz'].alt*u.deg
+            azimuth_bin = np.zeros(freqs_bin.shape)+cfg_par['rfi']['altaz'].az*u.deg
 
-        for i in xrange(0, len(freqs_bin)-1):
-            #look for the right velocity bin
-            index = (freqs_bin[i] <= freqs) & (freqs < freqs_bin[i+1])
+            for i in xrange(0, len(freqs_bin)-1):
+                #look for the right velocity bin
+                index = (freqs_bin[i] <= freqs) & (freqs < freqs_bin[i+1])
 
-            flag_lin_bin[i] = np.nanmean(flag_lin[index])
-            rms_lin_bin[i] = np.nanmean(rms_lin[index])
-            flag_lin_bin_short[i] = np.nanmean(flag_lin_short[index])
-            rms_lin_bin_short[i] = np.nanmean(rms_lin_short[index])
-            flag_lin_bin_long[i] = np.nanmean(flag_lin_long[index])
-            rms_lin_bin_long[i] = np.nanmean(rms_lin_long[index])
-            natural_rms_bin[i] = np.nanmean(natural_rms[index])
+                flag_lin_bin[i] = np.nanmean(flag_lin[index])
+                rms_lin_bin[i] = np.nanmean(rms_lin[index])
+                flag_lin_bin_short[i] = np.nanmean(flag_lin_short[index])
+                rms_lin_bin_short[i] = np.nanmean(rms_lin_short[index])
+                flag_lin_bin_long[i] = np.nanmean(flag_lin_long[index])
+                rms_lin_bin_long[i] = np.nanmean(rms_lin_long[index])
+                natural_rms_bin[i] = np.nanmean(natural_rms[index])
+
+            # save fits table        
+            c1 = fits.Column(name='frequency', format='D', unit='MHz', array=freqs_bin)
+            c2 = fits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin_bin)
+            c3 = fits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin_bin)
+            c4 = fits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_bin_short)
+            c5 = fits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_bin_short)
+            c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_bin_long)
+            c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_bin_long)        
+            c8 = fits.Column(name='natural_rms', format='D', array=natural_rms_bin)        
+            c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation_bin)        
+            c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth_bin)        
+
+            fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10])    
+
+            fits_table.writeto(rfi_table_bin, overwrite = True)
+
 
         # save fits table        
-        c1 = fits.Column(name='frequency', format='D', unit='MHz', array=freqs_bin)
-        c2 = fits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin_bin)
-        c3 = fits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin_bin)
-        c4 = fits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_bin_short)
-        c5 = fits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_bin_short)
-        c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_bin_long)
-        c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_bin_long)        
-        c8 = fits.Column(name='natural_rms', format='D', array=natural_rms_bin)        
-        c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation_bin)        
-        c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth_bin)        
-
-        fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10])    
-
-        fits_table.writeto(rfi_table_bin, overwrite = True)
-
-
-    # save fits table        
-    c1 = fits.Column(name='frequency', format='D', unit='MHz', array=freqs)
-    c2 = fits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin)
-    c3 = fits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin)
-    c4 = fits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_short)
-    c5 = fits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_short)
-    c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_long)
-    c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_long)        
-    c8 = fits.Column(name='natural_rms', format='D', array=natural_rms)        
-    c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation)        
-    c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth)        
-    
-    fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])    
-    
-    fits_table.writeto(rfi_table, overwrite = True)
-  
-    logger.info("\t ... RFI table saved ...\n")
+        c1 = fits.Column(name='frequency', format='D', unit='MHz', array=freqs)
+        c2 = fits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin)
+        c3 = fits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin)
+        c4 = fits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_short)
+        c5 = fits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_short)
+        c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_long)
+        c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_long)        
+        c8 = fits.Column(name='natural_rms', format='D', array=natural_rms)        
+        c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation)        
+        c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth)        
+        
+        fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])    
+        
+        fits_table.writeto(rfi_table, overwrite = True)
+      
+        logger.info("\t ... RFI table saved ...\n")
 
 

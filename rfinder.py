@@ -223,24 +223,27 @@ class rfinder:
                     self.logger.info((" ------ Working on chunk #{0:d}:").format(i))
                     self.logger.info(("\t \t between {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}").format(start.datetime,end.datetime))
 
-                    rfi.load_from_ms(self.cfg_par,timez)
+                    result = rfi.load_from_ms(self.cfg_par,timez)
                     self.logger.info("---- MSfile Loaded -----\n")
 
                     #sort visibilities by baseline lenght
-                    rfi.baselines_from_ms(self.cfg_par)
-                    self.logger.info("---- Dataset sorted by baseline lenght ----\n")
+                    if result != 1:
+                        rfi.baselines_from_ms(self.cfg_par)
+                        self.logger.info("---- Dataset sorted by baseline lenght ----\n")
 
-                    #flag bad antennas (from configuration file)
-                    datas = rfi.priors_flag(self.cfg_par)
-                    self.logger.info("---- Bad antennas and autocorrelations flagged ----\n")
+                        #flag bad antennas (from configuration file)
+                        datas = rfi.priors_flag(self.cfg_par)
+                        self.logger.info("---- Bad antennas and autocorrelations flagged ----\n")
 
-                    #find rfi above threshold
-                    rfi.find_rfi(datas,self.cfg_par,i)
-                    self.logger.info(" ------  RFI found  ------\n")
+                        #find rfi above threshold
+                        rfi.find_rfi(datas,self.cfg_par,i)
+                        self.logger.info(" ------  RFI found  ------\n")
 
-                    rfi_files.rfi_frequency(self.cfg_par,i)
-                    self.logger.info("---- RFI saved to table ----\n")
-
+                        rfi_files.rfi_frequency(self.cfg_par,i)
+                        self.logger.info("---- RFI saved to table ----\n")
+                    else:
+                        self.logger.warning("---- This chunk is empyt ----\n")
+                        continue
 
                 self.logger.info(" ------ End of RFI analysis on time chunks ------\n")
 
@@ -273,11 +276,15 @@ class rfinder:
 
                     if self.enable_task(self.cfg_par,'rfi')==False:
 
-                        rfi.load_from_ms(self.cfg_par,timez)
-                        self.logger.info("---- MSfile Loaded -----\n")                
-                        rfi.baselines_from_ms(self.cfg_par)
-                        self.logger.info("---- Dataset sorted by baseline lenght ----\n")
-            
+                        results = rfi.load_from_ms(self.cfg_par,timez)
+                        self.logger.info("---- MSfile Loaded -----\n")    
+                        if results != 1:
+                            rfi.baselines_from_ms(self.cfg_par)
+                            self.logger.info("---- Dataset sorted by baseline lenght ----\n")
+                        else:
+                            self.logger.warning("---- This chunk is empyy ----\n")
+                            continue       
+
                     rfiPL.plot_rfi_imshow(self.cfg_par,i)
                     self.logger.info("---- RFI in 2D plotted ----\n")
                     self.cfg_par['plots']['plot_noise'] = 'rfi'

@@ -2,7 +2,6 @@ import os,string,sys, glob
 import numpy as np
 
 import matplotlib
-print matplotlib.matplotlib_fname()
 
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
@@ -68,126 +67,134 @@ class rfi_plots:
             rfi_freq_base =outputdir+'rfi_base_'+time_name+'.fits'
             rfi_freq_base_plot = plotdir+'rfi_base_'+time_name+'.png'
         
-
-        # open file
-        t = fits.open(rfi_freq_base)
-        data = t[0].data
-        prihdr= t[0].header
-        freqs = (np.linspace(1, data.shape[1], data.shape[1])- prihdr['CRPIX1'])*prihdr['CDELT1'] + prihdr['CRVAL1']
-        
-        # set x-y axes
-        step_bin=50.
-        freqs_plot_bin=np.arange(freqs[0],freqs[-1]+step_bin,step_bin)
-        freqs_plot_bin=np.round(freqs_plot_bin,0)
-
-        freqs_plot_idx=np.zeros(freqs_plot_bin.shape)
-        for i in xrange(0, len(freqs_plot_bin)):
-            idx = (np.abs(freqs_plot_bin[i] - freqs)).argmin()
-            freqs_plot_idx[i]=idx
-
-
-        tele= cfg_par['rfi']['telescope']
-        if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':    
-            input_baselines = np.zeros(6)
-            for i in xrange (0,len(input_baselines)):
-                input_baselines[i] = 100.*np.power(2,i)
-        elif tele == 'apertif' or tele == 'Apertif' or tele == 'APERTIF' or tele == 'wsrt':
-            input_baselines = np.zeros(7)
-            for i in xrange (0,len(input_baselines)):
-                input_baselines[i] = 50.*np.power(2,i)
+        #open file
+        if os.path.exists(rfi_freq_base) == False:
+            self.logger.error('### 2D RFI in fits format does not exist ###')    
+        else:
+            # open file
+            t = fits.open(rfi_freq_base)
+            data = t[0].data
+            prihdr= t[0].header
+            freqs = (np.linspace(1, data.shape[1], data.shape[1])- prihdr['CRPIX1'])*prihdr['CDELT1'] + prihdr['CRVAL1']
+            
+            # set x-y axes
+            bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
+            cfg_par['rfi']['highfreq'] 
+            if bandwidth <= 500.:
+                step_bin=50.
+            else:
+                step_bin=100.
+            # Smaller multiple 
+            freq_max = (freqs[-1] // step_bin) * step_bin  
+            # Larger multiple 
+            freq_min= (freqs[0] // step_bin) * step_bin + step_bin
+            freqs_plot_bin=np.arange(freq_min,freq_max+step_bin,step_bin)
+            freqs_plot_bin=np.round(freqs_plot_bin,0)
+            freqs_plot_bin=np.array(freqs_plot_bin,dtype=int)
 
 
-        input_baselines_idx=np.zeros(input_baselines.shape)
-
-        baselines = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
-        
-        if input_baselines[-1] > baselines[0,-1]:
-            input_baselines[-1]=np.round(baselines[0,-1],0)
-
-        for i in xrange(0, len(input_baselines)):
-            idx = (np.abs(input_baselines[i] - baselines[0,:])).argmin()
-            input_baselines_idx[i]=idx
-        
-        #set rc parameters 
-        plt.rcParams['image.interpolation']='nearest'
-        plt.rcParams['image.origin']='lower'
-        plt.rcParams['image.aspect']='auto'
-
-        params = {'font.family'         :' serif',
-                  'font.style'          : 'normal',
-                  'font.weight'         : 'book',
-                  'font.size'           : 18.0,
-                  'axes.linewidth'      : 1,
-                  'lines.linewidth'     : 1,
-                  'xtick.labelsize'     : 16,
-                  'ytick.labelsize'     : 16, 
-                  'xtick.direction'     :'in',
-                  'ytick.direction'     :'in',
-                  #'xtick.top'           : True,   # draw ticks on the top side
-                  #'xtick.bottom'        : True,   # draw ticks on the bottom side    
-                  #'ytick.left'          : True,   # draw ticks on the top side
-                  #'ytick.right'         : True,   # draw ticks on the bottom side  
-                  'xtick.major.size'    : 4,
-                  'xtick.major.width'   : 1,
-                  'xtick.minor.size'    : 2,
-                  'xtick.minor.width'   : 1,
-                  'ytick.major.size'    : 4,
-                  'ytick.major.width'   : 1,
-                  'ytick.minor.size'    : 2,
-                  'ytick.minor.width'   : 1, 
-                  'text.usetex'         : True,
-                  'text.latex.unicode'  : True
-                   }
-        plt.rcParams.update(params)
-
-        fig, ax = plt.subplots(figsize=(12,8))
-        im = ax.imshow(data,vmin=0,vmax=100,cmap='nipy_spectral_r')
-
-        # ticks & labels
-        ax.set_xticks(freqs_plot_idx)
-        ax.set_yticks(input_baselines_idx)
-
-        ax.set_xticklabels(freqs_plot_bin)
-        ax.set_yticklabels(input_baselines)
-                
-        ax.set_xlabel('Frequency [MHz]')
-        ax.set_ylabel('Baseline lenght [m]')
-        
-        # colorbar
-        cbar = fig.colorbar(im,ticks=[10,20, 30,40,50,60,70,80,90,100]) 
-        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
-            cbar.set_label(r'$\% > 5 \times$ r.m.s.')
-        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
-            cbar.set_label(r'$\%$ flagged visibilites')
-
-        #times, start, end = rfi.time_chunk(cfg_par)
-        #start.format='iso' 
-        #start.subformat='date_hm'   
-        #end.format='iso'
-        #end.subformat='date_hm'
+            tele= cfg_par['rfi']['telescope']
+            if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':    
+                input_baselines = np.zeros(6)
+                for i in xrange (0,len(input_baselines)):
+                    input_baselines[i] = 100.*np.power(2,i)
+            elif tele == 'apertif' or tele == 'Apertif' or tele == 'APERTIF' or tele == 'wsrt':
+                input_baselines = np.zeros(7)
+                for i in xrange (0,len(input_baselines)):
+                    input_baselines[i] = 50.*np.power(2,i)
 
 
-        if cfg_par['rfi']['chunks']['time_enable']== False:
-            start = cfg_par['rfi']['startdate']
-            end = cfg_par['rfi']['enddate']
+            input_baselines_idx=np.zeros(input_baselines.shape)
 
-        elif cfg_par['rfi']['chunks']['time_enable'] == True:
-            time_del = TimeDelta(time_delta*60., format='sec')
-            time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
-            start = cfg_par['rfi']['startdate']+time_del
-            end = start+time_delta_plus
+            baselines = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+            
+            if input_baselines[-1] > baselines[0,-1]:
+                input_baselines[-1]=np.round(baselines[0,-1],0)
 
-        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
-            rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'
-            title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
-        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
-            title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
-        
-        ax.set_title(title_plot)
-     
-        plt.savefig(rfi_freq_base_plot,format='png' ,overwrite=True)
-        plt.close(fig)        
-        self.logger.info("\t ... RFI per baseline lenght and frequency plotted ... \n\n")
+            for i in xrange(0, len(input_baselines)):
+                idx = (np.abs(input_baselines[i] - baselines[0,:])).argmin()
+                input_baselines_idx[i]=idx
+            
+            #set rc parameters 
+            plt.rcParams['image.interpolation']='nearest'
+            plt.rcParams['image.origin']='lower'
+            plt.rcParams['image.aspect']='auto'
+
+            params = {'font.family'         :' serif',
+                      'font.style'          : 'normal',
+                      'font.weight'         : 'book',
+                      'font.size'           : 18.0,
+                      'axes.linewidth'      : 1,
+                      'lines.linewidth'     : 1,
+                      'xtick.labelsize'     : 16,
+                      'ytick.labelsize'     : 16, 
+                      'xtick.direction'     :'in',
+                      'ytick.direction'     :'in',
+                      #'xtick.top'           : True,   # draw ticks on the top side
+                      #'xtick.bottom'        : True,   # draw ticks on the bottom side    
+                      #'ytick.left'          : True,   # draw ticks on the top side
+                      #'ytick.right'         : True,   # draw ticks on the bottom side  
+                      'xtick.major.size'    : 4,
+                      'xtick.major.width'   : 1,
+                      'xtick.minor.size'    : 2,
+                      'xtick.minor.width'   : 1,
+                      'ytick.major.size'    : 4,
+                      'ytick.major.width'   : 1,
+                      'ytick.minor.size'    : 2,
+                      'ytick.minor.width'   : 1, 
+                      'text.usetex'         : True,
+                      'text.latex.unicode'  : True
+                       }
+            plt.rcParams.update(params)
+
+            fig, ax = plt.subplots(figsize=(12,8))
+            im = ax.imshow(data,vmin=0,vmax=100,cmap='nipy_spectral_r')
+
+            # ticks & labels
+            ax.set_xticks(freqs_plot_bin)
+            ax.set_yticks(input_baselines_idx)
+
+            ax.set_xticklabels(freqs_plot_bin)
+            ax.set_yticklabels(input_baselines)
+                    
+            ax.set_xlabel('Frequency [MHz]')
+            ax.set_ylabel('Baseline lenght [m]')
+            
+            # colorbar
+            cbar = fig.colorbar(im,ticks=[10,20, 30,40,50,60,70,80,90,100]) 
+            if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
+                cbar.set_label(r'$\% > 5 \times$ r.m.s.')
+            if cfg_par['rfi']['RFInder_mode']== 'use_flags':
+                cbar.set_label(r'$\%$ flagged visibilites')
+
+            #times, start, end = rfi.time_chunk(cfg_par)
+            #start.format='iso' 
+            #start.subformat='date_hm'   
+            #end.format='iso'
+            #end.subformat='date_hm'
+
+
+            if cfg_par['rfi']['chunks']['time_enable']== False:
+                start = cfg_par['rfi']['startdate']
+                end = cfg_par['rfi']['enddate']
+
+            elif cfg_par['rfi']['chunks']['time_enable'] == True:
+                time_del = TimeDelta(time_delta*60., format='sec')
+                time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
+                start = cfg_par['rfi']['startdate']+time_del
+                end = start+time_delta_plus
+
+            if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
+                rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'
+                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
+            if cfg_par['rfi']['RFInder_mode']== 'use_flags':
+                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
+            
+            ax.set_title(title_plot)
+         
+            plt.savefig(rfi_freq_base_plot,format='png' ,overwrite=True)
+            plt.close(fig)        
+            self.logger.info("\t ... RFI per baseline lenght and frequency plotted ... \n\n")
 
     def plot_noise_frequency(self,cfg_par,time_step=-1):
         '''
@@ -234,166 +241,189 @@ class rfi_plots:
 
         rfi_table = tabledir+table_name
         
+        #open file
+        if os.path.exists(rfi_table) == False:
+            self.logger.error('### Table of RFI results does not exist ###')    
+        else:    
+            
+            t = fits.open(rfi_table)
+            data_vec = t[1].data
+            cols = t[1].columns
+            
+            freqs = np.array(data_vec['frequency'],dtype=float)
+            flags = np.array(data_vec['percentage_flags'],dtype=float)
+            noise_factor = np.array(data_vec['noise_factor'],dtype=float)
+            noise_factor_long = np.array(data_vec['noise_factor_long'],dtype=float)
+            flags_long = np.array(data_vec['percentage_flags_long'],dtype=float)
+            noise_factor_short = np.array(data_vec['noise_factor_short'],dtype=float)
+            flags_short = np.array(data_vec['percentage_flags_short'],dtype=float)
 
-        t = fits.open(rfi_table)
-        data_vec = t[1].data
-        cols = t[1].columns
-        
-        freqs = np.array(data_vec['frequency'],dtype=float)
-        flags = np.array(data_vec['percentage_flags'],dtype=float)
-        noise_factor = np.array(data_vec['noise_factor'],dtype=float)
-        noise_factor_long = np.array(data_vec['noise_factor_long'],dtype=float)
-        flags_long = np.array(data_vec['percentage_flags_long'],dtype=float)
-        noise_factor_short = np.array(data_vec['noise_factor_short'],dtype=float)
-        flags_short = np.array(data_vec['percentage_flags_short'],dtype=float)
-
-       
-        if cfg_par['plots']['plot_noise'] == 'noise':
-            rms = np.array(cfg_par['rfi']['theo_rms']*1e3,dtype=float)
-            noise_all = noise_factor*rms
-            noise_short = noise_factor_short*rms
-            noise_long = noise_factor_long*rms
-            out_plot = plotdir+'noise_'+time_name
-        
-        if cfg_par['plots']['plot_noise'] == 'noise_factor':
-            self.logger.info("\t ... Plotting factor of noise increas per frequency channel ...")
-            noise_all = noise_factor
-            noise_short = noise_factor_short
-            noise_long = noise_factor_long    
-            out_plot = plotdir+'noisefactor_'+time_name
-        
-        if cfg_par['plots']['plot_noise'] == 'rfi':
-            self.logger.info("\t ... Plotting percentage of flagged RFI per frequency channel ...")
-            noise_all = flags
-            noise_long = flags_long
-            noise_short = flags_short
-            out_plot = plotdir+'flags_'+time_name
+           
+            if cfg_par['plots']['plot_noise'] == 'noise':
+                rms = np.array(cfg_par['rfi']['theo_rms']*1e3,dtype=float)
+                noise_all = noise_factor*rms
+                noise_short = noise_factor_short*rms
+                noise_long = noise_factor_long*rms
+                out_plot = plotdir+'noise_'+time_name
+            
+            if cfg_par['plots']['plot_noise'] == 'noise_factor':
+                self.logger.info("\t ... Plotting factor of noise increas per frequency channel ...")
+                noise_all = noise_factor
+                noise_short = noise_factor_short
+                noise_long = noise_factor_long    
+                out_plot = plotdir+'noisefactor_'+time_name
+            
+            if cfg_par['plots']['plot_noise'] == 'rfi':
+                self.logger.info("\t ... Plotting percentage of flagged RFI per frequency channel ...")
+                noise_all = flags
+                noise_long = flags_long
+                noise_short = flags_short
+                out_plot = plotdir+'flags_'+time_name
 
 
-                # initialize plotting parameters
-        params = {'font.family'         :' serif',
-                  'font.style'          : 'normal',
-                  'font.weight'         : 'book',
-                  'font.size'           : 18.0,
-                  'axes.linewidth'      : 1,
-                  'lines.linewidth'     : 1,
-                  'xtick.labelsize'     : 16,
-                  'ytick.labelsize'     : 16, 
-                  'xtick.direction'     :'in',
-                  'ytick.direction'     :'in',
-                  #'xtick.top'           : True,   # draw ticks on the top side
-                  #'xtick.bottom'        : True,   # draw ticks on the bottom side    
-                  #'ytick.left'          : True,   # draw ticks on the top side
-                  #'ytick.right'         : True,   # draw ticks on the bottom side  
-                  'xtick.major.size'    : 4,
-                  'xtick.major.width'   : 1,
-                  'xtick.minor.size'    : 2,
-                  'xtick.minor.width'   : 1,
-                  'ytick.major.size'    : 4,
-                  'ytick.major.width'   : 1,
-                  'ytick.minor.size'    : 2,
-                  'ytick.minor.width'   : 1, 
-                  'text.usetex'         : True,
-                  'text.latex.unicode'  : True
-                   }
-        plt.rcParams.update(params)
-        #plt.rc('xtick', labelsize=20)
-        
-        # initialize figure
-        fig = plt.figure(figsize =(14,8))
-        fig.subplots_adjust(hspace=0.0)
-        gs = gridspec.GridSpec(1, 1)
-        plt.rc('xtick', labelsize=20)
+                    # initialize plotting parameters
+            params = {'font.family'         :' serif',
+                      'font.style'          : 'normal',
+                      'font.weight'         : 'book',
+                      'font.size'           : 18.0,
+                      'axes.linewidth'      : 1,
+                      'lines.linewidth'     : 1,
+                      'xtick.labelsize'     : 16,
+                      'ytick.labelsize'     : 16, 
+                      'xtick.direction'     :'in',
+                      'ytick.direction'     :'in',
+                      #'xtick.top'           : True,   # draw ticks on the top side
+                      #'xtick.bottom'        : True,   # draw ticks on the bottom side    
+                      #'ytick.left'          : True,   # draw ticks on the top side
+                      #'ytick.right'         : True,   # draw ticks on the bottom side  
+                      'xtick.major.size'    : 4,
+                      'xtick.major.width'   : 1,
+                      'xtick.minor.size'    : 2,
+                      'xtick.minor.width'   : 1,
+                      'ytick.major.size'    : 4,
+                      'ytick.major.width'   : 1,
+                      'ytick.minor.size'    : 2,
+                      'ytick.minor.width'   : 1, 
+                      'text.usetex'         : True,
+                      'text.latex.unicode'  : True
+                       }
+            plt.rcParams.update(params)
+            #plt.rc('xtick', labelsize=20)
+            
+            # initialize figure
+            fig = plt.figure(figsize =(14,8))
+            fig.subplots_adjust(hspace=0.0)
+            gs = gridspec.GridSpec(1, 1)
+            plt.rc('xtick', labelsize=20)
 
-        # Initialize subplots
-        ax1 = fig.add_subplot(gs[0])
-        ax1.set_xlabel(r'Frequency [MHz]')
+            # Initialize subplots
+            ax1 = fig.add_subplot(gs[0])
+            ax1.set_xlabel(r'Frequency [MHz]')
+            bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
 
-        
-        if cfg_par['plots']['plot_noise'] != 'rfi':
-            ax1.set_yscale('log', basey=10)
-            print np.sum(noise_all), np.sum(noise_short), np.sum(noise_long)
-            if np.isnan(np.sum(noise_all)):
-                noise_all=np.zeros([len(freqs)])+100.
-            if np.isnan(np.sum(noise_short)):
-                noise_short=np.zeros([len(freqs)])+100.
-            if np.isnan(np.sum(noise_long)):
-                noise_long= np.zeros([len(freqs)])+100.
+            if bandwidth <= 500.:
+                step_bin=50.
+            else:
+                step_bin=100.
 
-        #define title output                     
-        
-        #plot
-        label_all = 'All baselines' 
-        label_long = r'Baselines $>$ '+str(cfg_par['rfi']['baseline_cut'])+' m'
-        label_short = r'Baselines $<$ '+str(cfg_par['rfi']['baseline_cut'])+' m' 
+            # Smaller multiple 
+            freq_max = (freqs[-1] // step_bin) * step_bin  
+            # Larger multiple 
+            freq_min= (freqs[0] // step_bin) * step_bin + step_bin
 
-        if cfg_par['plots']['plot_long_short'] == True:
-            self.logger.info("\t ... Plotting RFI in long and short baselines ...")
-            ax1.step(freqs,noise_short, where= 'pre', color='red', linestyle='-',label=label_short)
-            ax1.step(freqs,noise_long, where= 'pre', color='blue', linestyle='-',label=label_long)
-            out_plot = out_plot+'_sl'
+            freqs_plot_bin=np.arange(freq_min,freq_max+step_bin,step_bin)
+            freqs_plot_bin=np.round(freqs_plot_bin,0)
+            freqs_plot_bin=np.array(freqs_plot_bin,dtype=int)
 
-        ax1.step(freqs,noise_all, where= 'pre', color='black', linestyle='-',label=label_all)
+            #for i in xrange(0, len(freqs_plot_bin)):
+            #    idx = (np.abs(freqs_plot_bin[i] - freqs)).argmin()
+            #    freqs_plot_idx[i]=idx
+            ax1.set_xticks(freqs_plot_bin)
+            ax1.set_xticklabels(freqs_plot_bin)
+            
+            if cfg_par['plots']['plot_noise'] != 'rfi':
+                ax1.set_yscale('log', basey=10)
+                if np.isnan(np.sum(noise_all)):
+                    noise_all=np.zeros([len(freqs)])+100.
+                if np.isnan(np.sum(noise_short)):
+                    noise_short=np.zeros([len(freqs)])+100.
+                if np.isnan(np.sum(noise_long)):
+                    noise_long= np.zeros([len(freqs)])+100.
 
-        #titleplot = self.target+': '+self.aperfi_startime+' - '+self.aperfi_endtime
-        #ax1.set_title(titleplot)
-        
-        # set axis, legend ticks
+            #define title output                     
+            
+            #plot
+            label_all = 'All baselines' 
+            label_long = r'Baselines $>$ '+str(cfg_par['rfi']['baseline_cut'])+' m'
+            label_short = r'Baselines $<$ '+str(cfg_par['rfi']['baseline_cut'])+' m' 
 
-        #ax1.set_xlim([np.min(freqs)-5,np.max(freqs)+5])
+            if cfg_par['plots']['plot_long_short'] == True:
+                self.logger.info("\t ... Plotting RFI in long and short baselines ...")
+                ax1.step(freqs,noise_short, where= 'pre', color='red', linestyle='-',label=label_short)
+                ax1.step(freqs,noise_long, where= 'pre', color='blue', linestyle='-',label=label_long)
+                out_plot = out_plot+'_sl'
 
-        #xticks_num = np.linspace(cfg_par['rfi']['lowfreq'],cfg_par['rfi']['highfreq'],10,dtype=int)
-        #ax1.set_xticks(xticks_num)
+            ax1.step(freqs,noise_all, where= 'pre', color='black', linestyle='-',label=label_all)
 
-        if cfg_par['plots']['plot_noise']  == 'noise_factor':
-            ax1.set_yticks([1,round(np.sqrt(2),2),2,3,5,10,50]) 
-            ax1.set_yscale('linear')     
-            ax1.set_ylabel(r'Factor of noise increase')
-            ax1.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
+            #titleplot = self.target+': '+self.aperfi_startime+' - '+self.aperfi_endtime
+            #ax1.set_title(titleplot)
+            
+            # set axis, legend ticks
 
-        if cfg_par['plots']['plot_noise'] == 'noise':
-            ax1.set_yscale('linear')     
-            ax1.set_ylabel(r'Predicted noise [mJy beam$^{-1}$]')     
-            ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+            #ax1.set_xlim([np.min(freqs)-5,np.max(freqs)+5])
 
-        if cfg_par['plots']['plot_noise'] == 'rfi':
-            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
-                ax1.set_ylabel(r'$\% > 5 \times$ r.m.s.')
-            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
-                ax1.set_ylabel(r'$\%$ flagged visibilites')    
-            ax1.set_ylim([-5,105]) 
-            ax1.set_yticks([0,20,40,60,80,100]) 
-        
-        legend = plt.legend()
-        legend.get_frame().set_edgecolor('black')
+            #xticks_num = np.linspace(cfg_par['rfi']['lowfreq'],cfg_par['rfi']['highfreq'],10,dtype=int)
+            #ax1.set_xticks(xticks_num)
 
-        if cfg_par['rfi']['chunks']['time_enable']== False:
-            start = cfg_par['rfi']['startdate']
-            end = cfg_par['rfi']['enddate']
+            if cfg_par['plots']['plot_noise']  == 'noise_factor':
+                ax1.set_yticks([1,round(np.sqrt(2),2),2,3,5,10,50]) 
+                ax1.set_yscale('linear')     
+                ax1.set_ylabel(r'Factor of noise increase')
+                ax1.get_yaxis().set_major_formatter(ticker.ScalarFormatter())
 
-        elif cfg_par['rfi']['chunks']['time_enable'] == True:
-            time_del = TimeDelta(time_delta*60., format='sec')
-            time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
-            start = cfg_par['rfi']['startdate']+time_del
-            end = start+time_delta_plus
-            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
-                rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'        
-                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
-            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
-                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
-        
-        ax1.set_title(title_plot)
-        ax1.minorticks_on()
-        ax1.minorticks_on()
-        # Save figure to file
-        if cfg_par['rfi']['RFInder_mode']== 'use_flags':
-            rfi_freq_plot = out_plot+'_flags.png'
-        if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
-            rfi_freq_plot = out_plot+'_rfi.png'
+            if cfg_par['plots']['plot_noise'] == 'noise':
+                ax1.set_yscale('linear')     
+                ax1.set_ylabel(r'Predicted noise [mJy beam$^{-1}$]')     
+                ax1.get_yaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
 
-        plt.savefig(rfi_freq_plot,format='png',overwrite = True)      
-        plt.close(fig)        
-        self.logger.info("\t ... RFI in 1D plotted ...\n\n")
+            if cfg_par['plots']['plot_noise'] == 'rfi':
+                if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                    ax1.set_ylabel(r'$\% > 5 \times$ r.m.s.')
+                if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
+                    ax1.set_ylabel(r'$\%$ flagged visibilites')    
+                ax1.set_ylim([-5,105]) 
+                ax1.set_yticks([0,20,40,60,80,100]) 
+            
+            legend = plt.legend(loc=1)
+            legend.get_frame().set_edgecolor('black')
+
+            if cfg_par['rfi']['chunks']['time_enable']== False:
+                start = cfg_par['rfi']['startdate']
+                end = cfg_par['rfi']['enddate']
+
+            elif cfg_par['rfi']['chunks']['time_enable'] == True:
+                time_del = TimeDelta(time_delta*60., format='sec')
+                time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
+                start = cfg_par['rfi']['startdate']+time_del
+                end = start+time_delta_plus
+                if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                    rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'        
+                    title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
+                if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
+                    title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
+            
+            ax1.set_title(title_plot)
+            ax1.minorticks_on()
+            ax1.minorticks_on()
+            # Save figure to file
+            if cfg_par['rfi']['RFInder_mode']== 'use_flags':
+                rfi_freq_plot = out_plot+'_flags.png'
+            if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
+                rfi_freq_plot = out_plot+'_rfi.png'
+
+            plt.savefig(rfi_freq_plot,format='png',overwrite = True)      
+            plt.close(fig)        
+            self.logger.info("\t ... RFI in 1D plotted ...\n\n")
        
 
     def plot_altaz(self,cfg_par,number_chunks):
@@ -426,8 +456,6 @@ class rfi_plots:
             alt = []
             flags =[]
 
-
-
             for i in xrange(0,number_chunks):
             
                 tabledir = cfg_par['general']['timetabledir'] 
@@ -448,13 +476,21 @@ class rfi_plots:
                     table_name = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
 
                 rfi_table = tabledir+table_name
+                
+                #open file
+                if os.path.exists(rfi_table) == False:
+                    self.logger.error('### Table of RFI results does not exist ###')    
+                    spw.append(None)
+                    az.append(None)
+                    alt.append(None)
+                    flags.append(None)                
+                else:    
+                    table = Table.read(rfi_table)
 
-                table = Table.read(rfi_table)
-
-                spw.append(table['frequency'][j])
-                az.append(table['azimuth'][j])
-                alt.append(table['altitude'][j])
-                flags.append(table['percentage_flags'][j])
+                    spw.append(table['frequency'][j])
+                    az.append(table['azimuth'][j])
+                    alt.append(table['altitude'][j])
+                    flags.append(table['percentage_flags'][j])
 
             plotdir = cfg_par['general']['altazplotdir']
 

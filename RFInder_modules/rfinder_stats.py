@@ -34,7 +34,6 @@ class rfi_stats:
         '''
         use wsclean to predict the psf of the observation
         '''
-        print cfg_par['general']['rfidir']
         command1 = '''wsclean -name psfonly -mem 100 -no-dirty -weight natural -super-weight 1.0'''
         command2 = '''-weighting-rank-filter-size 16 -size 512 512 -scale 3.0asec -channels-out 1'''
         command3 = ''' -grid-mode kb -kernel-size 7 -oversampling 63 -make-psf-only -pol xx -intervals-out 1'''
@@ -61,7 +60,6 @@ class rfi_stats:
         starttime= self.time[0]
         
         endtime=self.time[-1]
-        print endtime
         time_chunk = float(cfg_par['rfi']['chunks']['time_step'])*60.
         
         times=np.arange(starttime,endtime+time_chunk*1.,time_chunk)
@@ -80,7 +78,6 @@ class rfi_stats:
 
         self.logger.info('\t Start date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(startdate.datetime))
         self.logger.info('\t End date  : {0:%y}{0:%b}{0:%d}:{0:%X} \n\n'.format(enddate.datetime))
-        print times
         return times,startdate,enddate
 
     def baseline_stats(self,cfg_par):
@@ -172,6 +169,9 @@ class rfi_stats:
         self.logger.info('\t Stokes I natural r.m.s.       = {0:.3e} mJy/b '.format(np.nanmedian(rms*1e3)))
 
         cfg_par['rfi']['theo_rms'] = rms
+        pol = cfg_par['rfi']['polarization']
+        if (pol == 'q' or pol == 'Q' or pol == 'i' or pol == 'I'):
+            cfg_par['rfi']['theo_rms'] = np.concatenate((rms,rms))
 
         self.logger.info("\t ... Natural r.m.s. predicted ... \n")
 
