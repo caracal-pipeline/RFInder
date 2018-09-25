@@ -92,6 +92,10 @@ class rfi_plots:
             freqs_plot_bin=np.round(freqs_plot_bin,0)
             freqs_plot_bin=np.array(freqs_plot_bin,dtype=int)
 
+            freqs_plot_idx=np.zeros(freqs_plot_bin.shape)
+            for i in xrange(0,len(freqs_plot_bin)):
+                idx = (np.abs(freqs_plot_bin[i]-freqs)).argmin()
+                freqs_plot_idx[i]=idx
 
             tele= cfg_par['rfi']['telescope']
             if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':    
@@ -152,7 +156,7 @@ class rfi_plots:
 
             # ticks & labels
             ax.set_xticks(freqs_plot_bin)
-            ax.set_yticks(input_baselines_idx)
+            ax.set_yticks(input_baselines)
 
             ax.set_xticklabels(freqs_plot_bin)
             ax.set_yticklabels(input_baselines)

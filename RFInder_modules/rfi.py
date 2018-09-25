@@ -146,11 +146,18 @@ class rfi:
     
             altaz = rfiST.alt_az(cfg_par,times_tm[0])
             cfg_par['rfi']['altaz'] = altaz
-            
-            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
-                self.vis = t.getcol('DATA')[selection]
-            self.interval = t.getcol('INTERVAL')[selection]
-            self.flag = t.getcol('FLAG')[selection]
+
+            if np.sum(selection) !=0. :
+                if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                    self.vis  = t.getcol('DATA')[selection]
+                self.flag = t.getcol('FLAG')[selection]
+                self.interval = t.getcol('INTERVAL')[selection]
+                empty_table=0     
+            else:
+                self.logger.warning('\t ### Table of selected interval is empty ')
+                self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
+                empty_table=1
+        
 
         t.close()
 
