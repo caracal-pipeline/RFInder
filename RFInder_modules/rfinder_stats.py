@@ -170,9 +170,9 @@ class rfi_stats:
 
         cfg_par['rfi']['theo_rms'] = rms
         pol = cfg_par['rfi']['polarization']
-        if (pol == 'q' or pol == 'Q' or pol == 'i' or pol == 'I' and cfg_par['rfi']['RFInder_mode'] == 'use_flags'):
+        if (pol == 'q' or pol == 'Q' or pol == 'i' or pol == 'I') and (cfg_par['rfi']['RFInder_mode'] == 'use_flags'):
             cfg_par['rfi']['theo_rms'] = np.concatenate((rms,rms))
-
+        print len(cfg_par['rfi']['theo_rms'])
         self.logger.info("\t ... Natural r.m.s. predicted ... \n")
 
 
