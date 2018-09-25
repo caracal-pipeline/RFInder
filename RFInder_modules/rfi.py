@@ -244,11 +244,10 @@ class rfi:
         self.logger.info('\t ... Flagging a-prioris  ...\n')
         pol = cfg_par['rfi']['polarization']
 
-
-        if (pol != 'q' and pol != 'Q' and pol != 'i' and pol != 'I'):
-            self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
-        else:
+        if (pol == 'q' or pol == 'Q' or pol == 'i' or pol != 'I') and ( cfg_par['rfi']['RFInder_mode'] == 'use_flags'):
             self.datacube = np.zeros([len(self.baselines_sort),2*self.flag.shape[1],2*self.flag.shape[0]/(len(self.baselines_sort))])
+        else:
+            self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
 
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
         #flag unused polarizations

@@ -18,7 +18,7 @@ import warnings
 
 #sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
 sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
-#sys.path.append('/data/maccagni//RFInder/RFInder_modules/')
+#sys.path.append('/data/maccagni/RFInder/RFInder_modules/')
 
 import rfi 
 import rfinder_stats as rfi_stats
