@@ -1,6 +1,6 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /home/maccagni/MFS/MeerKAT/ngc1399/ #full path to working directory
+    workdir: /Users/maccagni/Projects/RFI/rfinder_test/ #full path to working directory
     msname: ['ngc1399_100MHz.ms'] #name of input ms file
     field: 2 #field ID of target of file
 

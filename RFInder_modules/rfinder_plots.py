@@ -32,6 +32,17 @@ class rfi_plots:
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
+
+    # Project spherical coordinates on XY plane
+    def aitoff(self,x,y):
+        x=x/180*pi
+        y=y/180*pi
+        a=arccos(cos(y)*cos(x/2))
+        x=2*cos(y)*sin(x/2)/sin(a)*a/pi*180
+        y=sin(y)/sin(a)*a/pi*180
+        
+        return x,y
+
     def plot_rfi_imshow(self,cfg_par,time_step=-1):      
         '''
         
@@ -620,6 +631,14 @@ class rfi_plots:
             ax_centre.set_yticks([0,10,20,30,40,50,60,70,80,90])
 
             asse = ax_centre.scatter(az,alt,c=flags,cmap=colormap,vmin=0,vmax=100.)
+
+            azs=arange(-180.,181.,45.)
+            als=arange(0.,91.,1.)
+            azs[azs==0]=1e-6
+            als[als==0]=1e-6
+            for az in azs:
+                [X,Y]=self.aitoff(az*ones(als.shape),als)
+                ax_centre.plot(X,Y,'k:')
 
             start = cfg_par['rfi']['startdate']
             end = cfg_par['rfi']['enddate']
