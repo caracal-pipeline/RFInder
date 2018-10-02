@@ -2,6 +2,7 @@ import os,string,sys, glob
 import numpy as np
 
 import matplotlib
+from astropy import units as u
 
 from matplotlib import gridspec
 from matplotlib import pyplot as plt
@@ -432,11 +433,13 @@ class rfi_plots:
                 time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
                 start = cfg_par['rfi']['startdate']+time_del
                 end = start+time_delta_plus
-                if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
-                    rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'        
-                    title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
-                if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
-                    title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
+            
+            if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'        
+                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
+            
+            if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
+                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
             
             ax1.set_title(title_plot)
             ax1.minorticks_on()
@@ -452,7 +455,7 @@ class rfi_plots:
             self.logger.info("\t ... RFI in 1D plotted ...\n\n")
        
 
-    def plot_altaz(self,cfg_par,number_chunks):
+    def plot_altaz(self,cfg_par,number_chunks,times):
         '''
         Plots the elevation/azimuth of the observation scan binned by time chunks, for every binned spectral window
         '''
@@ -513,7 +516,7 @@ class rfi_plots:
                     table = Table.read(rfi_table)
 
                     spw.append(table['frequency'][j])
-                    az.append(table['azimuth'][j])
+                    az.append(table['azimuth'][j]-90.)
                     alt.append(table['altitude'][j])
                     flags.append(table['percentage_flags'][j])
 
@@ -611,9 +614,9 @@ class rfi_plots:
             ax_centre.set_xlabel(r'Azimuth [deg]')
             ax_centre.set_ylabel(r'Altitude [deg]')
             ax_centre.set_ylim([0,90])
-            ax_centre.set_xlim([0,360])
-            ax_centre.set_xticks([0,45,90,135,180,225,270,315,360])        
-            ax_centre.set_xticklabels(['0','45','90','135','180','225','270','315','0'])
+            #ax_centre.set_xlim([0,360])
+            #ax_centre.set_xticks([0,45,90,135,180,225,270,315,360])        
+            #ax_centre.set_xticklabels(['0','45','90','135','180','225','270','315','0'])
             ax_centre.set_yticks([0,10,20,30,40,50,60,70,80,90])
 
             asse = ax_centre.scatter(az,alt,c=flags,cmap=colormap,vmin=0,vmax=100.)
@@ -695,7 +698,7 @@ class rfi_plots:
 
         Writer = animation.writers['ffmpeg']
         writer = Writer(fps=5, metadata=dict(artist='XY'), bitrate=3600)
-        my_anim = animation.ArtistAnimation(fig, myimages, interval=1000, blit=True, repeat_delay=1000)
+        my_anim = animation.ArtistAnimation(fig, myimages, interval=2000, blit=True, repeat_delay=1000)
 
         my_anim.save(outmovie,writer=writer)
         plt.close()
