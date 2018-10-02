@@ -7,7 +7,7 @@ from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib import ticker, rc
 from matplotlib.ticker import NullFormatter
-import matplotlib.colors as colors
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from IPython.display import HTML, display
 
@@ -81,8 +81,11 @@ class rfi_plots:
             
             # set x-y axes
             bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
-            cfg_par['rfi']['highfreq'] 
-            if bandwidth <= 150.:
+            if bandwidth <=25:
+                step_bin = 5
+            elif bandwidth <=50 and bandwidth >25:
+                step_bin = 10
+            elif bandwidth <= 150. and bandwidth > 50.:
                 step_bin=25.
             elif bandwidth <= 500. and bandwidth >  150.:
                 step_bin=50.                
@@ -158,12 +161,12 @@ class rfi_plots:
             fig, ax = plt.subplots(figsize=(12,8))
 
             if bandwidth <= 150.:
-                 colormap = 'nipy_spectral_r'
+                colormap = 'nipy_spectral_r'
             else:
                 colormap = 'afmhot_r'
 
 
-            im = ax.imshow(data,cmap='afmhot_r',vmin=0,vmax=100)
+            im = ax.imshow(data,cmap=colormap,vmin=0,vmax=100)
 
             # ticks & labels
             ax.set_xticks(freqs_plot_idx)
@@ -176,7 +179,10 @@ class rfi_plots:
             ax.set_ylabel('Baseline lenght [m]')
             
             # colorbar
-            cbar = fig.colorbar(im,ticks=[0,10,20, 30,40,50,60,70,80,90,100]) 
+
+            divider = make_axes_locatable(ax)
+            cax = divider.append_axes("right", size="3%", pad=0.05)
+            cbar = fig.colorbar(im,ticks=[0,10,20, 30,40,50,60,70,80,90,100], cax=cax ) 
 
             
             if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
@@ -336,6 +342,7 @@ class rfi_plots:
             # Initialize subplots
             ax1 = fig.add_subplot(gs[0])
             ax1.set_xlabel(r'Frequency [MHz]')
+          
             bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
 
             if bandwidth <= 150.:
@@ -553,6 +560,13 @@ class rfi_plots:
                        }
             plt.rcParams.update(params)
             #plt.rc('xtick', labelsize=20)
+            bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
+
+            if bandwidth <= 150.:
+                colormap = 'rainbow_r'
+            else:
+                colormap = 'hot_r'
+
 
              # Format axes
             nullfmt        = NullFormatter() 
@@ -602,7 +616,7 @@ class rfi_plots:
             ax_centre.set_xticklabels(['0','45','90','135','180','225','270','315','0'])
             ax_centre.set_yticks([0,10,20,30,40,50,60,70,80,90])
 
-            asse = ax_centre.scatter(az,alt,c=flags,cmap='rainbow_r',vmin=0,vmax=100.)
+            asse = ax_centre.scatter(az,alt,c=flags,cmap=colormap,vmin=0,vmax=100.)
 
             start = cfg_par['rfi']['startdate']
             end = cfg_par['rfi']['enddate']
