@@ -1,8 +1,8 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /home/maccagni/FornaxA/MeerKAT/fa3/msdir/ #full path to working directory
+    workdir: /home/maccagni/MFS/MeerKAT/fa3/msdir/ #full path to working directory
     msname: ['fa3_conc.ms'] #name of input ms file
-    field: 2 #field ID of target of file
+    field: 2  #field ID of target of file
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
@@ -17,7 +17,7 @@ rfi:
     chunks:
         __helpstr: separate visibilities in small time intervals and/or larger spectral windows 
         time_enable: true
-        time_step: 30 #time chunks in minutes
+        time_step: 10 #time chunks in minutes
         spw_enable: true
         spw_width: 50 #channel width of rebinned output table [MHz]
 

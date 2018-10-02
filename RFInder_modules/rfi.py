@@ -160,9 +160,7 @@ class rfi:
         
 
         t.close()
-
-
-        
+       
         if not self.aperfi_badant:
             nrbadant =len(int(self.aperfi_badant))
         else:

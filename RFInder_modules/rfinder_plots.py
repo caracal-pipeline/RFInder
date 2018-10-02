@@ -7,6 +7,8 @@ from matplotlib import gridspec
 from matplotlib import pyplot as plt
 from matplotlib import ticker, rc
 from matplotlib.ticker import NullFormatter
+import matplotlib.colors as colors
+
 from IPython.display import HTML, display
 
 import matplotlib.image as mgimg
@@ -80,8 +82,10 @@ class rfi_plots:
             # set x-y axes
             bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
             cfg_par['rfi']['highfreq'] 
-            if bandwidth <= 500.:
-                step_bin=50.
+            if bandwidth <= 150.:
+                step_bin=25.
+            elif bandwidth <= 500. and bandwidth >  150.:
+                step_bin=50.                
             else:
                 step_bin=100.
             # Smaller multiple 
@@ -152,11 +156,18 @@ class rfi_plots:
             plt.rcParams.update(params)
 
             fig, ax = plt.subplots(figsize=(12,8))
-            im = ax.imshow(data,vmin=0,vmax=100,cmap='nipy_spectral_r')
+
+            if bandwidth <= 150.:
+                 colormap = 'nipy_spectral_r'
+            else:
+                colormap = 'afmhot_r'
+
+
+            im = ax.imshow(data,cmap='afmhot_r',vmin=0,vmax=100)
 
             # ticks & labels
-            ax.set_xticks(freqs_plot_bin)
-            ax.set_yticks(input_baselines)
+            ax.set_xticks(freqs_plot_idx)
+            ax.set_yticks(input_baselines_idx)
 
             ax.set_xticklabels(freqs_plot_bin)
             ax.set_yticklabels(input_baselines)
@@ -165,7 +176,9 @@ class rfi_plots:
             ax.set_ylabel('Baseline lenght [m]')
             
             # colorbar
-            cbar = fig.colorbar(im,ticks=[10,20, 30,40,50,60,70,80,90,100]) 
+            cbar = fig.colorbar(im,ticks=[0,10,20, 30,40,50,60,70,80,90,100]) 
+
+            
             if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
                 cbar.set_label(r'$\% > 5 \times$ r.m.s.')
             if cfg_par['rfi']['RFInder_mode']== 'use_flags':
@@ -325,8 +338,10 @@ class rfi_plots:
             ax1.set_xlabel(r'Frequency [MHz]')
             bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
 
-            if bandwidth <= 500.:
-                step_bin=50.
+            if bandwidth <= 150.:
+                step_bin=25.
+            elif bandwidth <= 500. and bandwidth >  150.:
+                step_bin=50.                
             else:
                 step_bin=100.
 
@@ -480,7 +495,6 @@ class rfi_plots:
                     table_name = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
 
                 rfi_table = tabledir+table_name
-                
                 #open file
                 if os.path.exists(rfi_table) == False:
                     self.logger.error('### Table of RFI results does not exist ###')    
@@ -588,7 +602,7 @@ class rfi_plots:
             ax_centre.set_xticklabels(['0','45','90','135','180','225','270','315','0'])
             ax_centre.set_yticks([0,10,20,30,40,50,60,70,80,90])
 
-            asse = ax_centre.scatter(az,alt,c=flags,cmap='jet_r',vmin=0,vmax=100.)
+            asse = ax_centre.scatter(az,alt,c=flags,cmap='rainbow_r',vmin=0,vmax=100.)
 
             start = cfg_par['rfi']['startdate']
             end = cfg_par['rfi']['enddate']
@@ -618,7 +632,7 @@ class rfi_plots:
    
             ax_x.set_title(title_plot)
            
-            ax_x.scatter(az,flags,c=flags,cmap='jet_r',vmin=0,vmax=100.)
+            ax_x.scatter(az,flags,c=flags,cmap='rainbow_r',vmin=0,vmax=100.)
             
             #y plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
@@ -630,7 +644,7 @@ class rfi_plots:
             ax_y.set_xlim([-5,100])
             ax_y.set_ylim([0,90])
             ax_y.set_xticks([0,25,50,75,100])
-            ax_y.scatter(flags,alt,c=flags,cmap='jet_r',vmin=0,vmax=100.)
+            ax_y.scatter(flags,alt,c=flags,cmap='rainbow_r',vmin=0,vmax=100.)
 
 
             # Finish everything up
