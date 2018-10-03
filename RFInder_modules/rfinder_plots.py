@@ -35,11 +35,11 @@ class rfi_plots:
 
     # Project spherical coordinates on XY plane
     def aitoff(self,x,y):
-        x=x/180*pi
-        y=y/180*pi
-        a=arccos(cos(y)*cos(x/2))
-        x=2*cos(y)*sin(x/2)/sin(a)*a/pi*180
-        y=sin(y)/sin(a)*a/pi*180
+        x=x/180*np.pi
+        y=y/180*np.pi
+        a=np.arccos(np.cos(y)*np.cos(x/2))
+        x=2*np.cos(y)*np.sin(x/2)/np.sin(a)*a/np.pi*180
+        y=np.sin(y)/np.sin(a)*a/np.pi*180
         
         return x,y
 
@@ -175,7 +175,7 @@ class rfi_plots:
             if bandwidth <= 150.:
                 colormap = 'nipy_spectral_r'
             else:
-                colormap = 'afmhot_r'
+                colormap = 'afmhot'
 
 
             im = ax.imshow(data,cmap=colormap,vmin=0,vmax=100)
@@ -466,7 +466,7 @@ class rfi_plots:
             self.logger.info("\t ... RFI in 1D plotted ...\n\n")
        
 
-    def plot_altaz(self,cfg_par,number_chunks,times):
+    def plot_altaz(self,cfg_par,number_chunks):
         '''
         Plots the elevation/azimuth of the observation scan binned by time chunks, for every binned spectral window
         '''
@@ -527,9 +527,14 @@ class rfi_plots:
                     table = Table.read(rfi_table)
 
                     spw.append(table['frequency'][j])
-                    az.append(table['azimuth'][j]-90.)
+                    az.append(table['azimuth'][j]-180.)
                     alt.append(table['altitude'][j])
                     flags.append(table['percentage_flags'][j])
+            #az=np.array([az],dtype=float)
+            #alt=np.array([alt],dtype=float)
+            #az,alt=self.aitoff(az,alt)
+
+
 
             plotdir = cfg_par['general']['altazplotdir']
 
@@ -594,7 +599,7 @@ class rfi_plots:
             box_y      = [left_h, bottom, 0.12, height]
             box_cbar       = [left_h+0.13, bottom, 0.05, height]
 
-            fig = plt.figure(1, figsize=(10,8))
+            fig = plt.figure(1, figsize=(10,7))
 
             ax_centre = plt.axes(box_centre)
             ax_x = plt.axes(box_x)
@@ -623,22 +628,39 @@ class rfi_plots:
             #ax1 = fig.add_subplot(gs[0])
             #centre
             ax_centre.set_xlabel(r'Azimuth [deg]')
-            ax_centre.set_ylabel(r'Altitude [deg]')
+            ax_centre.set_ylabel(r'Altitude [deg]',labelpad=15)
+            
             ax_centre.set_ylim([0,90])
-            #ax_centre.set_xlim([0,360])
-            #ax_centre.set_xticks([0,45,90,135,180,225,270,315,360])        
+            ax_centre.set_xlim([-180.,180])
+            ax_centre.set_xticks([-180,-135,-90,-45,0,45,90,135,180])        
             #ax_centre.set_xticklabels(['0','45','90','135','180','225','270','315','0'])
-            ax_centre.set_yticks([0,10,20,30,40,50,60,70,80,90])
+            #ax_centre.set_yticks([0,10,20,30,40,50,60,70,80,90])
+            #ax_centre.set_xticks([])        
+            ax_centre.set_yticks([])
 
-            asse = ax_centre.scatter(az,alt,c=flags,cmap=colormap,vmin=0,vmax=100.)
+            asse = ax_centre.scatter(az,alt,linewidth=None,c=flags,edgecolors=None,cmap=colormap,vmin=0,vmax=100.)
 
-            azs=arange(-180.,181.,45.)
-            als=arange(0.,91.,1.)
+            azs=np.arange(-180.,181.,45.)
+            als=np.arange(0.,91.,1.)
             azs[azs==0]=1e-6
             als[als==0]=1e-6
-            for az in azs:
-                [X,Y]=self.aitoff(az*ones(als.shape),als)
-                ax_centre.plot(X,Y,'k:')
+            for counter in azs:
+                [X,Y]=self.aitoff(counter*np.ones(als.shape),als)
+                ax_centre.plot(X,Y,'k-',linewidth=0.5)
+
+            azs=np.arange(-180.,181.,1.)
+            als=np.arange(0.,91.,15.)
+            azs[azs==0]=1e-6
+            als[als==0]=1e-6
+            for al in als:
+                [X,Y]=self.aitoff(azs,al*np.ones(azs.shape))
+                ax_centre.plot(X,Y,'k-',linewidth=0.5)
+
+            for dd in [15.,30.,45.,60.,75.]:
+                [X,Y]=self.aitoff(-180.,dd)
+                ax_centre.text(X,Y,r'${0:s}$'.format(str(int(round(dd,0)))),horizontalalignment='right',fontsize='medium')
+
+
 
             start = cfg_par['rfi']['startdate']
             end = cfg_par['rfi']['enddate']
@@ -663,12 +685,12 @@ class rfi_plots:
             if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
                 ax_x.set_ylabel(r'$\%$ flagged')                
             ax_x.set_ylim([-5,100])
-            ax_x.set_xlim([0,360])
+            ax_x.set_xlim([-180,180])
             ax_x.set_yticks([0,25,50,75,100])
    
             ax_x.set_title(title_plot)
            
-            ax_x.scatter(az,flags,c=flags,cmap='rainbow_r',vmin=0,vmax=100.)
+            ax_x.scatter(az,flags,facecolors=flags,cmap='rainbow_r',vmin=0,vmax=100.)
             
             #y plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
@@ -680,7 +702,7 @@ class rfi_plots:
             ax_y.set_xlim([-5,100])
             ax_y.set_ylim([0,90])
             ax_y.set_xticks([0,25,50,75,100])
-            ax_y.scatter(flags,alt,c=flags,cmap='rainbow_r',vmin=0,vmax=100.)
+            ax_y.scatter(flags,alt,facecolors=flags,cmap='rainbow_r',vmin=0,vmax=100.)
 
 
             # Finish everything up

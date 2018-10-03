@@ -27,13 +27,6 @@ rfiST = rfi_stats.rfi_stats()
 #rfiPLOT = rfi_plots.rfi_plots()
 
 
-
-__author__ = "Filippo Maccagni, Tom Oosterloo, Paolo Serra"
-__copyright__ = "RadioLife"
-__version__ = "1.0.0"
-__email__ = "filippo.maccagni@gmail.com"
-__status__ = "Development"
-
 class rfi:
 
     def __init__(self):

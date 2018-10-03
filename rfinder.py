@@ -30,8 +30,8 @@ rfiST = rfi_stats.rfi_stats()
 rfiPL = rfi_plots.rfi_plots()
 
 
-__author__ = "Filippo Maccagni"
-__copyright__ = "Apertif"
+__author__ = "Filippo Maccagni, Tom Oosterloo, Paolo Serra"
+__copyright__ = "Apertif, MFS"
 __version__ = "1.0.0"
 __email__ = "filippo.maccagni@gmail.com"
 __status__ = "Development"
