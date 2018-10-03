@@ -172,7 +172,7 @@ class rfi_plots:
 
             fig, ax = plt.subplots(figsize=(12,8))
 
-            if bandwidth <= 150.:
+            if bandwidth <= 500.:
                 colormap = 'nipy_spectral_r'
             else:
                 colormap = 'afmhot'
@@ -690,7 +690,7 @@ class rfi_plots:
    
             ax_x.set_title(title_plot)
            
-            ax_x.scatter(az,flags,facecolors=flags,cmap='rainbow_r',vmin=0,vmax=100.)
+            ax_x.scatter(az,flags,c=flags,edgecolors=None,cmap='rainbow_r',vmin=0,vmax=100.)
             
             #y plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
@@ -702,7 +702,7 @@ class rfi_plots:
             ax_y.set_xlim([-5,100])
             ax_y.set_ylim([0,90])
             ax_y.set_xticks([0,25,50,75,100])
-            ax_y.scatter(flags,alt,facecolors=flags,cmap='rainbow_r',vmin=0,vmax=100.)
+            ax_y.scatter(flags,alt,c=flags,edgecolors=None,cmap='rainbow_r',vmin=0,vmax=100.)
 
 
             # Finish everything up
