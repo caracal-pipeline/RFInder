@@ -242,10 +242,10 @@ class rfi:
         self.logger.info('\t ... Flagging a-prioris  ...\n')
         pol = cfg_par['rfi']['polarization']
 
-        if (pol == 'q' or pol == 'Q' or pol == 'i' or pol != 'I') and ( cfg_par['rfi']['RFInder_mode'] == 'use_flags'):
-            self.datacube = np.zeros([len(self.baselines_sort),2*self.flag.shape[1],2*self.flag.shape[0]/(len(self.baselines_sort))])
-        else:
-            self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
+        #if (pol == 'q' or pol == 'Q' or pol == 'i' or pol != 'I') and ( cfg_par['rfi']['RFInder_mode'] == 'use_flags'):
+        #   self.datacube = np.zeros([len(self.baselines_sort),2*self.flag.shape[1],2*self.flag.shape[0]/(len(self.baselines_sort))])
+        #else:
+        self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
 
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
         #flag unused polarizations
@@ -298,7 +298,7 @@ class rfi:
                     if (pol == 'yx' or pol == 'YX'):
                         self.datacube[indice,:,counter]=self.flag[i,:,3]
                     elif (pol == 'q' or pol == 'Q' or pol == 'I' or pol == 'i'):
-                        self.datacube[indice,:,counter]=np.concatenate((self.flag[i,:,0],self.flag[i,:,1]))                    
+                        self.datacube[indice,:,counter]=self.flag[i,:,0]+self.flag[i,:,1]                   
                 elif cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                     if (pol == 'xx' or pol == 'XX'):
                         self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])

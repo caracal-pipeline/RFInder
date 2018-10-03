@@ -218,12 +218,14 @@ class rfi_plots:
                 time_delta_plus = TimeDelta(float(cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
                 start = cfg_par['rfi']['startdate']+time_del
                 end = start+time_delta_plus
+           
+            pol = str(cfg_par['rfi']['polarization'] )
 
             if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
                 rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'
-                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
+                title_plot = 'Pol:  {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,rfi_clip,start.datetime,end.datetime)
             if cfg_par['rfi']['RFInder_mode']== 'use_flags':
-                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
+                title_plot = 'Pol:  {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,'Flags',start.datetime,end.datetime)
             
             ax.set_title(title_plot)
          
@@ -445,12 +447,13 @@ class rfi_plots:
                 start = cfg_par['rfi']['startdate']+time_del
                 end = start+time_delta_plus
             
+            pol =str(cfg_par['rfi']['polarization']) 
             if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                 rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'        
-                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format(rfi_clip,start.datetime,end.datetime)
+                title_plot = 'Pol: {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,rfi_clip,start.datetime,end.datetime)
             
             if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
-                title_plot = '{0:s} / {1:%d}{1:%b}{1:%y}: {1:%H}:{1:%M} - {2:%H}:{2:%M}'.format('Flags',start.datetime,end.datetime)
+                title_plot = 'Pol: {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,'Flags',start.datetime,end.datetime)
             
             ax1.set_title(title_plot)
             ax1.minorticks_on()
@@ -489,6 +492,10 @@ class rfi_plots:
         step_bin = cfg_par['rfi']['chunks']['spw_width']
         
         freqs_bin=np.arange(freq_S,freq_E+step_bin,step_bin)
+
+        pol = cfg_par['rfi']['polarization'] 
+
+
 
         for j in xrange(0,len(freqs_bin)):
             spw = []
@@ -581,10 +588,10 @@ class rfi_plots:
             #plt.rc('xtick', labelsize=20)
             bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
 
-            if bandwidth <= 150.:
-                colormap = 'rainbow_r'
+            if bandwidth <= 500.:
+                colormap = 'nipy_spectral_r'
             else:
-                colormap = 'hot_r'
+                colormap = 'afmhot'
 
 
              # Format axes
@@ -638,7 +645,7 @@ class rfi_plots:
             #ax_centre.set_xticks([])        
             ax_centre.set_yticks([])
 
-            asse = ax_centre.scatter(az,alt,linewidth=None,c=flags,edgecolors=None,cmap=colormap,vmin=0,vmax=100.)
+            asse = ax_centre.scatter(az,alt,c=flags,cmap=colormap,vmin=0,vmax=100.,s=100,linewidth=0.5,edgecolors='black',label=r'Pol: {0:s}'.format(pol))
 
             azs=np.arange(-180.,181.,45.)
             als=np.arange(0.,91.,1.)
@@ -660,7 +667,10 @@ class rfi_plots:
                 [X,Y]=self.aitoff(-180.,dd)
                 ax_centre.text(X,Y,r'${0:s}$'.format(str(int(round(dd,0)))),horizontalalignment='right',fontsize='medium')
 
-
+            legend = ax_centre.legend(loc=1,fontsize=14,handletextpad=0.1,borderpad=0.2)
+            legend.get_frame().set_edgecolor('black')
+            legend.legendHandles[0].set_color('black')
+            legend.legendHandles[0]._sizes = [35]
 
             start = cfg_par['rfi']['startdate']
             end = cfg_par['rfi']['enddate']
@@ -690,7 +700,7 @@ class rfi_plots:
    
             ax_x.set_title(title_plot)
            
-            ax_x.scatter(az,flags,c=flags,edgecolors=None,cmap='rainbow_r',vmin=0,vmax=100.)
+            ax_x.scatter(az,flags,c=flags,cmap=colormap,vmin=0,vmax=100.,s=70,linewidth=0.5,edgecolors='black')
             
             #y plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
@@ -702,7 +712,7 @@ class rfi_plots:
             ax_y.set_xlim([-5,100])
             ax_y.set_ylim([0,90])
             ax_y.set_xticks([0,25,50,75,100])
-            ax_y.scatter(flags,alt,c=flags,edgecolors=None,cmap='rainbow_r',vmin=0,vmax=100.)
+            ax_y.scatter(flags,alt,c=flags,cmap=colormap,vmin=0,vmax=100.,s=70,linewidth=0.5,edgecolors='black')
 
 
             # Finish everything up

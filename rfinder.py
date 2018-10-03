@@ -269,10 +269,13 @@ class rfinder:
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
                 times, start, end = rfiST.time_chunk(self.cfg_par)
-                self.logger.info(" ------ Working on time chunks ------\n")
+                self.logger.info(" ------ Plotting on time chunks ------\n")
 
                 for i in xrange(0,len(times)-1):
                     timez = [times[i],times[i+1]]            
+                    
+                    self.logger.info((" ------ Plotting chunk #{0:d}:").format(i))
+                    self.logger.info(("\t \t between {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}").format(start.datetime,end.datetime))
 
                     if self.enable_task(self.cfg_par,'rfi')==False:
 
