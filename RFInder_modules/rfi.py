@@ -61,6 +61,7 @@ class rfi:
         fields=tables.table(self.msfile+'/FIELD')
         self.fieldNames = fields.getcol('NAME')
         selectFieldName= self.fieldNames[int(self.selectFieldID)]
+        cfg_par['rfi']['fieldname'] = selectFieldName
         self.coords=fields.getcol('REFERENCE_DIR')
         self.coords =self.coords*180./np.pi
         cfg_par['rfi']['coords'] = SkyCoord(self.coords[self.selectFieldID,:,0]*u.degree, self.coords[self.selectFieldID,:,1]*u.degree,  unit=(u.deg, u.deg))
@@ -298,7 +299,7 @@ class rfi:
                     if (pol == 'yx' or pol == 'YX'):
                         self.datacube[indice,:,counter]=self.flag[i,:,3]
                     elif (pol == 'q' or pol == 'Q' or pol == 'I' or pol == 'i'):
-                        self.datacube[indice,:,counter]=self.flag[i,:,0]+self.flag[i,:,1]                   
+                        self.datacube[indice,:,counter]=np.multiply(self.flag[i,:,0],self.flag[i,:,1])                 
                 elif cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                     if (pol == 'xx' or pol == 'XX'):
                         self.datacube[indice,:,counter]=np.abs(self.vis[i,:,0])

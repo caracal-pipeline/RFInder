@@ -223,9 +223,9 @@ class rfi_plots:
 
             if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
                 rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'
-                title_plot = 'Pol:  {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,rfi_clip,start.datetime,end.datetime)
+                title_plot = 'Stokes:  {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,rfi_clip,start.datetime,end.datetime)
             if cfg_par['rfi']['RFInder_mode']== 'use_flags':
-                title_plot = 'Pol:  {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,'Flags',start.datetime,end.datetime)
+                title_plot = 'Stokes:  {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,'Flags',start.datetime,end.datetime)
             
             ax.set_title(title_plot)
          
@@ -450,10 +450,10 @@ class rfi_plots:
             pol =str(cfg_par['rfi']['polarization']) 
             if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                 rfi_clip = str(cfg_par['rfi']['rms_clip'])+r'$\sigma$ clip'        
-                title_plot = 'Pol: {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,rfi_clip,start.datetime,end.datetime)
+                title_plot = 'Stokes: {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,rfi_clip,start.datetime,end.datetime)
             
             if cfg_par['rfi']['RFInder_mode'] == 'use_flags':
-                title_plot = 'Pol: {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,'Flags',start.datetime,end.datetime)
+                title_plot = 'Stokes: {0:s} / {1:s} / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(pol,'Flags',start.datetime,end.datetime)
             
             ax1.set_title(title_plot)
             ax1.minorticks_on()
@@ -494,8 +494,6 @@ class rfi_plots:
         freqs_bin=np.arange(freq_S,freq_E+step_bin,step_bin)
 
         pol = cfg_par['rfi']['polarization'] 
-
-
 
         for j in xrange(0,len(freqs_bin)):
             spw = []
@@ -556,8 +554,6 @@ class rfi_plots:
             if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
                altazplot = plotdir+'AltAZ_rfi'+spwname+'MHz.png'
 
-
-
                     # initialize plotting parameters
             params = {'font.family'         :' serif',
                       'font.style'          : 'normal',
@@ -593,8 +589,7 @@ class rfi_plots:
             else:
                 colormap = 'afmhot'
 
-
-             # Format axes
+            # Format axes
             nullfmt        = NullFormatter() 
             left, width    = 0.12, 0.64                                                                     #|These determine where the subplots go
             bottom, height = 0.12, 0.54
@@ -625,7 +620,6 @@ class rfi_plots:
             ax_x.minorticks_on()
             ax_y.minorticks_on()
 
-
             # initialize figure
             #fig = plt.figure(figsize =(8,8))
             #fig.subplots_adjust(hspace=0.0)
@@ -645,7 +639,7 @@ class rfi_plots:
             #ax_centre.set_xticks([])        
             ax_centre.set_yticks([])
 
-            asse = ax_centre.scatter(az,alt,c=flags,cmap=colormap,vmin=0,vmax=100.,s=100,linewidth=0.5,edgecolors='black',label=r'Pol: {0:s}'.format(pol))
+            asse = ax_centre.scatter(az,alt,c=flags,cmap=colormap,vmin=0,vmax=100.,s=100,linewidth=0.5,edgecolors='black',label=r'Stokes: {0:s}'.format(pol))
 
             azs=np.arange(-180.,181.,45.)
             als=np.arange(0.,91.,1.)

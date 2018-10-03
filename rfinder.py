@@ -274,6 +274,13 @@ class rfinder:
                 for i in xrange(0,len(times)-1):
                     timez = [times[i],times[i+1]]            
                     
+                    #time chunk properties
+                    time_delta = float(self.cfg_par['rfi']['chunks']['time_step'])*i
+                    time_del = TimeDelta(time_delta*60., format='sec')
+                    time_delta_plus = TimeDelta(float(self.cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
+                    start = self.cfg_par['rfi']['startdate']+time_del
+                    end = start+time_delta_plus
+                    
                     self.logger.info((" ------ Plotting chunk #{0:d}:").format(i))
                     self.logger.info(("\t \t between {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}").format(start.datetime,end.datetime))
 
