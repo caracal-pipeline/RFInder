@@ -16,8 +16,8 @@ rfi:
     baseline_cut: 200 #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
     chunks:
         __helpstr: separate visibilities in small time intervals and/or larger spectral windows 
-        time_enable: false
-        time_step: 2 #time chunks in minutes
+        time_enable: true
+        time_step: 10 #time chunks in minutes
         spw_enable: true
         spw_width: 20 #channel width of rebinned output table [MHz]
 
