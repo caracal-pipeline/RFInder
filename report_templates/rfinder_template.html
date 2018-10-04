@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<style>
+    tab1 { padding-left: 2em; }
+    tabimage { padding-right: 3em; }
+    img.a{
+		float: baseline;
+  		height:450px;
+  		width: 600px;
+  		font-family: Veranda;
+	}
+	img.b{
+		float: baseline;
+		margin: 0 0 0 0px;
+  		height:450px;
+  		width: 600px;
+  		font-family: Veranda;
+	}
+	* {
+	    box-sizing: border-box;
+	}
+
+	.box {
+	    float: left;
+	    width: 33.33%;
+	    padding: 50px;
+	}
+
+	.clearfix::after {
+	    content: "";
+	    clear: both;
+	    display: table;
+	}
+</style>
+<body>
+<h1>{{ title }}</h1>
+<h2>Observation specs</h2>
+<p><b>Field</b>: {{fieldname}} ( ID = {{field}})<br/>
+Start Date            = <tab1> {{startdate}}</tab1> {{img_tag1}}<br/>
+End   Date            = <tab1> {{enddate}} 	</tab1><br/><br/>
+<b> Spectral window </b><br/>
+Number of channels = <tab1> {{totchans}} </tab1> <br/>
+Channel Width [kHz]= <tab1> {{chan_widths}} </tab1><br/>
+Start Frequency  [GHz]= <tab1> {{lowfreq}}	</tab1><br/>
+End   Frequency  [GHz]= <tab1> {{highfreq}}	</tab1><br/><br/>
+<b> Antennas & Baselines </b> <br/>
+Number of Antennas = <tab1> {{nant}} </tab1><br/>
+Antenna Names = <tab1> {{ant_names}} </tab1><br/>
+Maximum baseline length [m] = <tab1> {{maxbase}} </tab1><br/>
+Minimum baseline length [m] = <tab1> {{minbase}} </tab1><br/>
+Total number of baselines   = <tab1> {{totbase}} </tab1><br/><br/>
+<b> Natural noise predictions </b> <br/>
+Observing time on source       = {{exptime}} hours for {{polnum}} polarizations <br/>
+Stokes I natural r.m.s. [mJy/b]= {{noise}} <br/>
+{{img_tag2}}
+</p>
+
+</html>

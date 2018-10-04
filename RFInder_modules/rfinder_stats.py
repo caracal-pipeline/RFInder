@@ -133,6 +133,7 @@ class rfi_stats:
             polnum = 1
         else:
             polnum = 2
+        cfg_par['rfi']['polnum'] = polnum
 
         tele= cfg_par['rfi']['telescope']
 
@@ -160,8 +161,10 @@ class rfi_stats:
         nrBaseline = cfg_par['rfi']['number_baseline']
         self.logger.info('\t\t Total number of baselines = '+ str(nrBaseline))
         self.logger.info('\t\t Total number of channels = '+ str(channelWidths.shape[1]))
-        self.logger.info('\t\t Observing time on source = {0:.5f} h ({1:d} polarisations)\n'.format(interval.sum()/nrBaseline/3600.,polnum))
-        
+        cfg_par['rfi']['total_channels'] = channelWidths.shape[1]
+        cfg_par['rfi']['exptime'] = interval.sum()/nrBaseline/3600.
+        self.logger.info('\t\t Observing time on source = {0:.5f} h ({1:d} polarisations)\n'.format(cfg_par['rfi']['exptime'],polnum))
+
         rms=np.sqrt(2)*kB*tsyseff/Aant/np.sqrt(channelWidths*interval.sum()*polnum)
 
         if len(rms.shape)==2 and rms.shape[0]==1: rms=rms[0]
@@ -169,7 +172,6 @@ class rfi_stats:
         self.logger.info('\t Stokes I natural r.m.s.       = {0:.3e} mJy/b '.format(np.nanmedian(rms*1e3)))
 
         cfg_par['rfi']['theo_rms'] = rms
-        pol = cfg_par['rfi']['polarization']
         
         self.logger.info("\t ... Natural r.m.s. predicted ... \n")
 

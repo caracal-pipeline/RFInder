@@ -77,6 +77,9 @@ class rfi:
         self.nant = len(self.ant_names)
 
         #logging
+        cfg_par['rfi']['nant'] = self.nant
+        cfg_par['rfi']['ant_names'] = self.ant_names
+
         self.logger.info("\tTotal number of antennas:\t"+str(self.nant))
         self.logger.info("\tAntenna names:\t\t"+str(self.ant_names))
 
