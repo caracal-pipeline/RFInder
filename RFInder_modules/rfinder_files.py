@@ -3,6 +3,7 @@ import numpy as np
 from astropy.io import fits as fits
 from astropy import units as u
 
+from jinja2 import FileSystemLoader, Environment
 
 
 import rfinder_stats as rfi_stats 
@@ -239,4 +240,61 @@ def rfi_frequency(cfg_par,time_step=-1):
       
         logger.info("\t ... RFI table saved ...\n")
 
+        return 0
 
+# Content to be published
+
+def write_html_fullreport(cfg_par):
+
+    # Configure Jinja and ready the template
+    env = Environment(
+        loader=FileSystemLoader('/home/maccagni/programs/RFInder/report_templates/')
+    )
+    template = env.get_template('rfinder_template.html')
+
+    #base_template = env.get_template('report.html')
+    # Content to be published
+    title = 'RFI report: {0:s}'.format(cfg_par['general']['msname'])
+
+    #imagename1 = '/Users/maccagni/Projects/RFI/rfinder_test/rfi/plots/altaz/AltAZ_rfi1297-1317MHz.png'
+    #data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
+
+    imagename1 = cfg_par['general']['plotdir']+'rfi_base_full.png'
+    data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
+
+    imagename2 = cfg_par['general']['plotdir']+'AltAZ_full.png'
+    data_uri2 = open(imagename2, 'rb').read().encode('base64').replace('\n', '')
+
+    imagename3 = cfg_par['general']['plotdir']+'noise_full_sl_rfi.png'
+    data_uri3 = open(imagename3, 'rb').read().encode('base64').replace('\n', '')
+
+    with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
+        lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+        f.write(template.render(
+            title=title,
+            fieldname=cfg_par['general']['fieldname'],
+            field=cfg_par['general']['field'],
+            totchans = int(cfg_par['rfi']['total_channels']),
+            chan_widths=round(cfg_par['rfi']['chan_widths']/1e3,4),
+            lowfreq=round(cfg_par['rfi']['lowfreq']/1e6,3),
+            highfreq=round(cfg_par['rfi']['highfreq']/1e6,3),
+            startdate = ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['startdate'].datetime)),
+            enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
+            nant = cfg_par['rfi']['nant'],
+            ant_names = cfg_par['rfi']['ant_names'],
+            maxbase = str(np.round(lenghts[0][-1],0)),
+            minbase = str(np.round(lenghts[0][0],0)),
+            totbase = cfg_par['rfi']['number_baseline'],
+            exptime = np.round(cfg_par['rfi']['exptime'],2),
+            polnum = cfg_par['rfi']['polnum'],
+            noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
+            img_tag1 = '<img class="a" src="data:image/png;base64,{0}">'.format(data_uri1),
+            img_tag2 = '<img class="b" src="data:image/png;base64,{0}">'.format(data_uri2),
+            img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3)
+
+            
+        ))
+
+        print '\t+------+\n\t Html report done \n\t+------+'
+
+        return 0

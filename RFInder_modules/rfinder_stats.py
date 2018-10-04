@@ -63,7 +63,8 @@ class rfi_stats:
         time_chunk = float(cfg_par['rfi']['chunks']['time_step'])*60.
         
         times=np.arange(starttime,endtime+time_chunk*1.,time_chunk)
-
+        
+        cfg_par['rfi']['times'] = times
         startdate=Time(starttime/3600./24.,format='mjd',scale='utc')
         cfg_par['rfi']['startdate'] = startdate
         startdate.format='iso' 
@@ -78,6 +79,7 @@ class rfi_stats:
 
         self.logger.info('\t Start date: {0:%y}{0:%b}{0:%d}:{0:%X}'.format(startdate.datetime))
         self.logger.info('\t End date  : {0:%y}{0:%b}{0:%d}:{0:%X} \n\n'.format(enddate.datetime))
+        
         return times,startdate,enddate
 
     def baseline_stats(self,cfg_par):

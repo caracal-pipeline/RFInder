@@ -61,7 +61,7 @@ class rfi:
         fields=tables.table(self.msfile+'/FIELD')
         self.fieldNames = fields.getcol('NAME')
         selectFieldName= self.fieldNames[int(self.selectFieldID)]
-        cfg_par['rfi']['fieldname'] = selectFieldName
+        cfg_par['general']['fieldname'] = selectFieldName
         self.coords=fields.getcol('REFERENCE_DIR')
         self.coords =self.coords*180./np.pi
         cfg_par['rfi']['coords'] = SkyCoord(self.coords[self.selectFieldID,:,0]*u.degree, self.coords[self.selectFieldID,:,1]*u.degree,  unit=(u.deg, u.deg))

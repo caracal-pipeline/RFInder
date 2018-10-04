@@ -8,33 +8,29 @@
     tab1 { padding-left: 2em; }
     tabimage { padding-right: 3em; }
     img.a{
-		float: baseline;
-  		height:450px;
+    	position:absolute;
+    	top: 75px;
+    	left: 580px;
+  		height:400px;
   		width: 600px;
   		font-family: Veranda;
 	}
 	img.b{
-		float: baseline;
-		margin: 0 0 0 0px;
-  		height:450px;
-  		width: 600px;
+    	position:absolute;
+    	top: 525px;
+    	left: 0px;
+  		height:372px;
+  		width: 585px;
   		font-family: Veranda;
-	}
-	* {
-	    box-sizing: border-box;
-	}
-
-	.box {
-	    float: left;
-	    width: 33.33%;
-	    padding: 50px;
-	}
-
-	.clearfix::after {
-	    content: "";
-	    clear: both;
-	    display: table;
-	}
+  	}
+	img.c{
+    	position:absolute;
+    	top: 525px;
+    	left: 580px;
+  		height:372px;
+  		width: 585px;
+  		font-family: Veranda;
+  	}
 </style>
 <body>
 <h1>{{ title }}</h1>
@@ -56,7 +52,7 @@ Total number of baselines   = <tab1> {{totbase}} </tab1><br/><br/>
 <b> Natural noise predictions </b> <br/>
 Observing time on source       = {{exptime}} hours for {{polnum}} polarizations <br/>
 Stokes I natural r.m.s. [mJy/b]= {{noise}} <br/>
-{{img_tag2}}
+{{img_tag2}} {{img_tag3}}
 </p>
 
 </html>

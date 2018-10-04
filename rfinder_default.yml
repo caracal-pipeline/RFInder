@@ -1,23 +1,23 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /Users/maccagni/Projects/RFI/rfinder_test/ #full path to working directory
+    workdir: /home/maccagni/Projects/MFS/FornaxA/MeerKAT/fa1/msdir/ #full path to working directory
     msname: ['fa1_conc.ms'] #name of input ms file
     field: 1 #field ID of target of file
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
-    enable: true #if True this module is enabled
+    enable: false #if True this module is enabled
     RFInder_mode: 'rms_clip' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
     telescope: 'meerkat' #list of bad antennas: for no antennas try '[]'
     bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
-    polarization: 'xx' #xx, yy, xy, yx, q (also in CAPS)
+    polarization: 'q' #xx, yy, xy, yx, q (also in CAPS)
     rms_clip: 5 #Threshold for RFI identification
     noise_measure_edges: [1.420e9, 1.427e9] #min frequency and maximum frequency where to measure average std of visibilities
     baseline_cut: 200 #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
     chunks:
         __helpstr: separate visibilities in small time intervals and/or larger spectral windows 
         time_enable: false
-        time_step: 10 #time chunks in minutes
+        time_step: 2 #time chunks in minutes
         spw_enable: true
         spw_width: 20 #channel width of rebinned output table [MHz]
 

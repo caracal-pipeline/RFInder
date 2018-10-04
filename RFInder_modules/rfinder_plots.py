@@ -22,6 +22,8 @@ import logging
 
 import rfi
 rfi = rfi.rfi()
+import rfinder_stats as rfi_stats 
+rfiST = rfi_stats.rfi_stats()
 
 class rfi_plots:
     
@@ -169,9 +171,22 @@ class rfi_plots:
                       'text.latex.unicode'  : True
                        }
             plt.rcParams.update(params)
+            # Format axes
+            nullfmt        = NullFormatter() 
+            left, width    = 0.05, 0.9                                                                     #|These determine where the subplots go
+            bottom, height = 0.1, 0.85
+            #left_h = left+width+0.015
+            #bottom_h = left+height+0.015
 
-            fig, ax = plt.subplots(figsize=(12,8))
+            box_centre    = [left, bottom, width, height]
+            #box_x      = [left, bottom_h, width, 0.12]
+            #box_y      = [left_h, bottom, 0.12, height]
+            #box_cbar       = [left_h+0.13, bottom, 0.05, height]
 
+            fig = plt.figure(1, figsize=(12,8))
+
+            ax = plt.axes(box_centre)
+            
             if bandwidth <= 500.:
                 colormap = 'nipy_spectral_r'
             else:
@@ -346,15 +361,22 @@ class rfi_plots:
                        }
             plt.rcParams.update(params)
             #plt.rc('xtick', labelsize=20)
-            
+
+            # Format axes
+            nullfmt        = NullFormatter() 
+            left, width    = 0.05, 0.9                                                                     #|These determine where the subplots go
+            bottom, height = 0.1, 0.85
+            #left_h = left+width+0.015
+            #bottom_h = left+height+0.015
+
+            box_centre    = [left, bottom, width, height]
+                    
             # initialize figure
-            fig = plt.figure(figsize =(14,8))
-            fig.subplots_adjust(hspace=0.0)
-            gs = gridspec.GridSpec(1, 1)
+            fig = plt.figure(1, figsize=(12,8))
             plt.rc('xtick', labelsize=20)
 
             # Initialize subplots
-            ax1 = fig.add_subplot(gs[0])
+            ax1 = plt.axes(box_centre)
             ax1.set_xlabel(r'Frequency [MHz]')
           
             bandwidth= (cfg_par['rfi']['highfreq'] - cfg_par['rfi']['lowfreq'] )/1e6
@@ -380,7 +402,9 @@ class rfi_plots:
             #    freqs_plot_idx[i]=idx
             ax1.set_xticks(freqs_plot_bin)
             ax1.set_xticklabels(freqs_plot_bin)
-            
+            ax1.set_xlim([(cfg_par['rfi']['lowfreq']-5.*cfg_par['rfi']['chan_widths'])/1e6,
+                (cfg_par['rfi']['highfreq']+5.*cfg_par['rfi']['chan_widths'])/1e6])
+           
             if cfg_par['plots']['plot_noise'] != 'rfi':
                 ax1.set_yscale('log', basey=10)
                 if np.isnan(np.sum(noise_all)):
@@ -601,7 +625,7 @@ class rfi_plots:
             box_y      = [left_h, bottom, 0.12, height]
             box_cbar       = [left_h+0.13, bottom, 0.05, height]
 
-            fig = plt.figure(1, figsize=(10,7))
+            fig = plt.figure(1, figsize=(12,8))
 
             ax_centre = plt.axes(box_centre)
             ax_x = plt.axes(box_x)
@@ -713,6 +737,123 @@ class rfi_plots:
             plt.savefig(altazplot,format='png',overwrite = True)
             plt.close()
             self.logger.info(('\t ... ALT/AZ for spw: {0:d}-{1:d} MHz  ...\n').format(start_freq,end_freq))
+
+        return 0
+
+    def plot_altaz_short(self,cfg_par):
+        '''
+        Plots the elevation/azimuth of the observation scan binned by time chunks, for every binned spectral window
+        '''
+
+
+        self.logger.info("\t ... Plotting Alt/Az for observation ... \n")
+        
+        times = cfg_par['rfi']['times']
+        azimuth = []
+        altitude = []
+
+        for i in xrange(0,len(times)):
+        
+            altaz = rfiST.alt_az(cfg_par,times[i])
+            azimuth.append(altaz.az-180.*u.deg)
+            altitude.append(altaz.alt*u.deg)
+
+
+        plotdir = cfg_par['general']['plotdir']
+
+        freq_S = cfg_par['rfi']['lowfreq']/1e6
+        freq_E = cfg_par['rfi']['highfreq']/1e6
+
+        start_freq = int(np.round(freq_S,0))
+        end_freq = int(np.round(freq_E,0))
+
+        spwname= str(start_freq)+'-'+str(end_freq)
+
+        # Save figure to file
+        altazplot = cfg_par['general']['plotdir']+'AltAZ_full.png'
+
+                # initialize plotting parameters
+        params = {'font.family'         :' serif',
+                  'font.style'          : 'normal',
+                  'font.weight'         : 'book',
+                  'font.size'           : 18.0,
+                  'axes.linewidth'      : 1,
+                  'lines.linewidth'     : 1,
+                  'xtick.labelsize'     : 16,
+                  'ytick.labelsize'     : 16, 
+                  'xtick.direction'     :'in',
+                  'ytick.direction'     :'in',
+                  'xtick.major.size'    : 4,
+                  'xtick.major.width'   : 1,
+                  'xtick.minor.size'    : 2,
+                  'xtick.minor.width'   : 1,
+                  'ytick.major.size'    : 4,
+                  'ytick.major.width'   : 1,
+                  'ytick.minor.size'    : 2,
+                  'ytick.minor.width'   : 1, 
+                  'text.usetex'         : True,
+                  'text.latex.unicode'  : True
+                   }
+        plt.rcParams.update(params)
+
+        # Format axes
+        nullfmt        = NullFormatter() 
+        left, width    = 0.05, 0.9                                                                     #|These determine where the subplots go
+        bottom, height = 0.1, 0.85
+
+        box_centre    = [left, bottom, width, height]
+        fig = plt.figure(1, figsize=(12,8))
+
+        ax_centre = plt.axes(box_centre)
+        # Add minor tick marks
+        ax_centre.minorticks_on()
+
+        ax_centre.set_xlabel(r'Azimuth [deg]')
+        ax_centre.set_ylabel(r'Altitude [deg]')
+        
+        ax_centre.set_ylim([0,90])
+        ax_centre.set_xlim([-180.,180])
+        ax_centre.set_xticks([-180,-135,-90,-45,0,45,90,135,180])        
+        ax_centre.set_yticks([])
+
+        asse = ax_centre.scatter(azimuth,altitude,c='black',s=100,linewidth=0.5,edgecolors='black',label=cfg_par['general']['fieldname'])
+
+        azs=np.arange(-180.,181.,45.)
+        als=np.arange(0.,91.,1.)
+        azs[azs==0]=1e-6
+        als[als==0]=1e-6
+        for counter in azs:
+            [X,Y]=self.aitoff(counter*np.ones(als.shape),als)
+            ax_centre.plot(X,Y,'k-',linewidth=0.5)
+
+        azs=np.arange(-180.,181.,1.)
+        als=np.arange(0.,91.,15.)
+        azs[azs==0]=1e-6
+        als[als==0]=1e-6
+        for al in als:
+            [X,Y]=self.aitoff(azs,al*np.ones(azs.shape))
+            ax_centre.plot(X,Y,'k-',linewidth=0.5)
+
+        for dd in [15.,30.,45.,60.,75.]:
+            [X,Y]=self.aitoff(-180.,dd)
+            ax_centre.text(X,Y,r'${0:s}$'.format(str(int(round(dd,0)))),horizontalalignment='right',fontsize='medium')
+
+        legend = ax_centre.legend(loc=1,fontsize=14,handletextpad=0.1,borderpad=0.2)
+        legend.get_frame().set_edgecolor('black')
+        legend.legendHandles[0].set_color('black')
+        legend.legendHandles[0]._sizes = [35]
+
+        start = cfg_par['rfi']['startdate']
+        end = cfg_par['rfi']['enddate']
+
+        title_plot = '{0:d}-{1:d} MHz / {2:%d}{2:%b}{2:%y}: {2:%H}:{2:%M} - {3:%H}:{3:%M}'.format(start_freq,end_freq,start.datetime,end.datetime)
+         
+        ax_centre.set_title(title_plot)
+
+        # Finish everything up
+        plt.savefig(altazplot,format='png',overwrite = True)
+        plt.close()
+        self.logger.info(('\t ... ALT/AZ for {0:s} ...\n').format(cfg_par['general']['fieldname']))
 
         return 0
     

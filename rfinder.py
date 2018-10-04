@@ -16,8 +16,8 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
-#sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+#sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
 #sys.path.append('/data/maccagni/RFInder/RFInder_modules/')
 
 import rfi 
@@ -73,8 +73,8 @@ class rfinder:
             cfg = open(file)
 
         else:
-            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
-            #file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
+            #file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
             #file_default = '/data/maccagni/RFInder/rfinder_default.yml'
 
             cfg = open(file_default) 
@@ -318,14 +318,16 @@ class rfinder:
                 
                 if self.enable_task(self.cfg_par,'rfi')==False:
 
-                    results = rfi.load_from_ms(self.cfg_par,timez)
+                    results = rfi.load_from_ms(self.cfg_par,0)
                     self.logger.info("---- MSfile Loaded -----\n")    
                     if results != 1:
                         rfi.baselines_from_ms(self.cfg_par)
                         self.logger.info("---- Dataset sorted by baseline lenght ----\n")
                     else:
                         self.logger.warning("---- This dataset is empyy ----\n")
-                
+
+                rfiPL.plot_altaz_short(self.cfg_par)
+                self.logger.info("---- Alt/Az plotted ----\n")                            
                 rfiPL.plot_rfi_imshow(self.cfg_par,-1)
                 self.logger.info("---- RFI in 2D plotted ----\n")
                 self.cfg_par['plots']['plot_noise'] = 'rfi'
@@ -337,8 +339,9 @@ class rfinder:
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
                 self.cfg_par['plots']['plot_noise'] = 'noise'
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
-         
                 self.logger.info("---- RFI in 1D plotted ----\n")
+
+                rfi_files.write_html_fullreport(self.cfg_par)
 
         task = 'beam_shape'
         if self.enable_task(self.cfg_par,task) == True:
