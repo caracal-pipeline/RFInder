@@ -31,7 +31,7 @@
   		width: 585px;
   		font-family: Veranda;
   	}
-  	video.a{
+  	img.d{
     	position:absolute;
     	top: 900px;
     	left: 0px;
@@ -39,10 +39,18 @@
   		width: 580px;
   		font-family: Veranda;
   	}
-  	video.b{
+  	img.e{
     	position:absolute;
-    	top: 900px;
-    	left: 580px;
+    	top: 75px;
+    	left: 1200px;
+  		height:372px;
+  		width: 580px;
+  		font-family: Veranda;
+  	}
+  	img.f{
+    	position:absolute;
+    	top: 525;
+    	left: 1200px;
   		height:372px;
   		width: 580px;
   		font-family: Veranda;
@@ -52,7 +60,7 @@
 <h1>{{ title }}</h1>
 <h2>Observation specs</h2>
 <p><b>Field</b>: {{fieldname}} ( ID = {{field}})<br/>
-Start Date            = <tab1> {{startdate}}</tab1> {{img_tag1}}<br/>
+Start Date            = <tab1> {{startdate}}</tab1> {{img_tag1}} {{video_tag2}}<br/>
 End   Date            = <tab1> {{enddate}} 	</tab1><br/><br/>
 <b> Spectral window </b><br/>
 Number of channels = <tab1> {{totchans}} </tab1> <br/>
@@ -68,7 +76,7 @@ Total number of baselines   = <tab1> {{totbase}} </tab1><br/><br/>
 <b> Natural noise predictions </b> <br/>
 Observing time on source       = {{exptime}} hours for {{polnum}} polarizations <br/>
 Stokes I natural r.m.s. [mJy/b]= {{noise}} <br/>
-{{img_tag2}} {{img_tag3}} <br/>
+{{img_tag2}} {{img_tag3}} {{video_tag3}}<br/>
 {{video_tag1}}<br/>
 </p>
 

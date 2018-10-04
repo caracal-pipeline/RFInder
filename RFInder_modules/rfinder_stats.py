@@ -131,7 +131,7 @@ class rfi_stats:
         kB=1380.6  
 
         STOKES = ['xx','yy','XX','YY','xy','yx','XY','YX']
-        if not cfg_par['rfi']['polarization'] in STOKES:                                # Boltzmann constant (Jy m^2 / K)
+        if cfg_par['rfi']['polarization'] in STOKES:                                # Boltzmann constant (Jy m^2 / K)
             polnum = 1
         else:
             polnum = 2

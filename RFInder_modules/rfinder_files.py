@@ -268,6 +268,15 @@ def write_html_fullreport(cfg_par):
     imagename3 = cfg_par['general']['plotdir']+'noise_full_sl_rfi.png'
     data_uri3 = open(imagename3, 'rb').read().encode('base64').replace('\n', '')
 
+    video_name1 = rfi_par.cfg_par['general']['moviedir']+'AltAz_movie.gif'
+    video_encoded1 = open(video_name1, "rb").read().encode("base64")
+
+    video_name2 = rfi_par.cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
+    video_encoded2 = open(video_name2, "rb").read().encode("base64")
+
+    video_name3 = rfi_par.cfg_par['general']['moviedir']+'TimeChunks_1D_noise.gif'
+    video_encoded3 = open(video_name3, "rb").read().encode("base64")
+
     with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
         lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
         f.write(template.render(
@@ -290,9 +299,10 @@ def write_html_fullreport(cfg_par):
             noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
             img_tag1 = '<img class="a" src="data:image/png;base64,{0}">'.format(data_uri1),
             img_tag2 = '<img class="b" src="data:image/png;base64,{0}">'.format(data_uri2),
-            img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3)
-
-            
+            img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),
+            video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
+            video_tag2 = '<img class="e" src="data:video/gif;base64,{0}">'.format(video_encoded2),        
+            video_tag3 = '<img class="f" src="data:video/gif;base64,{0}">'.format(video_encoded3)                    
         ))
 
         print '\t+------+\n\t Html report done \n\t+------+'
