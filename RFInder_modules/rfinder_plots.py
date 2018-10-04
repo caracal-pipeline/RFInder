@@ -755,8 +755,14 @@ class rfi_plots:
         for i in xrange(0,len(times)):
         
             altaz = rfiST.alt_az(cfg_par,times[i])
-            azimuth.append(altaz.az-180.*u.deg)
-            altitude.append(altaz.alt*u.deg)
+            azimuth.append(altaz.az)
+            altitude.append(altaz.alt)
+
+
+        azimuth=np.array([azimuth],dtype=float)
+        altitude=np.array([altitude],dtype=float)
+
+        [azimuth,altitude] =self.aitoff(azimuth-180.,altitude)
 
 
         plotdir = cfg_par['general']['plotdir']
