@@ -1,12 +1,12 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /home/maccagni/Projects/MFS/FornaxA/MeerKAT/fa1/msdir/ #full path to working directory
+    workdir: /Users/maccagni/Projects/RFI/rfinder_test/ #full path to working directory
     msname: ['fa1_conc.ms'] #name of input ms file
     field: 1 #field ID of target of file
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
-    enable: false #if True this module is enabled
+    enable: true #if True this module is enabled
     RFInder_mode: 'rms_clip' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
     telescope: 'meerkat' #list of bad antennas: for no antennas try '[]'
     bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
@@ -30,7 +30,8 @@ plots:
     enable: true 
     plot_noise: 'rfi' #choose to plot % of RFI, 'rfi', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
     plot_long_short: True #plot all baselines, or only the short and the long
-#    2d_gif: false 
-#    1d_gif: false
-#    altaz_gif: false
-
+    movies:
+        __helpstr: make movies of output plots
+        2d_gif: true 
+        1d_gif: true
+        altaz_gif: true

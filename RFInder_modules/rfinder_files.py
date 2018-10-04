@@ -1,10 +1,8 @@
-import os,string,sys
+import os, string, sys, glob
 import numpy as np
 from astropy.io import fits as fits
 from astropy import units as u
-
 from jinja2 import FileSystemLoader, Environment
-
 
 import rfinder_stats as rfi_stats 
 rfiST = rfi_stats.rfi_stats()
@@ -134,8 +132,8 @@ def rfi_frequency(cfg_par,time_step=-1):
 
         natural_rms = cfg_par['rfi']['theo_rms'] 
 
-        elevation = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].alt*u.deg
-        azimuth = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].az*u.deg
+        elevation = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].alt
+        azimuth = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].az
 
 
         for i in xrange(0,datacube.shape[1]):
@@ -248,9 +246,9 @@ def write_html_fullreport(cfg_par):
 
     # Configure Jinja and ready the template
     env = Environment(
-        loader=FileSystemLoader('/home/maccagni/programs/RFInder/report_templates/')
+        loader=FileSystemLoader('/Users/maccagni/notebooks/rfinder/report_templates/')
     )
-    template = env.get_template('rfinder_template.html')
+    template = env.get_template('full_template.html')
 
     #base_template = env.get_template('report.html')
     # Content to be published
@@ -308,3 +306,138 @@ def write_html_fullreport(cfg_par):
         print '\t+------+\n\t Html report done \n\t+------+'
 
         return 0
+
+def write_html_timereport(cfg_par):
+
+    # Configure Jinja and ready the template
+    env = Environment(
+        loader=FileSystemLoader('/Users/maccagni/notebooks/rfinder/report_templates/')
+    )
+    template = env.get_template('time_template.html')
+
+    #base_template = env.get_template('report.html')
+    # Content to be published
+    title = 'RFI time scans report: {0:s}'.format(cfg_par['general']['msname'])
+
+    #imagename1 = '/Users/maccagni/Projects/RFI/rfinder_test/rfi/plots/altaz/AltAZ_rfi1297-1317MHz.png'
+    #data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
+
+    video_name1 = cfg_par['general']['moviedir']+'AltAz_movie.gif'
+    video_encoded1 = open(video_name1, "rb").read().encode("base64")
+
+    video_name2 = cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
+    video_encoded2 = open(video_name2, "rb").read().encode("base64")
+
+    video_name3 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise.gif'
+    video_encoded3 = open(video_name3, "rb").read().encode("base64")
+
+    with open(cfg_par['general']['rfidir']+'time_report.html', "w") as f:
+        lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+        f.write(template.render(
+            title=title,
+            fieldname=cfg_par['general']['fieldname'],
+            field=cfg_par['general']['field'],
+            totchans = int(cfg_par['rfi']['total_channels']),
+            chan_widths=round(cfg_par['rfi']['chan_widths']/1e3,4),
+            lowfreq=round(cfg_par['rfi']['lowfreq']/1e6,3),
+            highfreq=round(cfg_par['rfi']['highfreq']/1e6,3),
+            startdate = ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['startdate'].datetime)),
+            enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
+            nant = cfg_par['rfi']['nant'],
+            ant_names = cfg_par['rfi']['ant_names'],
+            maxbase = str(np.round(lenghts[0][-1],0)),
+            minbase = str(np.round(lenghts[0][0],0)),
+            totbase = cfg_par['rfi']['number_baseline'],
+            exptime = np.round(cfg_par['rfi']['exptime']/60.,2),
+            polnum = cfg_par['rfi']['polnum'],
+            noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
+            video_tag1 = '<img class="b" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
+            video_tag2 = '<img class="a" src="data:video/gif;base64,{0}">'.format(video_encoded2),        
+            video_tag3 = '<img class="c" src="data:video/gif;base64,{0}">'.format(video_encoded3)                    
+        ))
+
+        print '\t+------+\n\t Html report done \n\t+------+'
+
+        return 0
+
+def find_altaz_plots(cfg_par):
+    
+    tmp_arr=[]
+
+    if cfg_par['rfi']['RFInder_mode']=='use_flags':
+        filenames = glob.glob(cfg_par['general']['altazplotdir']+'/AltAZ_flags*')
+
+        for i in xrange(0,len(filenames)):
+            #print filenames[i]
+            #print 'aaa'
+            tmp = filenames[i].split('_flags')[1]
+            tmp_arr.append(tmp.split('MHz')[0])
+        tmp_arr.sort()
+            
+        filenames = [tmp[0]+'_flags' + s for s in tmp_arr] 
+        filenames = [s + 'MHz.png' for s in filenames] 
+    
+    elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
+        filenames = glob.glob(cfg_par['general']['altazplotdir']+'/AltAZ_rfi*')
+
+        for i in xrange(0,len(filenames)):
+            #print filenames[i]
+            #print 'aaa'
+            tmp = filenames[i].split('_rfi')
+            tmp_arr.append(tmp[1].split('MHz')[0])
+        tmp_arr.sort()
+            
+        filenames = [tmp[0]+'_rfi' + s for s in tmp_arr] 
+        filenames = [s + 'MHz.png' for s in filenames] 
+
+    return filenames
+
+def find_2d_plots(cfg_par):
+
+    if cfg_par['rfi']['RFInder_mode']=='use_flags':
+        filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/flags_base*')
+    elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
+        filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/rfi_base*')
+
+    tmp_arr=[]
+    for i in xrange(0,len(filenames)):
+            tmp = filenames[i].split('base_')[1]
+            tmp = filenames[i].split('base_')[1]
+            tmp_arr.append(tmp.split('m.png')[0])
+    tmp_arr.sort()
+
+    tmp = filenames[0].split('base_')
+    filenames = [tmp[0]+'base_' + s for s in tmp_arr] 
+    filenames = [s + 'm.png' for s in filenames] 
+
+    return filenames
+
+def find_1d_plots(cfg_par,name_root):
+
+    #select files
+    filenames = glob.glob(cfg_par['general']['timeplotdir1D']+'/'+name_root+'_*')
+
+    tmp_arr=[]
+
+    for i in xrange(0,len(filenames)):
+        if cfg_par['rfi']['RFInder_mode']=='use_flags':
+            if len(filenames[i].split('sl_rfi.'))>1:
+                continue
+        elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
+            if  len(filenames[i].split('sl_flags.'))>1:
+                continue
+        tmp = filenames[i].split(name_root+'_')[1]
+        tmp_arr.append(tmp.split('m_sl_rfi.png')[0])
+
+    tmp_arr.sort()
+    tmp = filenames[0].split(name_root+'_')
+
+    filenames = [tmp[0]+name_root+'_' + s for s in tmp_arr]
+    if cfg_par['rfi']['RFInder_mode']=='use_flags':
+        filenames = [s + 'm_sl_flags.png' for s in filenames] 
+    elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
+        filenames = [s + 'm_sl_rfi.png' for s in filenames] 
+
+    return filenames
+
+

@@ -16,8 +16,8 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-#sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
-sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+#sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
 #sys.path.append('/data/maccagni/RFInder/RFInder_modules/')
 
 import rfi 
@@ -73,8 +73,8 @@ class rfinder:
             cfg = open(file)
 
         else:
-            #file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
-            file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
+            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            #file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
             #file_default = '/data/maccagni/RFInder/rfinder_default.yml'
 
             cfg = open(file_default) 
@@ -124,7 +124,11 @@ class rfinder:
         self.cfg_par[key]['plotdir'] = self.rfiplotdir 
 
  
+        self.moviedir = self.rfidir+'plots/movies/'
+        self.cfg_par[key]['moviedir'] = self.moviedir        
 
+        if os.path.exists(self.moviedir) == False:
+             os.makedirs(self.moviedir)
 
         if os.path.exists(self.rfidir) == False:
              os.makedirs(self.rfidir)           
@@ -172,11 +176,7 @@ class rfinder:
             if os.path.exists(self.altazplotdir) == False:
                  os.makedirs(self.altazplotdir)
 
-            self.moviedir = self.rfidir+'plots/movies/'
-            self.cfg_par[key]['moviedir'] = self.moviedir        
 
-            if os.path.exists(self.moviedir) == False:
-                 os.makedirs(self.moviedir)
 
     def go(self,cfg_par):
         '''
@@ -242,7 +242,7 @@ class rfinder:
                         rfi_files.rfi_frequency(self.cfg_par,i)
                         self.logger.info("---- RFI saved to table ----\n")
                     else:
-                        self.logger.warning("---- This chunk is empyt ----\n")
+                        self.logger.warning("---- This chunk is empty ----\n")
                         continue
 
                 self.logger.info(" ------ End of RFI analysis on time chunks ------\n")
@@ -310,10 +310,48 @@ class rfinder:
                 
                 rfiPL.plot_altaz(self.cfg_par,i)
                 self.logger.info("---- RFI in ALT/AZ plotted ----\n")
+        
+                if (self.cfg_par['plots']['movies']['altaz_gif']==True or self.cfg_par['plots']['movies']['2d_gif']==True or 
+                    self.cfg_par['plots']['movies']['1d_gif']==True):
+                    self.logger.info("---- Making movies ----\n")
+     
+                if self.cfg_par['plots']['movies']['altaz_gif']==True:
 
-                self.logger.info("---- Making movies ----\n")
+                    out_animation = self.cfg_par['general']['moviedir']+'AltAz_movie.gif'
+                    filenames = rfi_files.find_altaz_plots(self.cfg_par)
+                    rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
+                    self.logger.info("---- AltAz movie done ----\n")
+                
+                if self.cfg_par['plots']['movies']['2d_gif']==True:
+                    out_animation = self.cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
+                    filenames = rfi_files.find_2d_plots(self.cfg_par)
+                    rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
+                
+                    self.logger.info("---- 2D movie done ----\n")
+                
+                if self.cfg_par['plots']['movies']['1d_gif']==True:
+                    out_animation = self.cfg_par['general']['moviedir']+'TimeChunks_1D_flags.gif'
+                    root_name = 'flags'
+                    filenames = rfi_files.find_1d_plots(self.cfg_par,root_name)
+                    rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
+                    
+                    out_animation = self.cfg_par['general']['moviedir']+'TimeChunks_1D_noise.gif'
+                    root_name = 'noise'
+                    filenames = rfi_files.find_1d_plots(self.cfg_par,root_name)
+                    rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
 
-                                    
+                    out_animation = self.cfg_par['general']['moviedir']+'TimeChunks_1D_noisefactor.gif'
+                    root_name = 'noisefactor'
+                    filenames = rfi_files.find_1d_plots(self.cfg_par,root_name)
+                    rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)         
+                    self.logger.info("---- 1D movies done ----\n")
+                
+                if (self.cfg_par['plots']['movies']['altaz_gif']==True or self.cfg_par['plots']['movies']['2d_gif']==True or 
+                    self.cfg_par['plots']['movies']['1d_gif']==True):
+                    self.logger.info("---- Movies done ----\n")
+
+                rfi_files.write_html_timereport(self.cfg_par)                 
+
             else:
                 
                 if self.enable_task(self.cfg_par,'rfi')==False:
@@ -342,6 +380,9 @@ class rfinder:
                 self.logger.info("---- RFI in 1D plotted ----\n")
 
                 rfi_files.write_html_fullreport(self.cfg_par)
+
+
+
 
         task = 'beam_shape'
         if self.enable_task(self.cfg_par,task) == True:

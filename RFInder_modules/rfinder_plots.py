@@ -18,6 +18,9 @@ from astropy.io import fits as fits
 from astropy.table import Table
 from astropy.time import Time, TimeDelta
 
+import imageio as io
+
+
 import logging
 
 import rfi
@@ -521,8 +524,8 @@ class rfi_plots:
 
         for j in xrange(0,len(freqs_bin)):
             spw = []
-            az = []
-            alt = []
+            azimuth = []
+            altitude= []
             flags =[]
 
             for i in xrange(0,number_chunks):
@@ -549,20 +552,22 @@ class rfi_plots:
                 if os.path.exists(rfi_table) == False:
                     self.logger.error('### Table of RFI results does not exist ###')    
                     spw.append(None)
-                    az.append(None)
-                    alt.append(None)
+                    azimuth.append(None)
+                    altitude.append(None)
                     flags.append(None)                
                 else:    
                     table = Table.read(rfi_table)
-
                     spw.append(table['frequency'][j])
-                    az.append(table['azimuth'][j]-180.)
-                    alt.append(table['altitude'][j])
+                    azimuth.append(table['azimuth'][j])
+                    altitude.append(table['altitude'][j])
                     flags.append(table['percentage_flags'][j])
             #az=np.array([az],dtype=float)
             #alt=np.array([alt],dtype=float)
             #az,alt=self.aitoff(az,alt)
+            azimuth=np.array([azimuth],dtype=float)
+            altitude=np.array([altitude],dtype=float)
 
+            [azimuth,altitude] =self.aitoff(azimuth-180.,altitude)
 
 
             plotdir = cfg_par['general']['altazplotdir']
@@ -663,7 +668,7 @@ class rfi_plots:
             #ax_centre.set_xticks([])        
             ax_centre.set_yticks([])
 
-            asse = ax_centre.scatter(az,alt,c=flags,cmap=colormap,vmin=0,vmax=100.,s=100,linewidth=0.5,edgecolors='black',label=r'Stokes: {0:s}'.format(pol))
+            asse = ax_centre.scatter(azimuth,altitude,c=flags,cmap=colormap,vmin=0,vmax=100.,s=100,linewidth=0.5,edgecolors='black',label=r'Stokes: {0:s}'.format(pol))
 
             azs=np.arange(-180.,181.,45.)
             als=np.arange(0.,91.,1.)
@@ -718,7 +723,7 @@ class rfi_plots:
    
             ax_x.set_title(title_plot)
            
-            ax_x.scatter(az,flags,c=flags,cmap=colormap,vmin=0,vmax=100.,s=70,linewidth=0.5,edgecolors='black')
+            ax_x.scatter(azimuth,flags,c=flags,cmap=colormap,vmin=0,vmax=100.,s=70,linewidth=0.5,edgecolors='black')
             
             #y plot
             #ax_x.set_xlabel(r'Azimuth [deg]',fontsize=16)
@@ -730,7 +735,7 @@ class rfi_plots:
             ax_y.set_xlim([-5,100])
             ax_y.set_ylim([0,90])
             ax_y.set_xticks([0,25,50,75,100])
-            ax_y.scatter(flags,alt,c=flags,cmap=colormap,vmin=0,vmax=100.,s=70,linewidth=0.5,edgecolors='black')
+            ax_y.scatter(flags,altitude,c=flags,cmap=colormap,vmin=0,vmax=100.,s=70,linewidth=0.5,edgecolors='black')
 
 
             # Finish everything up
@@ -866,36 +871,20 @@ class rfi_plots:
 
     def gif_me_up(self,cfg_par,filenames,outmovie):
         
-        import matplotlib.animation as animation
 
         self.logger.info(('\t ... Creating movie ...'))
        
-
-        fig = plt.figure(figsize=(8,8))
-        plt.axis('off')
-
         # initiate an empty  list of "plotted" images 
-        myimages = []
+        images=[]
 
-        #loops through available png:s
-        for p in xrange(0, len(filenames)):
-            ## Read in picture
-            img = mgimg.imread(filenames[p])
-            imgplot = plt.imshow(img)
-            #plt.show()
-            # append AxesImage object to the list
-            myimages.append([imgplot])
+        for filename in filenames:
+            images.append(io.imread(filename))
+            
+        io.mimsave(outmovie,images,duration=1.5)
 
-            ## create an instance of animation
 
-        Writer = animation.writers['ffmpeg']
-        writer = Writer(fps=5, metadata=dict(artist='XY'), bitrate=3600)
-        my_anim = animation.ArtistAnimation(fig, myimages, interval=2000, blit=True, repeat_delay=1000)
-
-        my_anim.save(outmovie,writer=writer)
-        plt.close()
         self.logger.info(('\t ... Movie written to file ...\n'))
 
-        return my_anim
+        return 0
 
 
