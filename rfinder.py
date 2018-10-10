@@ -16,8 +16,8 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
-#sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+#sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
 #sys.path.append('/data/maccagni/RFInder/RFInder_modules/')
 
 import rfi 
@@ -73,8 +73,8 @@ class rfinder:
             cfg = open(file)
 
         else:
-            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
-            #file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
+            #file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
             #file_default = '/data/maccagni/RFInder/rfinder_default.yml'
 
             cfg = open(file_default) 
@@ -110,7 +110,7 @@ class rfinder:
         self.msfile = self.workdir + self.cfg_par[key].get('msname', None)[0]
         self.cfg_par[key]['msfullpath'] = self.msfile      
 
-        self.rfidir  = self.workdir+'rfi/'
+        self.rfidir  = self.workdir+'rfi_xx/'
         self.cfg_par[key]['rfidir'] = self.rfidir
 
         self.rfifile = self.rfidir+'rfi_flagged_vis.MS'
@@ -272,6 +272,8 @@ class rfinder:
                 self.logger.info(" ------ Plotting on time chunks ------\n")
 
                 for i in xrange(0,len(times)-1):
+#                for i in xrange(0,2):
+
                     timez = [times[i],times[i+1]]            
                     
                     #time chunk properties
@@ -292,7 +294,7 @@ class rfinder:
                             rfi.baselines_from_ms(self.cfg_par)
                             self.logger.info("---- Dataset sorted by baseline lenght ----\n")
                         else:
-                            self.logger.warning("---- This chunk is empyy ----\n")
+                            self.logger.warning("---- This chunk is empty ----\n")
                             continue       
 
                     rfiPL.plot_rfi_imshow(self.cfg_par,i)
@@ -308,7 +310,7 @@ class rfinder:
                     rfiPL.plot_noise_frequency(self.cfg_par,i)         
                     self.logger.info("---- RFI in 1D plotted ----\n")
                 
-                rfiPL.plot_altaz(self.cfg_par,i)
+                rfiPL.plot_altaz(self.cfg_par,68)
                 self.logger.info("---- RFI in ALT/AZ plotted ----\n")
         
                 if (self.cfg_par['plots']['movies']['altaz_gif']==True or self.cfg_par['plots']['movies']['2d_gif']==True or 

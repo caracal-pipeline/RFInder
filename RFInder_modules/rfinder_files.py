@@ -149,17 +149,17 @@ def rfi_frequency(cfg_par,time_step=-1):
             shortbase=datacube[:idx,i]
             longbase = datacube[idx:,i]               
             
-            rms_lin_tmp = 1.-np.divide(np.divide(np.sum(datacube[:,i]),datacube.shape[0]),100.)
+            rms_lin_tmp = 1.-np.divide(np.divide(np.nansum(datacube[:,i]),datacube.shape[0]),100.)
             rms_lin[i] = np.divide(1.,np.sqrt(rms_lin_tmp))
 
-            flag_lin_tmp = np.divide(np.sum(shortbase),len(shortbase))
+            flag_lin_tmp = np.divide(np.nansum(shortbase),len(shortbase))
             flag_lin_short[i] = flag_lin_tmp
-            rms_lin_tmp_short = 1.-np.divide(np.divide(np.sum(shortbase),len(shortbase)),100.)
+            rms_lin_tmp_short = 1.-np.divide(np.divide(np.nansum(shortbase),len(shortbase)),100.)
             rms_lin_short[i] *= np.divide(1.,np.sqrt(rms_lin_tmp_short))
 
-            flag_lin_tmp = np.divide(np.sum(longbase),len(longbase))
+            flag_lin_tmp = np.divide(np.nansum(longbase),len(longbase))
             flag_lin_long[i] = flag_lin_tmp
-            rms_lin_tmp_long = 1.-np.divide(np.divide(np.sum(longbase),len(longbase)),100.)
+            rms_lin_tmp_long = 1.-np.divide(np.divide(np.nansum(longbase),len(longbase)),100.)
             rms_lin_long[i] *= np.divide(1.,np.sqrt(rms_lin_tmp_long))
 
         
@@ -246,7 +246,7 @@ def write_html_fullreport(cfg_par):
 
     # Configure Jinja and ready the template
     env = Environment(
-        loader=FileSystemLoader('/Users/maccagni/notebooks/rfinder/report_templates/')
+        loader=FileSystemLoader('/home/maccagni/programs/RFInder/report_templates/')
     )
     template = env.get_template('full_template.html')
 
@@ -296,9 +296,9 @@ def write_html_fullreport(cfg_par):
             polnum = cfg_par['rfi']['polnum'],
             noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
             img_tag1 = '<img class="a" src="data:image/png;base64,{0}">'.format(data_uri1),
-            img_tag2 = '<img class="b" src="data:image/png;base64,{0}">'.format(data_uri2),
+            video_tag1 = '<img class="b" src="data:video/gif;base64,{0}">'.format(video_encoded1),
             img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),
-            video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
+            #video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
             video_tag2 = '<img class="e" src="data:video/gif;base64,{0}">'.format(video_encoded2),        
             video_tag3 = '<img class="f" src="data:video/gif;base64,{0}">'.format(video_encoded3)                    
         ))
@@ -311,7 +311,7 @@ def write_html_timereport(cfg_par):
 
     # Configure Jinja and ready the template
     env = Environment(
-        loader=FileSystemLoader('/Users/maccagni/notebooks/rfinder/report_templates/')
+        loader=FileSystemLoader('/home/maccagni/programs/RFInder/report_templates/')
     )
     template = env.get_template('time_template.html')
 
@@ -348,7 +348,7 @@ def write_html_timereport(cfg_par):
             maxbase = str(np.round(lenghts[0][-1],0)),
             minbase = str(np.round(lenghts[0][0],0)),
             totbase = cfg_par['rfi']['number_baseline'],
-            exptime = np.round(cfg_par['rfi']['exptime']/60.,2),
+            exptime = np.round(cfg_par['rfi']['exptime']*60.,2),
             polnum = cfg_par['rfi']['polnum'],
             noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
             video_tag1 = '<img class="b" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
@@ -368,10 +368,8 @@ def find_altaz_plots(cfg_par):
         filenames = glob.glob(cfg_par['general']['altazplotdir']+'/AltAZ_flags*')
 
         for i in xrange(0,len(filenames)):
-            #print filenames[i]
-            #print 'aaa'
-            tmp = filenames[i].split('_flags')[1]
-            tmp_arr.append(tmp.split('MHz')[0])
+            tmp = filenames[i].split('_flags')
+            tmp_arr.append(tmp[1].split('MHz')[0])
         tmp_arr.sort()
             
         filenames = [tmp[0]+'_flags' + s for s in tmp_arr] 
@@ -381,8 +379,6 @@ def find_altaz_plots(cfg_par):
         filenames = glob.glob(cfg_par['general']['altazplotdir']+'/AltAZ_rfi*')
 
         for i in xrange(0,len(filenames)):
-            #print filenames[i]
-            #print 'aaa'
             tmp = filenames[i].split('_rfi')
             tmp_arr.append(tmp[1].split('MHz')[0])
         tmp_arr.sort()
@@ -401,7 +397,6 @@ def find_2d_plots(cfg_par):
 
     tmp_arr=[]
     for i in xrange(0,len(filenames)):
-            tmp = filenames[i].split('base_')[1]
             tmp = filenames[i].split('base_')[1]
             tmp_arr.append(tmp.split('m.png')[0])
     tmp_arr.sort()
@@ -426,8 +421,8 @@ def find_1d_plots(cfg_par,name_root):
         elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
             if  len(filenames[i].split('sl_flags.'))>1:
                 continue
-        tmp = filenames[i].split(name_root+'_')[1]
-        tmp_arr.append(tmp.split('m_sl_rfi.png')[0])
+        tmp = filenames[i].split(name_root+'_')
+        tmp_arr.append(tmp[1].split('m_sl_rfi.png')[0])
 
     tmp_arr.sort()
     tmp = filenames[0].split(name_root+'_')

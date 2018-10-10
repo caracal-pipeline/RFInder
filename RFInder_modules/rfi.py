@@ -399,7 +399,7 @@ class rfi:
         elif cfg_par['rfi']['RFInder_mode'] == 'use_flags': 
             for i in xrange(0,self.datacube.shape[0]):
                 for j in xrange(0,self.datacube.shape[1]):
-                    rms[i,j] = 100.*np.sum(self.datacube[i,j,:])/time_ax_len
+                    rms[i,j] = 100.*np.nansum(self.datacube[i,j,:])/time_ax_len
 
         rfi_files.write_freq_base(cfg_par,rms,time_step)
 

@@ -504,8 +504,6 @@ class rfi_plots:
 
         self.logger.info("\t ... Plotting Alt/Az for binned dataset ... \n")
       
-
-
         if os.path.exists(cfg_par['general']['timetabledir']) == False:
             self.logger.error("\t Folder with time subsets missing")
 
@@ -523,10 +521,10 @@ class rfi_plots:
         pol = cfg_par['rfi']['polarization'] 
 
         for j in xrange(0,len(freqs_bin)):
-            spw = []
-            azimuth = []
-            altitude= []
-            flags =[]
+            spw = np.full((number_chunks),np.nan)
+            azimuth = np.full((number_chunks),np.nan)
+            altitude= np.full((number_chunks),np.nan)
+            flags = np.full((number_chunks),np.nan)
 
             for i in xrange(0,number_chunks):
             
@@ -548,27 +546,26 @@ class rfi_plots:
                     table_name = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
 
                 rfi_table = tabledir+table_name
+
                 #open file
                 if os.path.exists(rfi_table) == False:
                     self.logger.error('### Table of RFI results does not exist ###')    
-                    spw.append(None)
-                    azimuth.append(None)
-                    altitude.append(None)
-                    flags.append(None)                
+                    continue         
                 else:    
                     table = Table.read(rfi_table)
-                    spw.append(table['frequency'][j])
-                    azimuth.append(table['azimuth'][j])
-                    altitude.append(table['altitude'][j])
-                    flags.append(table['percentage_flags'][j])
+                    spw[i] = table['frequency'][j]
+                    azimuth[i] = table['azimuth'][j]
+                    altitude[i] = table['altitude'][j]
+                    flags[i] = table['percentage_flags'][j]
             #az=np.array([az],dtype=float)
             #alt=np.array([alt],dtype=float)
             #az,alt=self.aitoff(az,alt)
-            azimuth=np.array([azimuth],dtype=float)
-            altitude=np.array([altitude],dtype=float)
+            #azimuth=np.array(azimuth,dtype=float)
+            #altitude=np.array(altitude,dtype=float)
 
-            [azimuth,altitude] =self.aitoff(azimuth-180.,altitude)
-
+            azimuth,altitude =self.aitoff(azimuth-180.,altitude)
+            #azimuth=np.array([azimuth],dtype=float)
+            #altitude=np.array([altitude],dtype=float)
 
             plotdir = cfg_par['general']['altazplotdir']
 
