@@ -255,12 +255,14 @@ def write_html_fullreport(cfg_par):
 
     #imagename1 = '/Users/maccagni/Projects/RFI/rfinder_test/rfi/plots/altaz/AltAZ_rfi1297-1317MHz.png'
     #data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
-    if cfg_par['rfi']['RFInder_mode'] == 'rfi_clip':
+    
+    if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
         imagename1 = cfg_par['general']['plotdir']+'rfi_base_full.png'
         imagename3 = cfg_par['general']['plotdir']+'noise_full_sl_rfi.png'
     elif cfg_par['rfi']['RFInder_mode'] == 'use_flags':
         imagename1 = cfg_par['general']['plotdir']+'flags_base_full.png'
         imagename3 = cfg_par['general']['plotdir']+'noise_full_sl_flags.png'
+    
     data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
 
     imagename2 = cfg_par['general']['plotdir']+'AltAZ_full.png'
