@@ -246,9 +246,8 @@ def write_html_fullreport(cfg_par):
 
     # Configure Jinja and ready the template
     env = Environment(
-        loader=FileSystemLoader('/home/maccagni/programs/RFInder/report_templates/')
+        loader=FileSystemLoader(cfg_par['general']['template_folder'])
     )
-    template = env.get_template('full_template.html')
 
     #base_template = env.get_template('report.html')
     # Content to be published
@@ -256,52 +255,87 @@ def write_html_fullreport(cfg_par):
 
     #imagename1 = '/Users/maccagni/Projects/RFI/rfinder_test/rfi/plots/altaz/AltAZ_rfi1297-1317MHz.png'
     #data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
-
-    imagename1 = cfg_par['general']['plotdir']+'rfi_base_full.png'
+    if cfg_par['rfi']['RFInder_mode'] == 'rfi_clip':
+        imagename1 = cfg_par['general']['plotdir']+'rfi_base_full.png'
+        imagename3 = cfg_par['general']['plotdir']+'noise_full_sl_rfi.png'
+    elif cfg_par['rfi']['RFInder_mode'] == 'use_flags':
+        imagename1 = cfg_par['general']['plotdir']+'flags_base_full.png'
+        imagename3 = cfg_par['general']['plotdir']+'noise_full_sl_flags.png'
     data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
 
     imagename2 = cfg_par['general']['plotdir']+'AltAZ_full.png'
     data_uri2 = open(imagename2, 'rb').read().encode('base64').replace('\n', '')
 
-    imagename3 = cfg_par['general']['plotdir']+'noise_full_sl_rfi.png'
     data_uri3 = open(imagename3, 'rb').read().encode('base64').replace('\n', '')
 
     video_name1 = cfg_par['general']['moviedir']+'AltAz_movie.gif'
-    video_encoded1 = open(video_name1, "rb").read().encode("base64")
+    if os.path.exists(video_name1):
+        video_encoded1 = open(video_name1, "rb").read().encode("base64")
 
     video_name2 = cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
-    video_encoded2 = open(video_name2, "rb").read().encode("base64")
+    if os.path.exists(video_name2):
+        video_encoded2 = open(video_name2, "rb").read().encode("base64")
 
     video_name3 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise.gif'
-    video_encoded3 = open(video_name3, "rb").read().encode("base64")
+    if os.path.exists(video_name3):
+        video_encoded3 = open(video_name3, "rb").read().encode("base64")
 
-    with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
-        lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
-        f.write(template.render(
-            title=title,
-            fieldname=cfg_par['general']['fieldname'],
-            field=cfg_par['general']['field'],
-            totchans = int(cfg_par['rfi']['total_channels']),
-            chan_widths=round(cfg_par['rfi']['chan_widths']/1e3,4),
-            lowfreq=round(cfg_par['rfi']['lowfreq']/1e6,3),
-            highfreq=round(cfg_par['rfi']['highfreq']/1e6,3),
-            startdate = ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['startdate'].datetime)),
-            enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
-            nant = cfg_par['rfi']['nant'],
-            ant_names = cfg_par['rfi']['ant_names'],
-            maxbase = str(np.round(lenghts[0][-1],0)),
-            minbase = str(np.round(lenghts[0][0],0)),
-            totbase = cfg_par['rfi']['number_baseline'],
-            exptime = np.round(cfg_par['rfi']['exptime'],2),
-            polnum = cfg_par['rfi']['polnum'],
-            noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
-            img_tag1 = '<img class="a" src="data:image/png;base64,{0}">'.format(data_uri1),
-            video_tag1 = '<img class="b" src="data:video/gif;base64,{0}">'.format(video_encoded1),
-            img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),
-            #video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
-            video_tag2 = '<img class="e" src="data:video/gif;base64,{0}">'.format(video_encoded2),        
-            video_tag3 = '<img class="f" src="data:video/gif;base64,{0}">'.format(video_encoded3)                    
-        ))
+    if cfg_par['plots']['movies']['movies_in_report'] == True:
+        template = env.get_template('full_template.html')
+        with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
+            lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+            f.write(template.render(
+                title=title,
+                fieldname=cfg_par['general']['fieldname'],
+                field=cfg_par['general']['field'],
+                totchans = int(cfg_par['rfi']['total_channels']),
+                chan_widths=round(cfg_par['rfi']['chan_widths']/1e3,4),
+                lowfreq=round(cfg_par['rfi']['lowfreq']/1e6,3),
+                highfreq=round(cfg_par['rfi']['highfreq']/1e6,3),
+                startdate = ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['startdate'].datetime)),
+                enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
+                nant = cfg_par['rfi']['nant'],
+                ant_names = cfg_par['rfi']['ant_names'],
+                maxbase = str(np.round(lenghts[0][-1],0)),
+                minbase = str(np.round(lenghts[0][0],0)),
+                totbase = cfg_par['rfi']['number_baseline'],
+                exptime = np.round(cfg_par['rfi']['exptime'],2),
+                polnum = cfg_par['rfi']['polnum'],
+                noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
+                img_tag1 = '<img class="a" src="data:image/png;base64,{0}">'.format(data_uri1),
+                video_tag1 = '<img class="b" src="data:video/gif;base64,{0}">'.format(video_encoded1),
+                img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),
+                #video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
+                video_tag2 = '<img class="e" src="data:video/gif;base64,{0}">'.format(video_encoded2),        
+                video_tag3 = '<img class="f" src="data:video/gif;base64,{0}">'.format(video_encoded3)                    
+            ))
+
+    elif cfg_par['plots']['movies']['movies_in_report'] == False:
+        template = env.get_template('fullshort_template.html')
+        with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
+            lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+            f.write(template.render(
+                title=title,
+                fieldname=cfg_par['general']['fieldname'],
+                field=cfg_par['general']['field'],
+                totchans = int(cfg_par['rfi']['total_channels']),
+                chan_widths=round(cfg_par['rfi']['chan_widths']/1e3,4),
+                lowfreq=round(cfg_par['rfi']['lowfreq']/1e6,3),
+                highfreq=round(cfg_par['rfi']['highfreq']/1e6,3),
+                startdate = ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['startdate'].datetime)),
+                enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
+                nant = cfg_par['rfi']['nant'],
+                ant_names = cfg_par['rfi']['ant_names'],
+                maxbase = str(np.round(lenghts[0][-1],0)),
+                minbase = str(np.round(lenghts[0][0],0)),
+                totbase = cfg_par['rfi']['number_baseline'],
+                exptime = np.round(cfg_par['rfi']['exptime'],2),
+                polnum = cfg_par['rfi']['polnum'],
+                noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
+                img_tag1 = '<img class="a" src="data:image/png;base64,{0}">'.format(data_uri1),
+                video_tag1 = '<img class="b" src="data:video/gif;base64,{0}">'.format(data_uri2),
+                img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),                 
+            ))
 
         print '\t+------+\n\t Html report done \n\t+------+'
 
@@ -311,7 +345,7 @@ def write_html_timereport(cfg_par):
 
     # Configure Jinja and ready the template
     env = Environment(
-        loader=FileSystemLoader('/home/maccagni/programs/RFInder/report_templates/')
+        loader=FileSystemLoader(cfg_par['general']['template_folder'])
     )
     template = env.get_template('time_template.html')
 
@@ -321,15 +355,23 @@ def write_html_timereport(cfg_par):
 
     #imagename1 = '/Users/maccagni/Projects/RFI/rfinder_test/rfi/plots/altaz/AltAZ_rfi1297-1317MHz.png'
     #data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
-
     video_name1 = cfg_par['general']['moviedir']+'AltAz_movie.gif'
-    video_encoded1 = open(video_name1, "rb").read().encode("base64")
-
+    if os.path.exists(video_name1):
+        video_encoded1 = open(video_name1, "rb").read().encode("base64")
+    else:
+        video_encoded1 = None
+    
     video_name2 = cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
-    video_encoded2 = open(video_name2, "rb").read().encode("base64")
+    if os.path.exists(video_name2):
+        video_encoded2 = open(video_name2, "rb").read().encode("base64")
+    else:
+        video_encoded1 = None
 
     video_name3 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise.gif'
-    video_encoded3 = open(video_name3, "rb").read().encode("base64")
+    if os.path.exists(video_name3):
+        video_encoded3 = open(video_name3, "rb").read().encode("base64")
+    else:
+        video_encoded3 = None
 
     with open(cfg_par['general']['rfidir']+'time_report.html', "w") as f:
         lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.

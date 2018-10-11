@@ -1,14 +1,15 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /home/maccagni/Projects/MFS/NGC1399/MeerKAT/msdir/ #full path to working directory
-    msname: ['ngc1399_20MHz.ms'] #name of input ms file
-    field: 0 #field ID of target of file
+    workdir: /Users/maccagni/Projects/MFS/FornaxA/MeerKAT/fa1/msdir/ #full path to working directory
+    outdir: /Users/maccagni/Projects/MFS/FornaxA/MeerKAT/fa1/msdir/ #full path to working directory
+    msname: ['fa1_conc.ms'] #name of input ms file
+    field: 1 #field ID of target of file
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold 
     enable: true #if True this module is enabled
-    RFInder_mode: 'rms_clip' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
-    telescope: 'apertif' #list of bad antennas: for no antennas try '[]'
+    RFInder_mode: 'use_flags' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
+    telescope: 'meerkat' #list of bad antennas: for no antennas try '[]'
     bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
     polarization: 'xx' #xx, yy, xy, yx, q (also in CAPS)
     rms_clip: 5 #Threshold for RFI identification
@@ -16,7 +17,7 @@ rfi:
     baseline_cut: 200 #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
     chunks:
         __helpstr: separate visibilities in small time intervals and/or larger spectral windows 
-        time_enable: true
+        time_enable: false
         time_step: 10 #time chunks in minutes
         spw_enable: true
         spw_width: 20 #channel width of rebinned output table [MHz]
@@ -32,6 +33,7 @@ plots:
     plot_long_short: True #plot all baselines, or only the short and the long
     movies:
         __helpstr: make movies of output plots
-        2d_gif: true 
-        1d_gif: true
-        altaz_gif: true
+        2d_gif: false 
+        1d_gif: false
+        altaz_gif: false
+        movies_in_report: false

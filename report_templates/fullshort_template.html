@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<style>
+    tab1 { padding-left: 2em; }
+    tabimage { padding-right: 3em; }
+    img.a{
+    	position:absolute;
+    	top: 75px;
+    	left: 580px;
+  		height:400px;
+  		width: 600px;
+  		font-family: Veranda;
+	}
+	img.b{
+    	position:absolute;
+    	top: 525px;
+    	left: 0px;
+  		height:372px;
+  		width: 585px;
+  		font-family: Veranda;
+  	}
+	img.c{
+    	position:absolute;
+    	top: 525px;
+    	left: 580px;
+  		height:372px;
+  		width: 585px;
+  		font-family: Veranda;
+  	}
+  	img.d{
+    	position:absolute;
+    	top: 900px;
+    	left: 0px;
+  		height:372px;
+  		width: 580px;
+  		font-family: Veranda;
+  	}
+  	img.e{
+    	position:absolute;
+    	top: 75px;
+    	left: 1200px;
+  		height:372px;
+  		width: 580px;
+  		font-family: Veranda;
+  	}
+  	img.f{
+    	position:absolute;
+    	top: 525;
+    	left: 1200px;
+  		height:372px;
+  		width: 580px;
+  		font-family: Veranda;
+  	}
+</style>
+<body>
+<h1>{{ title }}</h1>
+<h2>Observation specs</h2>
+<p><b>Field</b>: {{fieldname}} ( ID = {{field}})<br/>
+Start Date            = <tab1> {{startdate}}</tab1> {{img_tag1}}<br/>
+End   Date            = <tab1> {{enddate}} 	</tab1><br/><br/>
+<b> Spectral window </b><br/>
+Number of channels = <tab1> {{totchans}} </tab1> <br/>
+Channel Width [kHz]= <tab1> {{chan_widths}} </tab1><br/>
+Start Frequency  [MHz]= <tab1> {{lowfreq}}	</tab1><br/>
+End   Frequency  [MHz]= <tab1> {{highfreq}}	</tab1><br/><br/>
+<b> Antennas & Baselines </b> <br/>
+Number of Antennas = <tab1> {{nant}} </tab1><br/>
+Antenna Names = <tab1> {{ant_names}} </tab1><br/>
+Maximum baseline length [m] = <tab1> {{maxbase}} </tab1><br/>
+Minimum baseline length [m] = <tab1> {{minbase}} </tab1><br/>
+Total number of baselines   = <tab1> {{totbase}} </tab1><br/><br/>
+<b> Natural noise predictions </b> <br/>
+Observing time on source       = {{exptime}} hours for {{polnum}} polarizations <br/>
+Stokes I natural r.m.s. [mJy/b]= {{noise}} <br/>
+{{video_tag1}} {{img_tag3}}<br/>
+<br/>
+<br/><br/>
+RFInder automatically generated this report.
+</p>
+
+</html>

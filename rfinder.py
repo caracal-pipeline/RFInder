@@ -16,8 +16,8 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-#sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
-sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
+sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
+#sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
 #sys.path.append('/data/maccagni/RFInder/RFInder_modules/')
 
 import rfi 
@@ -73,14 +73,14 @@ class rfinder:
             cfg = open(file)
 
         else:
-            #file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
-            file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
+            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
+            #file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
             #file_default = '/data/maccagni/RFInder/rfinder_default.yml'
 
             cfg = open(file_default) 
 
         self.cfg_par = yaml.load(cfg)
-    
+        self.cfg_par['general']['template_folder'] = '/Users/maccagni/notebooks/rfinder/report_templates/'
         self.set_dirs()
 
 
@@ -110,7 +110,8 @@ class rfinder:
         self.msfile = self.workdir + self.cfg_par[key].get('msname', None)[0]
         self.cfg_par[key]['msfullpath'] = self.msfile      
 
-        self.rfidir  = self.workdir+'rfi_xx/'
+        self.outdir  = self.cfg_par[key].get('outdir', None)
+        self.rfidir  = self.outdir+'rfi_'+self.cfg_par['rfi']['polarization']+'/'
         self.cfg_par[key]['rfidir'] = self.rfidir
 
         self.rfifile = self.rfidir+'rfi_flagged_vis.MS'
