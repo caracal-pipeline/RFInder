@@ -824,7 +824,7 @@ class rfi_plots:
         ax_centre.set_xticks([-180,-135,-90,-45,0,45,90,135,180])        
         ax_centre.set_yticks([])
 
-        asse = ax_centre.scatter(azimuth,altitude,c='black',s=100,linewidth=0.5,edgecolors='black',label=r'${0:s}$'.format(cfg_par['general']['fieldname'])
+        asse = ax_centre.scatter(azimuth,altitude,c='black',s=100,linewidth=0.5,edgecolors='black',label=r'${0:s}$'.format(cfg_par['general']['fieldname']))
 
         azs=np.arange(-180.,181.,45.)
         als=np.arange(0.,91.,1.)
