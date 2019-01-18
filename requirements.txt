@@ -1,6 +1,5 @@
 astropy
 ffmpeg
-json
 numpy
 pyaml
 scipy
