@@ -35,7 +35,7 @@ These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show th
 - **beam_shape** uses [`wsclean`] option `wcclean --psf-only`. Instructions to download and install `wsclean` [(Offringa et al. 2014)](https://arxiv.org/abs/1407.1943) can be found [here](https://sourceforge.net/projects/wsclean/).
 
 **Insallation instructions**
-- To install from source clone this repository. From terminal type:
+To install from source clone this repository. From terminal type:
 
 ```
 git clone https://github.com/Fil8/RFInder.git
