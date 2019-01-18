@@ -8,29 +8,18 @@ The main function of `rfinder` is to identify the presence of RFI in an observat
 
 These are the available functions:
 
-- visualize the presence of RFI per frequency channel and baseline lenght.
+- visualize the presence of RFI per frequency channel and baseline length.
 - visualize the percentage flagged visibilities due to RFI per frequency channel. 
 - visualize the increase in noice due to RFI per frequency channel.
 - estimate the shape of the PSF after flagging of RFI.
 
-check out the `WiKi` for a complete illustration of `RFInder`.
+check out the [WiKi](https://github.com/Fil8/RFInder/wiki) for a complete illustration of `RFInder`.
 
 ***
 ### Usage
 
 All `rfinder` can be run in an automated way as `python rfi_pipeline.py <path_to_parameter_file.yml>`, or via an `IPython`
 [notebook](https://github.com/Fil8/RFInder/blob/master/tutorials/T2_rfinder_automated.ipynb). Commands and options of `RFInder` must be specified in a `.yml` [parameter file](https://github.com/Fil8/RFInder/wiki/Parameter-file)
-
-To call `RFInder` as `rfinder` from anywhere in your shell (using the parameters stored in `rfinder_default.yml`) add the following lines to your `.cshrc/.bashrc` file:
-
-```
-setenv RFI '<path_to_rfinder_pipeline.py>'
-alias rfinder 'python $RFI/rfi_pipeline.py $RFI/rfinder_default.yml'
-
-export RFI="path_to_rfinder_pipeline.py>:$RFI"
-alias rfinder='python $RFI/rfi_pipeline.py $RFI/rfinder_default.yml'
-
-```
 
 These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show the different capabilities of `rfinder`.
 
@@ -46,21 +35,28 @@ These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show th
 - **beam_shape** uses [`wsclean`] option `wcclean --psf-only`. Instructions to download and install `wsclean` [(Offringa et al. 2014)](https://arxiv.org/abs/1407.1943) can be found [here](https://sourceforge.net/projects/wsclean/).
 
 **Insallation instructions**
-- Clone this repository. From terminal type:
+- To install from source clone this repository. From terminal type:
 
 ```
 git clone https://github.com/Fil8/RFInder.git
 ```
 
-- add `rfinder` directory to `PYTHONPATH` (for permanent use save it in your `.cshrc_profile`, or `.bash_profile`, respectively)
+Then run:
 
 ```
-setenv PYTHONPATH $path_to_rfindser:${PYTHONPATH}
-
-export PYTHONPATH=$PYTHONPATH:path_to_rfinder
+pip install .
 ```
 
-- change path at `line16` of `rfinder.py` as follows: `sys.path.append('/path-to-rfinder/RFInder_modules/')` 
- 
+This package will soon be available on PYPI, allowing:
+
+```
+pip install rfinder
+```
+
+**License**
+
+This project is licensed under the GNU General Public License v3.0 - see [license](https://github.com/Fil8/RFInder/blob/master/LICENSE.md) for details.
+
+
  ***
  <p>&copy <sub> Filippo M. Maccagni 2018 </sub></p>
