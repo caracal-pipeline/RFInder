@@ -77,12 +77,12 @@ class rfinder:
             cfg = open(file)
 
         else:
-            file_default = ('{:s}{:s}'.format(RFINDER_PATH, DEFAULT_CONFIG))
+            file_default = os.path.join(RFINDER_PATH, DEFAULT_CONFIG)
 
             cfg = open(file_default)
 
         self.cfg_par = yaml.load(cfg)
-        self.cfg_par['general']['template_folder'] = ('{:s}report_templates'.format(RFINDER_PATH))
+        self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'report_templates')
         self.set_dirs()
 
     def enable_task(self, config, task):
