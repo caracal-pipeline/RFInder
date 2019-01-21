@@ -32,6 +32,7 @@ These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show th
 - The parameter file is in `yaml` format, hence [`pyaml`](https://anaconda.org/anaconda/pyyaml), and [`json`](https://anaconda.org/conda-forge/json-c) packages should be installed,
 - The `logging` module is used to print out warnings.
 - `.gif` file of multiple plots can be created if `ffmpeg` is installed.
+- `casacore` is utilized to open casa tables.
 - **beam_shape** uses [`wsclean`] option `wcclean --psf-only`. Instructions to download and install `wsclean` [(Offringa et al. 2014)](https://arxiv.org/abs/1407.1943) can be found [here](https://sourceforge.net/projects/wsclean/).
 
 **Insallation instructions**
@@ -44,7 +45,7 @@ git clone https://github.com/Fil8/RFInder.git
 Then run:
 
 ```
-pip install .
+cd RFInder && pip install .
 ```
 
 This package will soon be available on PYPI, allowing:
