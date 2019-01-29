@@ -1,6 +1,9 @@
 astropy
 ffmpeg
 imageio
+ipython
+jinja2
+matplotlib
 numpy
 pyaml
 scipy
