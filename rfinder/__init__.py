@@ -18,7 +18,7 @@ import warnings
 
 # get rfinder install directory
 RFINDER_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(os.path.join(RFINDER_PATH, 'RFInder_modules'))
+sys.path.append(os.path.join(RFINDER_PATH, 'rfinder'))
 
 import rfi
 import rfinder_stats as rfi_stats
