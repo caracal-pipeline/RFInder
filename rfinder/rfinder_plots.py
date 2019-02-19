@@ -3,8 +3,8 @@ import numpy as np
 
 import matplotlib
 # Make matplotlib not choose Xwindows backend by default
-matplotlib.use('Agg')
-matplotlib.rcParams['text.usetex'] = True
+#matplotlib.use('Agg')
+#matplotlib.rcParams['text.usetex'] = True
 
 from astropy import units as u
 
