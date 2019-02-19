@@ -1,7 +1,7 @@
 astropy
 ffmpeg
 imageio
-ipython
+ipython==5.8.0
 jinja2
 matplotlib==2.2.3
 numpy
