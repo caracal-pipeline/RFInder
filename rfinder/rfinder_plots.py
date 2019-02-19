@@ -4,8 +4,7 @@ import numpy as np
 import matplotlib
 # Make matplotlib not choose Xwindows backend by default
 matplotlib.use('Agg')
-pgf_with_rc_fonts = {"pgf.texsystem": "pdflatex"}
-matplotlib.rcParams.update(pgf_with_rc_fonts)
+matplotlib.rcParams['text.usetex'] = True
 
 from astropy import units as u
 
