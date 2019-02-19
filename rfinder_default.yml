@@ -7,7 +7,7 @@ general:
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold
-    enable: true #if True this module is enabled
+    rfi_enable: true #if True this module is enabled
     RFInder_mode: 'rms_clip' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
     telescope: 'apertif' #list of bad antennas: for no antennas try '[]'
     bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
@@ -28,7 +28,7 @@ beam_shape:
 
 plots:
     __helpstr: plot rfi over different axes
-    enable: true
+    plot_enable: true
     plot_noise: 'rfi' #choose to plot % of RFI, 'rfi', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
     plot_long_short: True #plot all baselines, or only the short and the long
     movies:

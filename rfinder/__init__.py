@@ -83,14 +83,6 @@ class rfinder:
         self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'report_templates')
         self.set_dirs()
 
-    def enable_task(self, config, task):
-
-        a = config.get(task, False)
-        if a:
-            return a['enable']
-        else:
-            False
-
     def set_dirs(self):
         '''
      
@@ -203,7 +195,7 @@ class rfinder:
         task = 'rfi'
         self.logger.info(" ------ STARTING RFI analysis ------\n")
 
-        if self.enable_task(self.cfg_par,task)==True:
+        if self.cfg_par[task]['rfi_enable']==True:
             
             if self.cfg_par[task]['chunks']['time_enable']==True:
 
@@ -264,7 +256,7 @@ class rfinder:
                 self.logger.info(" ------ End of RFI analysis  ------\n")
       
         task = 'plots'
-        if self.enable_task(self.cfg_par,task) == True:
+        if self.cfg_par[task]['plot_enable']==True:
             
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
@@ -286,7 +278,7 @@ class rfinder:
                     self.logger.info((" ------ Plotting chunk #{0:d}:").format(i))
                     self.logger.info(("\t \t between {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}").format(start.datetime,end.datetime))
 
-                    if self.enable_task(self.cfg_par,'rfi')==False:
+                    if self.cfg_par['rfi']['rfi_enable']==False:
 
                         results = rfi.load_from_ms(self.cfg_par,timez)
                         self.logger.info("---- MSfile Loaded -----\n")    
@@ -356,7 +348,7 @@ class rfinder:
 
             else:
                 
-                if self.enable_task(self.cfg_par,'rfi')==False:
+                if self.cfg_par['rfi']['rfi_enable']==False:
 
                     results = rfi.load_from_ms(self.cfg_par,0)
                     self.logger.info("---- MSfile Loaded -----\n")    
@@ -383,20 +375,6 @@ class rfinder:
 
                 rfi_files.write_html_fullreport(self.cfg_par)
 
-
-
-
-        task = 'beam_shape'
-        if self.enable_task(self.cfg_par,task) == True:
-            rfi.rfi_flag(self.cfg_par)
-            rfi_beam.make_psf(self.cfg_par)
         self.logger.info(" ------ End of RFInder ------ \n\n")
 
-    
         return 0
-
-
-
-
-
-
