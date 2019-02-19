@@ -2,6 +2,8 @@ import os,string,sys, glob
 import numpy as np
 
 import matplotlib
+# Make matplotlib not choose Xwindows backend by default
+matplotlib.use('Agg')
 from astropy import units as u
 
 from matplotlib import gridspec
@@ -27,9 +29,6 @@ import rfi
 rfi = rfi.rfi()
 import rfinder_stats as rfi_stats
 rfiST = rfi_stats.rfi_stats()
-
-# Make matplotlib not choose Xwindows backend by default
-matplotlib.use('Agg')
 
 
 class rfi_plots:
