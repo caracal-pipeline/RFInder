@@ -25,11 +25,15 @@ import logging
 
 import rfi
 rfi = rfi.rfi()
-import rfinder_stats as rfi_stats 
+import rfinder_stats as rfi_stats
 rfiST = rfi_stats.rfi_stats()
 
+# Make matplotlib not choose Xwindows backend by default
+matplotlib.use('Agg')
+
+
 class rfi_plots:
-    
+
     def __init__(self):
 
 
