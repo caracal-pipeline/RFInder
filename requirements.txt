@@ -3,7 +3,7 @@ ffmpeg
 imageio
 ipython
 jinja2
-matplotlib
+matplotlib==2.2.3
 numpy
 pyaml
 scipy
