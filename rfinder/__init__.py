@@ -80,7 +80,7 @@ class rfinder:
             cfg = open(file_default)
 
         self.cfg_par = yaml.load(cfg)
-        self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'report_templates')
+        self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
         self.set_dirs()
 
     def set_dirs(self):
