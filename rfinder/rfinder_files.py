@@ -3,7 +3,7 @@ import numpy as np
 from astropy.io import fits as fits
 from astropy import units as u
 from jinja2 import FileSystemLoader, Environment
-
+import shutil
 import rfinder_stats as rfi_stats 
 rfiST = rfi_stats.rfi_stats()
 
@@ -339,7 +339,7 @@ def write_html_fullreport(cfg_par):
                 img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),                 
             ))
 
-        print '\t+------+\n\t Html report done \n\t+------+'
+        logger.info('---- Html report done ----\n')
 
         return 0
 
@@ -375,34 +375,42 @@ def write_html_timereport(cfg_par):
     else:
         video_encoded3 = None
 
-    with open(cfg_par['general']['rfidir']+'time_report.html', "w") as f:
-        lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
-        f.write(template.render(
-            title=title,
-            fieldname=cfg_par['general']['fieldname'],
-            field=cfg_par['general']['field'],
-            totchans = int(cfg_par['rfi']['total_channels']),
-            chan_widths=round(cfg_par['rfi']['chan_widths']/1e3,4),
-            lowfreq=round(cfg_par['rfi']['lowfreq']/1e6,3),
-            highfreq=round(cfg_par['rfi']['highfreq']/1e6,3),
-            startdate = ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['startdate'].datetime)),
-            enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
-            nant = cfg_par['rfi']['nant'],
-            ant_names = cfg_par['rfi']['ant_names'],
-            maxbase = str(np.round(lenghts[0][-1],0)),
-            minbase = str(np.round(lenghts[0][0],0)),
-            totbase = cfg_par['rfi']['number_baseline'],
-            exptime = np.round(cfg_par['rfi']['exptime']*60.,2),
-            polnum = cfg_par['rfi']['polnum'],
-            noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
-            video_tag1 = '<img class="b" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
-            video_tag2 = '<img class="a" src="data:video/gif;base64,{0}">'.format(video_encoded2),        
-            video_tag3 = '<img class="c" src="data:video/gif;base64,{0}">'.format(video_encoded3)                    
-        ))
+    if cfg_par['plots']['movies']['movies_in_report'] == True:
 
-        print '\t+------+\n\t Html report done \n\t+------+'
+        with open(cfg_par['general']['rfidir']+'time_report.html', "w") as f:
+            lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+            f.write(template.render(
+                title=title,
+                fieldname=cfg_par['general']['fieldname'],
+                field=cfg_par['general']['field'],
+                totchans = int(cfg_par['rfi']['total_channels']),
+                chan_widths=round(cfg_par['rfi']['chan_widths']/1e3,4),
+                lowfreq=round(cfg_par['rfi']['lowfreq']/1e6,3),
+                highfreq=round(cfg_par['rfi']['highfreq']/1e6,3),
+                startdate = ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['startdate'].datetime)),
+                enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
+                nant = cfg_par['rfi']['nant'],
+                ant_names = cfg_par['rfi']['ant_names'],
+                maxbase = str(np.round(lenghts[0][-1],0)),
+                minbase = str(np.round(lenghts[0][0],0)),
+                totbase = cfg_par['rfi']['number_baseline'],
+                exptime = np.round(cfg_par['rfi']['exptime']*60.,2),
+                polnum = cfg_par['rfi']['polnum'],
+                noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
+                video_tag1 = '<img class="b" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
+                video_tag2 = '<img class="a" src="data:video/gif;base64,{0}">'.format(video_encoded2),        
+                video_tag3 = '<img class="c" src="data:video/gif;base64,{0}">'.format(video_encoded3)                    
+            ))
+
+    elif cfg_par['plots']['movies']['movies_in_report'] == False:
+
+        logger.info('\t ERROR:  movies in report must be set to TRUE\n')
 
         return 0
+
+    logger.info('---- Html time report done ----\n')
+
+    return 0
 
 def find_altaz_plots(cfg_par):
     
@@ -455,6 +463,7 @@ def find_1d_plots(cfg_par,name_root):
 
     #select files
     filenames = glob.glob(cfg_par['general']['timeplotdir1D']+'/'+name_root+'_*')
+    #print filenames 
 
     tmp_arr=[]
 
@@ -472,11 +481,31 @@ def find_1d_plots(cfg_par,name_root):
     tmp = filenames[0].split(name_root+'_')
 
     filenames = [tmp[0]+name_root+'_' + s for s in tmp_arr]
-    if cfg_par['rfi']['RFInder_mode']=='use_flags':
-        filenames = [s + 'm_sl_flags.png' for s in filenames] 
-    elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
-        filenames = [s + 'm_sl_rfi.png' for s in filenames] 
+    #if cfg_par['rfi']['RFInder_mode']=='use_flags':
+    #    filenames = [s + 'm_sl_flags.png' for s in filenames] 
+    #elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
+    #    filenames = [s + 'm_sl_rfi.png' for s in filenames] 
+    
+    #print filenames
 
     return filenames
 
+def cleanup(cfg_par):
+
+    key = 'general'
+
+    if os.path.exists(cfg_par[key]['plotdir']):
+        shutil.rmtree(cfg_par[key]['plotdir'])
+    
+    if os.path.exists(cfg_par[key]['tabledir']):
+        shutil.rmtree(cfg_par[key]['tabledir'])
+
+    if 'rfitimedir' in cfg_par[key]:
+        shutil.rmtree(cfg_par[key]['rfitimedir'])
+
+    fitsname = glob.glob(cfg_par[key]['rfidir']+'*.fits')
+
+    if len(fitsname)>0:
+        for i in xrange(0,len(fitsname)):
+            os.remove(fitsname[i])
 

@@ -1,7 +1,7 @@
-#!/usr/bin/env python
-
 # Import modules
-import sys, string, os
+import os
+import sys
+import string
 import numpy as np
 import yaml
 import json
@@ -16,11 +16,11 @@ from astropy.table import Table, Column, MaskedColumn
 
 import warnings
 
-sys.path.append('/Users/maccagni/notebooks/rfinder/RFInder_modules/')
-#sys.path.append('/home/maccagni/programs/RFInder/RFInder_modules/')
-#sys.path.append('/data/maccagni/RFInder/RFInder_modules/')
+# get rfinder install directory
+RFINDER_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(os.path.join(RFINDER_PATH, 'rfinder'))
 
-import rfi 
+import rfi
 import rfinder_stats as rfi_stats
 import rfinder_plots as rfi_plots
 import rfinder_files as rfi_files
@@ -30,67 +30,58 @@ rfiST = rfi_stats.rfi_stats()
 rfiPL = rfi_plots.rfi_plots()
 
 
-__author__ = "Filippo Maccagni, Tom Oosterloo, Paolo Serra"
+__author__ = "Filippo Maccagni, Tom Oosterloo, Athananasues Ramaila, Paolo Serra"
 __copyright__ = "Apertif, MFS"
 __version__ = "1.0.0"
 __email__ = "filippo.maccagni@gmail.com"
 __status__ = "Development"
 
 
+DEFAULT_CONFIG = 'rfinder_default.yml'
 
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
 ####################################################################################################
 
+
 class rfinder:
     '''
-    
+
     Class to investigate the RFI behaviour during observations
 
     '''
 
-    C=2.99792458e5 #km/s
-    HI=1.420405751e9 #Hz
+    C = 2.99792458e5  # km/s
+    HI = 1.420405751e9  # Hz
 
     def __init__(self, file=None):
         '''
-    
+
         Set self.logger for spectrum extraction
         Find config file
         If not specified by user load rfinder_default.yml
-    
+
         '''
 
-        #set self.logger
+        # set self.logger
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
         self.logger.info('\t ... Reading parameter file ... \n')
         # read database here
 
-        if file != None:
+        if file is not None:
             cfg = open(file)
 
         else:
-            file_default = '/Users/maccagni/notebooks/RFInder/rfinder_default.yml'
-            #file_default = '/home/maccagni/programs/RFInder/rfinder_default.yml'
-            #file_default = '/data/maccagni/RFInder/rfinder_default.yml'
+            file_default = os.path.join(RFINDER_PATH, DEFAULT_CONFIG)
 
-            cfg = open(file_default) 
+            cfg = open(file_default)
 
         self.cfg_par = yaml.load(cfg)
-        self.cfg_par['general']['template_folder'] = '/Users/maccagni/notebooks/rfinder/report_templates/'
+        self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
         self.set_dirs()
-
-
-    def enable_task(self,config,task):
-
-        a = config.get(task, False)
-        if a:
-            return a['enable']
-        else:
-            False
 
     def set_dirs(self):
         '''
@@ -113,7 +104,6 @@ class rfinder:
         self.outdir  = self.cfg_par[key].get('outdir', None)
         self.rfidir  = self.outdir+'rfi_'+self.cfg_par['rfi']['polarization']+'/'
         self.cfg_par[key]['rfidir'] = self.rfidir
-
         self.rfifile = self.rfidir+'rfi_flagged_vis.MS'
         self.rfi_freq_base = self.rfidir+'freq_base.fits'
         self.rfimsfile = self.rfidir+'rfi_flagged.MS'
@@ -204,7 +194,7 @@ class rfinder:
         task = 'rfi'
         self.logger.info(" ------ STARTING RFI analysis ------\n")
 
-        if self.enable_task(self.cfg_par,task)==True:
+        if self.cfg_par[task]['rfi_enable']==True:
             
             if self.cfg_par[task]['chunks']['time_enable']==True:
 
@@ -265,7 +255,7 @@ class rfinder:
                 self.logger.info(" ------ End of RFI analysis  ------\n")
       
         task = 'plots'
-        if self.enable_task(self.cfg_par,task) == True:
+        if self.cfg_par[task]['plot_enable']==True:
             
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
@@ -287,7 +277,7 @@ class rfinder:
                     self.logger.info((" ------ Plotting chunk #{0:d}:").format(i))
                     self.logger.info(("\t \t between {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}").format(start.datetime,end.datetime))
 
-                    if self.enable_task(self.cfg_par,'rfi')==False:
+                    if self.cfg_par['rfi']['rfi_enable']==False:
 
                         results = rfi.load_from_ms(self.cfg_par,timez)
                         self.logger.info("---- MSfile Loaded -----\n")    
@@ -357,7 +347,7 @@ class rfinder:
 
             else:
                 
-                if self.enable_task(self.cfg_par,'rfi')==False:
+                if self.cfg_par['rfi']['rfi_enable']==False:
 
                     results = rfi.load_from_ms(self.cfg_par,0)
                     self.logger.info("---- MSfile Loaded -----\n")    
@@ -384,20 +374,10 @@ class rfinder:
 
                 rfi_files.write_html_fullreport(self.cfg_par)
 
+        self.logger.info(" ---- cleaning up ---- \n")
 
+        rfi_files.cleanup(self.cfg_par)
 
+        self.logger.info(" ---- End of RFInder ---- \n\n")
 
-        task = 'beam_shape'
-        if self.enable_task(self.cfg_par,task) == True:
-            rfi.rfi_flag(self.cfg_par)
-            rfi_beam.make_psf(self.cfg_par)
-        self.logger.info(" ------ End of RFInder ------ \n\n")
-
-    
         return 0
-
-
-
-
-
-

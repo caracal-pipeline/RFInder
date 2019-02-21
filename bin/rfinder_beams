@@ -1,0 +1,38 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import glob
+import string
+import numpy as np
+
+import rfinder as rfinder
+import logging
+
+
+file = sys.argv[1]
+cfg = open(file)
+
+# set self.logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+logger.info('\t+------+ Starting beam analysis +------+ \n')
+
+filenames = glob.glob(rfi_par.cfg_par['general']['workdir']+'/*.MS')
+
+for i in xrange(0, len(filenames)):
+    filenames_tmp = string.split(filenames[i], '_')
+    filenames_tmp = string.split(filenames_tmp[1], '.MS')
+
+    rfi_par = rfinder.rfinder(file)
+    rfi_par.cfg_par['general']['msname'] = filenames[i]
+    run = rfi_par.go(rfi_par.cfg_par)
+
+    os.rename(rfi_par.cfg_par['general']['rfidir'],
+              rfi_par.cfg_par['general']['workdir']+'rfi_'+filenames_tmp[0])
+
+    if run == 0:
+        logger.info(('\t+------+\n\t Beam Done \n\t+------+')
+
+logger.info('\t+------+\n\t All beams Done \n\t+------+')

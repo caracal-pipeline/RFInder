@@ -2,6 +2,8 @@ import os,string,sys, glob
 import numpy as np
 
 import matplotlib
+matplotlib.rcParams['text.usetex'] = True
+
 from astropy import units as u
 
 from matplotlib import gridspec
@@ -25,11 +27,12 @@ import logging
 
 import rfi
 rfi = rfi.rfi()
-import rfinder_stats as rfi_stats 
+import rfinder_stats as rfi_stats
 rfiST = rfi_stats.rfi_stats()
 
+
 class rfi_plots:
-    
+
     def __init__(self):
 
 
