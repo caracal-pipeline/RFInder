@@ -33,6 +33,6 @@ for i in xrange(0, len(filenames)):
               rfi_par.cfg_par['general']['workdir']+'rfi_'+filenames_tmp[0])
 
     if run == 0:
-        print('\t+------+\n\t Beam Done \n\t+------+')
+        logger.info(('\t+------+\n\t Beam Done \n\t+------+')
 
-print('\t+------+\n\t All beams Done \n\t+------+')
+logger.info('\t+------+\n\t All beams Done \n\t+------+')
