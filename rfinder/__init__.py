@@ -29,14 +29,6 @@ rfi = rfi.rfi()
 rfiST = rfi_stats.rfi_stats()
 rfiPL = rfi_plots.rfi_plots()
 
-
-__author__ = "Filippo Maccagni, Tom Oosterloo, Athananasues Ramaila, Paolo Serra"
-__copyright__ = "Apertif, MFS"
-__version__ = "1.0.0"
-__email__ = "filippo.maccagni@gmail.com"
-__status__ = "Development"
-
-
 DEFAULT_CONFIG = 'rfinder_default.yml'
 
 if not sys.warnoptions:
