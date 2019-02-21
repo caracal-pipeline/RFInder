@@ -104,7 +104,6 @@ class rfinder:
         self.outdir  = self.cfg_par[key].get('outdir', None)
         self.rfidir  = self.outdir+'rfi_'+self.cfg_par['rfi']['polarization']+'/'
         self.cfg_par[key]['rfidir'] = self.rfidir
-        print self.cfg_par[key]['rfidir']
         self.rfifile = self.rfidir+'rfi_flagged_vis.MS'
         self.rfi_freq_base = self.rfidir+'freq_base.fits'
         self.rfimsfile = self.rfidir+'rfi_flagged.MS'
@@ -375,10 +374,10 @@ class rfinder:
 
                 rfi_files.write_html_fullreport(self.cfg_par)
 
-        self.logger.info(" ------ cleaning up ------ \n\n")
+        self.logger.info(" ---- cleaning up ---- \n")
 
         rfi_files.cleanup(self.cfg_par)
 
-        self.logger.info(" ------ End of RFInder ------ \n\n")
+        self.logger.info(" ---- End of RFInder ---- \n\n")
 
         return 0

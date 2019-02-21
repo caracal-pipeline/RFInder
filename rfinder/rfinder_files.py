@@ -339,7 +339,7 @@ def write_html_fullreport(cfg_par):
                 img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),                 
             ))
 
-        logger.info('\t+------+\n\t Html report done \n\t+------+')
+        logger.info('---- Html report done ----\n')
 
         return 0
 
@@ -404,11 +404,11 @@ def write_html_timereport(cfg_par):
 
     elif cfg_par['plots']['movies']['movies_in_report'] == False:
 
-        logger.info('\t ...  movies in report must be set to TRUE ...')
+        logger.info('\t ERROR:  movies in report must be set to TRUE\n')
 
         return 0
 
-    logger.info('----\t Html report done \t----')
+    logger.info('---- Html time report done ----\n')
 
     return 0
 
@@ -500,10 +500,12 @@ def cleanup(cfg_par):
     if os.path.exists(cfg_par[key]['tabledir']):
         shutil.rmtree(cfg_par[key]['tabledir'])
 
-    if os.path.exists(cfg_par[key]['rfitimedir']):
+    if 'rfitimedir' in cfg_par[key]:
         shutil.rmtree(cfg_par[key]['rfitimedir'])
 
     fitsname = glob.glob(cfg_par[key]['rfidir']+'*.fits')
 
-    os.remove(fitsname[0])
+    if len(fitsname)>0:
+        for i in xrange(0,len(fitsname)):
+            os.remove(fitsname[i])
 
