@@ -1,8 +1,38 @@
 # RFInder
 
+**Insallation instructions**
 
-This is a set of tools that have been developed in preparation of the [Apertif surveys](
-https://www.astron.nl/astronomy-group/apertif/science-projects/apertif-science-projects).
+```
+pip install rfinder
+```
+
+To create a local repository, type:
+
+```
+git clone https://github.com/Fil8/RFInder
+```
+
+***
+
+**Requisites**
+
+For a successfull installation make sure to have installed the following packages.
+
+- RFInder makes use of the most common `python` packages (e.g. `numpy`, `scipy`, `astropy`). 
+- The parameter file is in `yaml` format, hence [`pyaml`](https://anaconda.org/anaconda/pyyaml), and [`json`](https://anaconda.org/conda-forge/json-c) packages should be installed,
+- The `logging` module is used to print out warnings.
+- `.gif` file of multiple plots can be created if `ffmpeg` is installed.
+- `casacore` is utilized to open casa tables.
+- `texmaker` to plot latex fancy formulae
+- `dvipng`
+- `python tk`
+
+
+
+***
+### Description
+
+This is a set of tools that have been developed in preparation of the Apertif & MeerKAT surveys.
 
 The main function of `rfinder` is to identify the presence of RFI in an observation and visualize it according to different parameters.
 
@@ -18,41 +48,11 @@ check out the [WiKi](https://github.com/Fil8/RFInder/wiki) for a complete illust
 ***
 ### Usage
 
-All `rfinder` can be run in an automated way as `python rfi_pipeline.py <path_to_parameter_file.yml>`, or via an `IPython`
-[notebook](https://github.com/Fil8/RFInder/blob/master/tutorials/T2_rfinder_automated.ipynb). Commands and options of `RFInder` must be specified in a `.yml` [parameter file](https://github.com/Fil8/RFInder/wiki/Parameter-file)
+`rfinder rfinder_default.yml`
+
+Commands and options of `RFInder` are specified in the yaml file
 
 These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show the different capabilities of `rfinder`.
-
-***
-
-### Installation
-
-**Requisites**
-- RFInder makes use of the most common `python` packages (e.g. `numpy`, `scipy`, `astropy`). 
-- The parameter file is in `yaml` format, hence [`pyaml`](https://anaconda.org/anaconda/pyyaml), and [`json`](https://anaconda.org/conda-forge/json-c) packages should be installed,
-- The `logging` module is used to print out warnings.
-- `.gif` file of multiple plots can be created if `ffmpeg` is installed.
-- `casacore` is utilized to open casa tables.
-- **beam_shape** uses [`wsclean`] option `wcclean --psf-only`. Instructions to download and install `wsclean` [(Offringa et al. 2014)](https://arxiv.org/abs/1407.1943) can be found [here](https://sourceforge.net/projects/wsclean/).
-
-**Insallation instructions**
-To install from source clone this repository. From terminal type:
-
-```
-git clone https://github.com/Fil8/RFInder.git
-```
-
-Then run:
-
-```
-cd RFInder && pip install .
-```
-
-This package will soon be available on PYPI, allowing:
-
-```
-pip install rfinder
-```
 
 **License**
 
