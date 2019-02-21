@@ -17,10 +17,10 @@ def requirements():
     """Get package requirements"""
     with open(os.path.join(build_root, 'requirements.txt')) as f:
         return [pname.strip() for pname in f.readlines()]
-
+__version__ = "1.0.1"
 
 setup(name=pkg,
-      version="1.0.0",
+      version=__version__,
       description="A tool to identify the presence of RFI in an observation and visualize it",
       long_description=readme(),
       author="Filippo Marcello Maccagni",
