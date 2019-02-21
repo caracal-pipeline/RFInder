@@ -30,7 +30,7 @@ For a successfull installation make sure to have installed the following package
 
 
 ***
-### Description
+**Description**
 
 This is a set of tools that have been developed in preparation of the Apertif & MeerKAT surveys.
 
@@ -46,7 +46,7 @@ These are the available functions:
 check out the [WiKi](https://github.com/Fil8/RFInder/wiki) for a complete illustration of `RFInder`.
 
 ***
-### Usage
+**Usage**
 
 `rfinder rfinder_default.yml`
 
