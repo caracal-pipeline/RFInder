@@ -54,6 +54,8 @@ Commands and options of `RFInder` are specified in the yaml file
 
 These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show the different capabilities of `rfinder`.
 
+***
+
 **License**
 
 This project is licensed under the GNU General Public License v3.0 - see [license](https://github.com/Fil8/RFInder/blob/master/LICENSE.md) for details.
