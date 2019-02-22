@@ -17,6 +17,7 @@ def requirements():
     """Get package requirements"""
     with open(os.path.join(build_root, 'requirements.txt')) as f:
         return [pname.strip() for pname in f.readlines()]
+
 __version__ = "1.0.2"
 
 setup(name=pkg,
@@ -27,7 +28,10 @@ setup(name=pkg,
       author_email="filippo.maccagni@gmail.com",
       packages=find_packages(),
       include_package_data=True,
-      package_data={'': ['rfinder_default.yml']},
+      package_data={
+          '': ['rfinder_default.yml'],
+          'rfinder': ['templates/*.html']
+      },
       url="https://github.com/Fil8/RFInder",
       license="GNU GPL 3",
       classifiers=["Intended Audience :: Developers",
