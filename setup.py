@@ -29,8 +29,8 @@ setup(name=pkg,
       packages=find_packages(),
       include_package_data=True,
       package_data={
-          '': ['rfinder_default.yml'],
-          'rfinder': ['templates/*.html']
+          'rfinder': ['rfinder_default.yml',
+                      'templates/*.html']
       },
       url="https://github.com/Fil8/RFInder",
       license="GNU GPL 3",
