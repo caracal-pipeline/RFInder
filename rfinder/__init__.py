@@ -6,6 +6,9 @@ import numpy as np
 import yaml
 import json
 import glob
+import argparse
+from  argparse import ArgumentParser
+import textwrap as _textwrap
 
 import logging
 
@@ -34,8 +37,32 @@ DEFAULT_CONFIG = 'rfinder_default.yml'
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
+
+import pkg_resources
+
+try:
+    __version__ = pkg_resources.require("rfinder")[0].version
+except pkg_resources.DistributionNotFound:
+    __version__ = "dev"
+
 ####################################################################################################
 
+class MultilineFormatter(argparse.HelpFormatter):
+    def _fill_text(self, text, width, indent):
+        text = self._whitespace_matcher.sub(' ', text).strip()
+        paragraphs = text.split('|n ')
+        multiline_text = ''
+        for paragraph in paragraphs:
+            formatted_paragraph = _textwrap.fill(paragraph, width, initial_indent=indent, subsequent_indent=indent) + '\n\n'
+            multiline_text = multiline_text + formatted_paragraph
+        return multiline_text
+
+
+def is_valid_file(parser, arg):
+    if not os.path.exists(arg):
+        parser.error("The file '%s' does not exist!" % arg)
+
+    return arg
 
 class rfinder:
     '''
@@ -60,20 +87,22 @@ class rfinder:
         logging.basicConfig(level=logging.INFO)
         self.logger = logging.getLogger(__name__)
 
-        self.logger.info('\t ... Reading parameter file ... \n')
+        #self.logger.info('\t ... Reading parameter file ... \n')
         # read database here
 
-        if file is not None:
-            cfg = open(file)
+        #if file is not None:
+        #    print file
+        #    cfg = open(file)
 
-        else:
-            file_default = os.path.join(RFINDER_PATH, DEFAULT_CONFIG)
+        #else:
+        #    return None
+            #file_default = os.path.join(RFINDER_PATH, DEFAULT_CONFIG)
 
-            cfg = open(file_default)
+            #cfg = open(file_default)
 
-        self.cfg_par = yaml.load(cfg)
-        self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
-        self.set_dirs()
+        #self.cfg_par = yaml.load(cfg)
+        #self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
+        #self.set_dirs()
 
     def set_dirs(self):
         '''
@@ -373,3 +402,64 @@ class rfinder:
         self.logger.info(" ---- End of RFInder ---- \n\n")
 
         return 0
+
+
+
+    def main (self,argv):
+
+
+        for i, arg in enumerate(argv):
+            if (arg[0] == '-') and arg[1].isdigit(): argv[i] = ' ' + arg
+
+        parser = ArgumentParser(description='RFInder: package to visualize the flagged RFI in a dataset '
+                                '|n version {:s} |n install path {:s} |n '
+                                'Filippo Maccagni <filippo.maccagni@gmial.com>'.format(__version__,
+                                                                                   os.path.dirname(__file__)),
+                                formatter_class=MultilineFormatter,
+                                add_help=False)
+
+        add = parser.add_argument
+
+        add("-h", "--help",  action="store_true",
+                help="Print help message and exit")
+
+        add("-v","--version", action='version',
+                version='{:s} version {:s}'.format(parser.prog, __version__))
+
+        add('-c', '--config',
+            type=lambda a: is_valid_file(parser, a),
+            default=DEFAULT_CONFIG,
+            help='RFInder configuration file (YAML format)')
+
+        args = parser.parse_args(argv)
+        
+
+        if args.help:
+            parser.print_help()
+
+            print ("""\nRun a command. This can be: \nrfinder -c path_to_config_file.yml""")
+
+            sys.exit(0)
+
+
+        elif args.config:
+
+            self.logger.info('\t ... Reading parameter file ... \n')
+            # read database here
+            files =  args.config
+
+            
+            if files is not None:
+                print files
+                cfg = open(files)
+            else:
+                return None
+                file_default = os.path.join(RFINDER_PATH, DEFAULT_CONFIG)
+
+                cfg = open(file_default)
+
+            self.cfg_par = yaml.load(cfg)
+            self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
+            self.set_dirs()
+
+            return self
