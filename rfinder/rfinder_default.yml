@@ -2,13 +2,13 @@ general:
     __helpstr: General INPUT directories and filenames
     workdir:  #full path to working directory
     outdir:  #full path to working directory
-    msname: [''] #name of input ms file
-    field:  #field ID of target of file
+    msname: #name of input ms file
+    field: 1  #field ID of target of file
+    telescope: #telescope of the observations (needed for antenna diameter)
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold
     rfi_enable: true #if True this module is enabled
-    telescope: 'meerkat' #telescope of the observations (needed for antenna diameter)
     polarization: 'q' #xx, yy, xy, yx, q (also in CAPS)
     bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
     RFInder_mode: 'use_flags' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'

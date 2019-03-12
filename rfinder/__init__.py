@@ -121,7 +121,7 @@ class rfinder:
         key = 'general'
 
         self.workdir  = self.cfg_par[key].get('workdir', None)
-        self.msfile = self.workdir + self.cfg_par[key].get('msname', None)[0]
+        self.msfile = self.workdir + self.cfg_par[key].get('msname', None)
         self.cfg_par[key]['msfullpath'] = self.msfile      
 
         self.outdir  = self.cfg_par[key].get('outdir', None)
@@ -198,12 +198,12 @@ class rfinder:
             self.cfg_par['general']['outdir'] = args.output_dir
         if args.input:
             self.cfg_par['general']['msname'] = args.input
-        if args.field:
+        if args.field != None:
             self.cfg_par['general']['field'] = args.field
+        if args.telescope:
+            self.cfg_par['general']['telescope'] = args.telescope
         if args.polarization:
             self.cfg_par['rfi']['polarization'] = args.polarization
-        if args.telescope:
-            self.cfg_par['rfi']['telescope'] = args.telescope
         if args.baseline_cut:
             self.cfg_par['rfi']['baseline_cut'] = args.baseline_cut
         if args.time_step:
@@ -212,6 +212,8 @@ class rfinder:
         if args.spw_av:
             self.cfg_par['rfi']['chunks']['spw_enable'] = True
             self.cfg_par['rfi']['chunks']['spw_width'] = args.spw_av
+        if args.chunks_off:
+            self.cfg_par['rfi']['chunks']['time_enable'] = False
         if (args.rfimode == 'rms_clip' or args.rfimode == 'rms') :
                 self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
                 if args.sigma_clip:
@@ -219,6 +221,7 @@ class rfinder:
                 if args.frequency_interval:
                     self.cfg_par['rfi']['noise_measure_edges'] = args.frequency_interval
 
+        return self
 
     def go(self,cfg_par):
         '''
@@ -261,7 +264,6 @@ class rfinder:
                     time_delta_plus = TimeDelta(float(self.cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
                     start = self.cfg_par['rfi']['startdate']+time_del
                     end = start+time_delta_plus
-
                     self.logger.info((" ------ Working on chunk #{0:d}:").format(i))
                     self.logger.info(("\t \t between {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}").format(start.datetime,end.datetime))
 
@@ -483,7 +485,7 @@ class rfinder:
         add('-tel', '--telescope',
             type=str,
             default=False,
-            help='select telescope: meerkat or apertif(WSRT)')
+            help='select telescope: meerkat, apertif, wsrt')
 
         add('-mode', '--rfimode',
             type=str,
@@ -520,12 +522,19 @@ class rfinder:
             default=False,
             help='select baseline cut for differential RFI analysis')
 
-        args = parser.parse_args(argv)
+        add('-chOff', '--chunks_off',
+            type=str,
+            default=False,
+            help='select baseline cut for differential RFI analysis')
 
+        args = parser.parse_args(argv)
+        
+        
         if args.help:  #rfinder -h 
             parser.print_help()
 
-            print ("""\nRun a command. This can be: \nrfinder \nrfinder -c path_to_config_file.yml\n rfinder -i ['ngc1399.ms']""")
+            print ("""\nRun a command. This can be: \nrfinder \nrfinder -c path_to_config_file.yml
+rfinder -i ['ngc1399.ms'] -fl <num> -tel <meerkat/apertif>""")
 
             sys.exit(0)
 
@@ -538,11 +547,11 @@ class rfinder:
 
         else: #rfinder  or rfinder -options
             workdir = os.getcwd()
+            workdir = workdir+'/'
             exists = os.path.isfile(workdir+'/'+DEFAULT_CONFIG)
             if exists:
                 self.logger.info('\t ... Reading default parameter file in your directory ... \n')
                 file_default = os.path.join(workdir, DEFAULT_CONFIG)
-                print file_default
                 cfg = open(file_default)
                 self.cfg_par = yaml.load(cfg)
             else:
@@ -553,31 +562,33 @@ class rfinder:
                 self.cfg_par = yaml.load(cfg)            
                 self.cfg_par['general']['workdir'] = workdir
                 self.cfg_par['general']['outdir'] = workdir
-                print workdir
                 with open(workdir+'/'+DEFAULT_CONFIG, 'w') as outfile:
                     yaml.dump(self.cfg_par, outfile, default_flow_style=False)
 
-                if args.field ==False and args.input==False:
+                if args.field ==False and args.input==False :
 
-                    self.logger.info('''MSNAME & Field missing\n please edit rfinder_default.yml in your current directory\n
-                    or run: rfinder -i ['msname'] -fl number (assuming the observation is located in your current directory)
+                    self.logger.warning('''\t MSNAME & telescope missing
+              \tplease edit rfinder_default.yml in your current directory
+              \tor run: rfinder -i ['msname'] -tel <meerkat,apertif>
+              \t(assuming the observation is located in your current directory)
                     \n''')
+                    self.logger.critical(''' ... RFInder out ...
+                    ''')
                     
                     sys.exit(0)
 
                 else:
-                    self.logger.info('''... you gave MSname and field in your first run, 
-                        assuming they are in your current directory ...
+                    self.logger.info('''\t ... you gave MSname and telescope in your first run, 
+            \tassuming MS is your current directory ...
                     ''')
-
+ 
             if all(x==False for x in vars(args).values()) == False and (args.help==False and args.config == False):
-            
                 self.logger.info('\t ... Updating arguments given from terminal ... \n')
+
                 self.read_args(args)
                 with open(workdir+'/'+DEFAULT_CONFIG, 'w') as outfile:
                     yaml.dump(self.cfg_par, outfile, default_flow_style=False)
  
-
         self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
         self.set_dirs()
 

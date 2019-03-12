@@ -137,7 +137,7 @@ class rfi_stats:
             polnum = 2
         cfg_par['rfi']['polnum'] = polnum
 
-        tele= cfg_par['rfi']['telescope']
+        tele= cfg_par['general']['telescope']
 
         if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':
             tsyseff = 30.             # Tsys/eff(K)
@@ -186,7 +186,7 @@ class rfi_stats:
         self.logger.info("\t ... Altitude/Azimuth info ... \n")
 
         #open miriad observation
-        tele= cfg_par['rfi']['telescope']
+        tele= cfg_par['general']['telescope']
         coord = cfg_par['rfi']['coords']
 
         if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':
