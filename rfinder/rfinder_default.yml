@@ -1,17 +1,17 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir: /Users/maccagni/data/MFS/MeerKATComm/N1399/msdir/ #full path to working directory
-    outdir: /Users/maccagni/data/MFS/MeerKATComm/N1399/ #full path to working directory
-    msname: ['ngc1399_20MHz.ms'] #name of input ms file
-    field: 1 #field ID of target of file
+    workdir:  #full path to working directory
+    outdir:  #full path to working directory
+    msname: [''] #name of input ms file
+    field:  #field ID of target of file
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold
     rfi_enable: true #if True this module is enabled
-    RFInder_mode: 'use_flags' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
-    telescope: 'meerkat' #list of bad antennas: for no antennas try '[]'
-    bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
+    telescope: 'meerkat' #telescope of the observations (needed for antenna diameter)
     polarization: 'q' #xx, yy, xy, yx, q (also in CAPS)
+    bad_antenna: '[]' #list of bad antennas: for no antennas try '[]'
+    RFInder_mode: 'use_flags' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
     rms_clip: 5 #Threshold for RFI identification
     noise_measure_edges: [1.400e9, 1.420e9] #min frequency and maximum frequency where to measure average std of visibilities
     baseline_cut: 200 #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
@@ -21,10 +21,6 @@ rfi:
         time_step: 10 #time chunks in minutes
         spw_enable: true
         spw_width: 10 #channel width of rebinned output table [MHz]
-
-beam_shape:
-    __helpstr: estimate beam shape after RFI flagging
-    enable: false #if True this module is enabled
 
 plots:
     __helpstr: plot rfi over different axes

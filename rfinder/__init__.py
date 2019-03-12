@@ -21,6 +21,8 @@ import warnings
 
 # get rfinder install directory
 RFINDER_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RFINDER_DIR = RFINDER_PATH+'/rfinder/'
+
 sys.path.append(os.path.join(RFINDER_PATH, 'rfinder'))
 
 import rfi
@@ -188,6 +190,34 @@ class rfinder:
             if os.path.exists(self.altazplotdir) == False:
                  os.makedirs(self.altazplotdir)
 
+    def read_args(self,args):
+
+        if args.working_dir:
+            self.cfg_par['general']['workdir'] = args.working_dir
+        if args.output_dir:
+            self.cfg_par['general']['outdir'] = args.output_dir
+        if args.input:
+            self.cfg_par['general']['msname'] = args.input
+        if args.field:
+            self.cfg_par['general']['field'] = args.field
+        if args.polarization:
+            self.cfg_par['rfi']['polarization'] = args.polarization
+        if args.telescope:
+            self.cfg_par['rfi']['telescope'] = args.telescope
+        if args.baseline_cut:
+            self.cfg_par['rfi']['baseline_cut'] = args.baseline_cut
+        if args.time_step:
+            self.cfg_par['rfi']['chunks']['time_enable'] = True
+            self.cfg_par['rfi']['chunks']['time_step'] = args.time_step
+        if args.spw_av:
+            self.cfg_par['rfi']['chunks']['spw_enable'] = True
+            self.cfg_par['rfi']['chunks']['spw_width'] = args.spw_av
+        if (args.rfimode == 'rms_clip' or args.rfimode == 'rms') :
+                self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
+                if args.sigma_clip:
+                    self.cfg_par['rfi']['rms_clip'] = args.sigma_clip
+                if args.frequency_interval:
+                    self.cfg_par['rfi']['noise_measure_edges'] = args.frequency_interval
 
 
     def go(self,cfg_par):
@@ -407,7 +437,6 @@ class rfinder:
 
     def main (self,argv):
 
-
         for i, arg in enumerate(argv):
             if (arg[0] == '-') and arg[1].isdigit(): argv[i] = ' ' + arg
 
@@ -428,38 +457,128 @@ class rfinder:
 
         add('-c', '--config',
             type=lambda a: is_valid_file(parser, a),
-            default=DEFAULT_CONFIG,
+            default=False,
             help='RFInder configuration file (YAML format)')
 
-        args = parser.parse_args(argv)
-        
+        add('-w', '--working_dir',
+            type= str,
+            default = False,
+            help= 'select working directory (MS file assumed to be here)')
 
-        if args.help:
+        add('-odir', '--output_dir',
+            type=str,
+            default=False,
+            help='select output directory')
+
+        add('-i', '--input',
+            type=str,
+            default=False,
+            help='''input ['MS'] file''')
+
+        add('-fl', '--field',
+            type=int,
+            default=False,
+            help='select field of MS file to analyze')
+
+        add('-tel', '--telescope',
+            type=str,
+            default=False,
+            help='select telescope: meerkat or apertif(WSRT)')
+
+        add('-mode', '--rfimode',
+            type=str,
+            default=False,
+            help='select mode where to investigate RFI: use_flags or rms_clip, rms')
+
+        add('-pol', '--polarization',
+            type=str,
+            default=False,
+            help='select stokes parameter')
+
+        add('-fint', '--frequency_interval',
+            nargs='*',
+            default=False,
+            help='select frequency interval where to measure noise')
+
+        add('-spwAv', '--spw_av',
+            type=int,
+            default=False,
+            help='select average in frequency')
+
+        add('-tStep', '--time_step',
+            type=int,
+            default=False,
+            help='select time step')
+
+        add('-sig', '--sigma_clip',
+            type=int,
+            default=False,
+            help='select sigma clip for rms_clip mode')
+
+        add('-baseCut', '--baseline_cut',
+            type=int,
+            default=False,
+            help='select baseline cut for differential RFI analysis')
+
+        args = parser.parse_args(argv)
+
+        if args.help:  #rfinder -h 
             parser.print_help()
 
-            print ("""\nRun a command. This can be: \nrfinder -c path_to_config_file.yml""")
+            print ("""\nRun a command. This can be: \nrfinder \nrfinder -c path_to_config_file.yml\n rfinder -i ['ngc1399.ms']""")
 
             sys.exit(0)
 
-
-        elif args.config:
-
-            self.logger.info('\t ... Reading parameter file ... \n')
+        elif args.config:    #rfinder -c config_file.yml         
+            self.logger.info('\t ... Reading your parameter file ... \n')
             # read database here
             files =  args.config
-
-            
-            if files is not None:
-                print files
-                cfg = open(files)
-            else:
-                return None
-                file_default = os.path.join(RFINDER_PATH, DEFAULT_CONFIG)
-
-                cfg = open(file_default)
-
+            cfg = open(files)
             self.cfg_par = yaml.load(cfg)
-            self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
-            self.set_dirs()
 
-            return self
+        else: #rfinder  or rfinder -options
+            workdir = os.getcwd()
+            exists = os.path.isfile(workdir+'/'+DEFAULT_CONFIG)
+            if exists:
+                self.logger.info('\t ... Reading default parameter file in your directory ... \n')
+                file_default = os.path.join(workdir, DEFAULT_CONFIG)
+                print file_default
+                cfg = open(file_default)
+                self.cfg_par = yaml.load(cfg)
+            else:
+                # Keep presets
+                self.logger.info('\t ... Reading default installation parameter file ... \n')
+                file_default = os.path.join(RFINDER_DIR, DEFAULT_CONFIG)
+                cfg = open(file_default)
+                self.cfg_par = yaml.load(cfg)            
+                self.cfg_par['general']['workdir'] = workdir
+                self.cfg_par['general']['outdir'] = workdir
+                print workdir
+                with open(workdir+'/'+DEFAULT_CONFIG, 'w') as outfile:
+                    yaml.dump(self.cfg_par, outfile, default_flow_style=False)
+
+                if args.field ==False and args.input==False:
+
+                    self.logger.info('''MSNAME & Field missing\n please edit rfinder_default.yml in your current directory\n
+                    or run: rfinder -i ['msname'] -fl number (assuming the observation is located in your current directory)
+                    \n''')
+                    
+                    sys.exit(0)
+
+                else:
+                    self.logger.info('''... you gave MSname and field in your first run, 
+                        assuming they are in your current directory ...
+                    ''')
+
+            if all(x==False for x in vars(args).values()) == False and (args.help==False and args.config == False):
+            
+                self.logger.info('\t ... Updating arguments given from terminal ... \n')
+                self.read_args(args)
+                with open(workdir+'/'+DEFAULT_CONFIG, 'w') as outfile:
+                    yaml.dump(self.cfg_par, outfile, default_flow_style=False)
+ 
+
+        self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
+        self.set_dirs()
+
+        return self

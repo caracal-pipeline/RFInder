@@ -16,8 +16,6 @@ rfi_par = RFInder.main([a for a in sys.argv[1:]])
 #file = sys.argv[1]
 #cfg = open(file)
 
-
-
 #rfi_par = rfinder.rfinder(file)
 run = rfi_par.go(rfi_par.cfg_par)
 
