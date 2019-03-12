@@ -25,12 +25,25 @@ class rfi_stats:
 
 
     def __init__(self):
+        
+        self.logger = logging.getLogger('log-rfinder.log')
+        #self.logger.setLevel(logging.INFO)
 
-        #set logger
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
+        fh = logging.FileHandler('log-rfinder.log')
+        fh.setLevel(logging.INFO)
 
-    def make_psf(cfg_par) :
+        #ch = logging.StreamHandler()
+        #ch.setLevel(logging.WARNING)
+
+        formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+        fh.setFormatter(formatter)
+        #ch.setFormatter(formatter)
+
+        #self.logger.addHandler(ch)
+        self.logger.addHandler(fh)
+
+
+    def make_psf(self,cfg_par) :
         '''
         use wsclean to predict the psf of the observation
         '''

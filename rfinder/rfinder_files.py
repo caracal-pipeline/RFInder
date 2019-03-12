@@ -8,8 +8,21 @@ import rfinder_stats as rfi_stats
 rfiST = rfi_stats.rfi_stats()
 
 import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('log-rfinder.log')
+#logger.setLevel(logging.INFO)
+
+fh = logging.FileHandler('log-rfinder.log')
+#fh.setLevel(logging.INFO)
+
+#ch = logging.StreamHandler()
+#ch.setLevel(logging.WARNING)
+
+formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+fh.setFormatter(formatter)
+#ch.setFormatter(formatter)
+
+#logger.addHandler(ch)
+logger.addHandler(fh)
 
 
 def write_freq_base(cfg_par,rms,time_step=-1) :
@@ -241,7 +254,6 @@ def rfi_frequency(cfg_par,time_step=-1):
         return 0
 
 # Content to be published
-
 def write_html_fullreport(cfg_par):
 
     # Configure Jinja and ready the template
@@ -494,14 +506,29 @@ def cleanup(cfg_par):
 
     key = 'general'
 
-    if os.path.exists(cfg_par[key]['plotdir']):
-        shutil.rmtree(cfg_par[key]['plotdir'])
-    
-    if os.path.exists(cfg_par[key]['tabledir']):
-        shutil.rmtree(cfg_par[key]['tabledir'])
 
-    if 'rfitimedir' in cfg_par[key]:
-        shutil.rmtree(cfg_par[key]['rfitimedir'])
+    if cfg_par['rfi']['chunks']['time_enable'] == True:
+        if os.path.exists(cfg_par[key]['timeplotdir1D']):
+            shutil.rmtree(cfg_par[key]['timeplotdir1D'])
+
+        if os.path.exists(cfg_par[key]['timeplotdir2D']):
+            shutil.rmtree(cfg_par[key]['timeplotdir2D']) 
+
+        if os.path.exists(cfg_par[key]['altazplotdir']):
+            shutil.rmtree(cfg_par[key]['altazplotdir']) 
+
+        if os.path.exists(cfg_par[key]['timechunksdir']):
+            shutil.rmtree(cfg_par[key]['timechunksdir']) 
+
+        if os.path.exists(cfg_par[key]['tabledir']):
+            shutil.rmtree(cfg_par[key]['tabledir'])
+
+        if os.path.exists(cfg_par[key]['rfitimedir']):
+            shutil.rmtree(cfg_par[key]['rfitimedir'])
+
+    else:
+        if os.path.exists(cfg_par[key]['plotdir']):
+            shutil.rmtree(cfg_par[key]['plotdir'])
 
     fitsname = glob.glob(cfg_par[key]['rfidir']+'*.fits')
 

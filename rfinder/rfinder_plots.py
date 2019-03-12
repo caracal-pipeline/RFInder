@@ -35,11 +35,22 @@ class rfi_plots:
 
     def __init__(self):
 
-
         #set self.logger
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('log-rfinder.log')
+        #self.logger.setLevel(logging.INFO)
 
+        fh = logging.FileHandler('log-rfinder.log')
+        fh.setLevel(logging.INFO)
+
+        #ch = logging.StreamHandler()
+        #ch.setLevel(logging.WARNING)
+
+        formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+        fh.setFormatter(formatter)
+        #ch.setFormatter(formatter)
+
+        #self.logger.addHandler(ch)
+        self.logger.addHandler(fh)
 
     # Project spherical coordinates on XY plane
     def aitoff(self,x,y):

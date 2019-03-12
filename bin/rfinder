@@ -5,22 +5,30 @@ import sys
 import string
 import numpy as np
 import logging
-
 import rfinder as rfinder
 
+logger = logging.getLogger('log-rfinder.log')
+logger.setLevel(logging.INFO)
+logger.propagate = False
+
+fh = logging.FileHandler('log-rfinder.log')
+fh.setLevel(logging.INFO)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.WARNING)
+
+formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+
+logger.addHandler(ch)
+logger.addHandler(fh)
 
 
-RFInder = rfinder.rfinder(None)
+RFInder = rfinder.rfinder()
 rfi_par = RFInder.main([a for a in sys.argv[1:]])
 
-#file = sys.argv[1]
-#cfg = open(file)
-
-#rfi_par = rfinder.rfinder(file)
 run = rfi_par.go(rfi_par.cfg_par)
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 if run == 0:
-    logger.critical('\t+------+\n\t\t Done \n\t\t+------+')
+    logger.warning('\t+------+\n\t\t\t Done \n\t\t\t+------+')
