@@ -204,9 +204,13 @@ class rfinder:
             action='store_true',
             help='enable chunking in time')
 
+        add('-noMov', '--no_movies',
+            action='store_true',
+            help='disable movies (use if dataset is read as a whole)')
+
         add('-noSpw', '--no_spw_av',
             action='store_true',
-            help='desable averaging in channels')
+            help='disable averaging in channels')
 
         add('-yesSpw','--yes_spw_av',
             action='store_true',
@@ -214,7 +218,7 @@ class rfinder:
 
         add('-noClp','--no_cleanup',
             action='store_true',
-            help='desable cleanup of intermediate products')
+            help='disable cleanup of intermediate products')
 
         add('-yesClp','--yes_cleanup',
             action='store_true',
@@ -255,8 +259,12 @@ class rfinder:
 
         if args.no_spw_av==True:
             self.cfg_par['rfi']['chunks']['spw_enable'] = False
+        
         if args.yes_spw_av==True:
             self.cfg_par['rfi']['chunks']['spw_enable'] = True
+
+        if args.no_movies == True : 
+            self.cfg_par['plots']['movies']['movies_in_report'] = False
 
         if args.no_cleanup==True:
             self.cfg_par['general']['cleanup_enable'] = False

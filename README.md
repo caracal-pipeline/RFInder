@@ -101,6 +101,8 @@ If `rfinder` runs correctly, you will find the following output products in your
 - The configuration file `rfinder_default.yml` contains the parameters of the last run.
 - A `log` of the commands run by the program is stored in `log-rfinder.log`, in your working directory.
 
+***
+
 **Help**
 
 `rfinder -h` will show you a (minimal) help:
