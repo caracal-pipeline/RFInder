@@ -11,18 +11,18 @@ import logging
 logger = logging.getLogger('log-rfinder.log')
 #logger.setLevel(logging.INFO)
 
-fh = logging.FileHandler('log-rfinder.log')
+#fh = logging.FileHandler('log-rfinder.log')
 #fh.setLevel(logging.INFO)
 
 #ch = logging.StreamHandler()
 #ch.setLevel(logging.WARNING)
 
-formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
-fh.setFormatter(formatter)
+#formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+#fh.setFormatter(formatter)
 #ch.setFormatter(formatter)
 
 #logger.addHandler(ch)
-logger.addHandler(fh)
+#logger.addHandler(fh)
 
 
 def write_freq_base(cfg_par,rms,time_step=-1) :
@@ -501,6 +501,51 @@ def find_1d_plots(cfg_par,name_root):
     #print filenames
 
     return filenames
+
+def set_dirs(cfg_par):
+    '''
+ 
+    Sets temporary subtirectories
+    Creates directory rfi_stokes/
+    Subdirectories can be kept using no_cleanup option
+
+    '''
+
+    key = 'general'
+
+    if os.path.exists(cfg_par[key]['moviedir']) == False:
+         os.makedirs(cfg_par[key]['moviedir'])
+
+    if os.path.exists(cfg_par[key]['rfidir']) == False:
+         os.makedirs(cfg_par[key]['rfidir'])           
+
+    if os.path.exists(cfg_par[key]['tabledir']) == False:
+         os.makedirs(cfg_par[key]['tabledir'])
+
+    if os.path.exists(cfg_par[key]['plotdir']) == False:
+         os.makedirs(cfg_par[key]['plotdir'])
+
+    if cfg_par['rfi']['chunks']['time_enable'] == True:
+
+        if os.path.exists(cfg_par[key]['rfitimedir']) == False:
+             os.makedirs(cfg_par[key]['rfitimedir'])
+
+        if os.path.exists(cfg_par[key]['timetabledir']) == False:
+             os.makedirs(cfg_par[key]['timetabledir'])
+
+        if os.path.exists(cfg_par[key]['timechunksdir']) == False:
+             os.makedirs(cfg_par[key]['timechunksdir'])
+
+        if os.path.exists(cfg_par[key]['timeplotdir1D']) == False:
+             os.makedirs(cfg_par[key]['timeplotdir1D'])
+
+        if os.path.exists(cfg_par[key]['timeplotdir2D']) == False:
+             os.makedirs(cfg_par[key]['timeplotdir2D'])
+
+        if os.path.exists(cfg_par[key]['altazplotdir']) == False:
+             os.makedirs(cfg_par[key]['altazplotdir'])
+
+        return(0)
 
 def cleanup(cfg_par):
 

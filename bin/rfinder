@@ -18,8 +18,10 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.WARNING)
 
 formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+formatter_ch = logging.Formatter('%(message)s')
+
 fh.setFormatter(formatter)
-ch.setFormatter(formatter)
+ch.setFormatter(formatter_ch)
 
 logger.addHandler(ch)
 logger.addHandler(fh)
@@ -31,4 +33,4 @@ rfi_par = RFInder.main([a for a in sys.argv[1:]])
 run = rfi_par.go(rfi_par.cfg_par)
 
 if run == 0:
-    logger.warning('\t+------+\n\t\t\t Done \n\t\t\t+------+')
+    logger.warning('\t+------+\n\t  Done\n\t+------+')

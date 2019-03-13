@@ -34,18 +34,18 @@ class rfi:
         self.logger = logging.getLogger('log-rfinder.log')
         #self.logger.setLevel(logging.INFO)
 
-        fh = logging.FileHandler('log-rfinder.log')
+        #fh = logging.FileHandler('log-rfinder.log')
         #fh.setLevel(logging.INFO)
 
         #ch = logging.StreamHandler()
         #ch.setLevel(logging.WARNING)
 
-        formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
-        fh.setFormatter(formatter)
+        #formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+        #fh.setFormatter(formatter)
         #ch.setFormatter(formatter)
 
         #self.logger.addHandler(ch)
-        self.logger.addHandler(fh)
+        #self.logger.addHandler(fh)
 
 
     def load_from_ms(self,cfg_par,times=0,counter=0):
@@ -67,8 +67,6 @@ class rfi:
         self.msfile = cfg_par['general']['msfullpath']
         self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
         self.selectFieldID = cfg_par['general']['field']
-
-
         
         fields=tables.table(self.msfile+'/FIELD')
         self.fieldNames = fields.getcol('NAME')
