@@ -81,13 +81,23 @@ If you wish to use a different configuration file (at your own risk!!), type: `r
 
 **Minimal instructions**
 
-- By default `rfinder` will scan the MSfile in chunks of 10 minutes averaging 10 channels together. The output product will be an `html` file where the `gis` scan through the time steps to show the identified RFI/flags.
+- Default `rfinder` will scan the MSfile in chunks of 10 minutes averaging 10 channels together. The output product will be an `html` file where the `gis` scan through the time steps to show the identified RFI/flags.
 
 - Running `rfinder -noCh` after `rfinder` will produce a `full_report.html` file containing both the analysis over time steps and the analysis of the dataset as a whole.
 
 - Running `rfinder -noCh -noMov` will analyse the full dataset as a whole and generate the `full_report.html` without embedded movies.
 
 _Attention_: the option `rfinder -noCh` will end with a report successfully generated, only if it is run after `rfinder`. Otherwise run `rfinder -noCh -noMov`.
+
+(These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show the different capabilities of `rfinder`. **outdated**)
+
+
+**Output products**
+
+=======
+or, editing the `rfinder_default.yml` configuration file that has been copied in your current directory (workdir, in the configuration file). This configuration file is read automatically by RFInder through the command `rfinder`. A short explanation of the parameters is given in the configuration file, and by typing `rfinder -h` (see below).
+
+If you wish to use a different configuration file (at your own risk!!), type: `rfinder -c <path_to_configuration_file>`.
 
 (These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show the different capabilities of `rfinder`. **outdated**)
 
@@ -170,7 +180,6 @@ rfinder
 rfinder -c path_to_config_file.yml
 rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>
 ```
-
 
 ***
 
