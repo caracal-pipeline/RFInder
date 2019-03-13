@@ -25,12 +25,25 @@ class rfi_stats:
 
 
     def __init__(self):
+        
+        self.logger = logging.getLogger('log-rfinder.log')
+        #self.logger.setLevel(logging.INFO)
 
-        #set logger
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
+        #fh = logging.FileHandler('log-rfinder.log')
+        #fh.setLevel(logging.INFO)
 
-    def make_psf(cfg_par) :
+        #ch = logging.StreamHandler()
+        #ch.setLevel(logging.WARNING)
+
+        #formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+        #fh.setFormatter(formatter)
+        #ch.setFormatter(formatter)
+
+        #self.logger.addHandler(ch)
+        #self.logger.addHandler(fh)
+
+
+    def make_psf(self,cfg_par) :
         '''
         use wsclean to predict the psf of the observation
         '''
@@ -137,7 +150,7 @@ class rfi_stats:
             polnum = 2
         cfg_par['rfi']['polnum'] = polnum
 
-        tele= cfg_par['rfi']['telescope']
+        tele= cfg_par['general']['telescope']
 
         if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':
             tsyseff = 30.             # Tsys/eff(K)
@@ -186,7 +199,7 @@ class rfi_stats:
         self.logger.info("\t ... Altitude/Azimuth info ... \n")
 
         #open miriad observation
-        tele= cfg_par['rfi']['telescope']
+        tele= cfg_par['general']['telescope']
         coord = cfg_par['rfi']['coords']
 
         if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':

@@ -35,11 +35,22 @@ class rfi_plots:
 
     def __init__(self):
 
-
         #set self.logger
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('log-rfinder.log')
+        #self.logger.setLevel(logging.INFO)
 
+        #fh = logging.FileHandler('log-rfinder.log')
+        #fh.setLevel(logging.INFO)
+
+        #ch = logging.StreamHandler()
+        #ch.setLevel(logging.WARNING)
+
+        #formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+        #fh.setFormatter(formatter)
+        #ch.setFormatter(formatter)
+
+        #self.logger.addHandler(ch)
+        #self.logger.addHandler(fh)
 
     # Project spherical coordinates on XY plane
     def aitoff(self,x,y):
@@ -124,7 +135,7 @@ class rfi_plots:
                 idx = (np.abs(freqs_plot_bin[i]-freqs)).argmin()
                 freqs_plot_idx[i]=idx
 
-            tele= cfg_par['rfi']['telescope']
+            tele= cfg_par['general']['telescope']
             if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':    
                 input_baselines = np.zeros(6)
                 for i in xrange (0,len(input_baselines)):

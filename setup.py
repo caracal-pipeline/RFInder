@@ -18,12 +18,13 @@ def requirements():
     with open(os.path.join(build_root, 'requirements.txt')) as f:
         return [pname.strip() for pname in f.readlines()]
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 
 setup(name=pkg,
       version=__version__,
       description="A tool to identify the presence of RFI in an observation and visualize it",
       long_description=readme(),
+      long_description_content_type = 'text/markdown',
       author="Filippo Marcello Maccagni",
       author_email="filippo.maccagni@gmail.com",
       packages=find_packages(),

@@ -31,13 +31,24 @@ class rfi:
 
     def __init__(self):
 
-        #set logger
-        logging.basicConfig(level=logging.INFO)
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger('log-rfinder.log')
+        #self.logger.setLevel(logging.INFO)
 
-        #self.logger.info("\t ... Initializing rfi.py ... \n\n")
+        #fh = logging.FileHandler('log-rfinder.log')
+        #fh.setLevel(logging.INFO)
 
-    def load_from_ms(self,cfg_par,times=0):
+        #ch = logging.StreamHandler()
+        #ch.setLevel(logging.WARNING)
+
+        #formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+        #fh.setFormatter(formatter)
+        #ch.setFormatter(formatter)
+
+        #self.logger.addHandler(ch)
+        #self.logger.addHandler(fh)
+
+
+    def load_from_ms(self,cfg_par,times=0,counter=0):
         '''
 
         Loads important columns from MS file
@@ -50,13 +61,12 @@ class rfi:
 
         '''
 
-        self.logger.info("\t ... Field, Antenna & Bandwidth Info ...\n")
-        
+        if counter == 0 :
+            self.logger.warning("\t ... Field, Antenna & Bandwidth Info ...\n")
+
         self.msfile = cfg_par['general']['msfullpath']
         self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
         self.selectFieldID = cfg_par['general']['field']
-
-
         
         fields=tables.table(self.msfile+'/FIELD')
         self.fieldNames = fields.getcol('NAME')
@@ -66,7 +76,8 @@ class rfi:
         self.coords =self.coords*180./np.pi
         cfg_par['rfi']['coords'] = SkyCoord(self.coords[self.selectFieldID,:,0]*u.degree, self.coords[self.selectFieldID,:,1]*u.degree,  unit=(u.deg, u.deg))
 
-        self.logger.info("\tField with name {0:s} (Field ID = {1:d})".format(selectFieldName,self.selectFieldID))
+        if counter == 0 :
+            self.logger.warning("\tField with name {0:s} (Field ID = {1:d})".format(selectFieldName,self.selectFieldID))
         #self.logger.info("\tCoordinates {}".format(selectFieldName,self.selectFieldID))
   
         antennas = tables.table(self.msfile +'/ANTENNA')
@@ -80,8 +91,9 @@ class rfi:
         cfg_par['rfi']['nant'] = self.nant
         cfg_par['rfi']['ant_names'] = self.ant_names
 
-        self.logger.info("\tTotal number of antennas:\t"+str(self.nant))
-        self.logger.info("\tAntenna names:\t\t"+str(self.ant_names))
+        if counter == 0 :
+            self.logger.warning("\tTotal number of antennas:\t"+str(self.nant))
+            self.logger.warning("\tAntenna names:\t\t"+str(self.ant_names))
 
         antennas.close()
 
@@ -94,10 +106,12 @@ class rfi:
         cfg_par['rfi']['highfreq'] = float(self.channelFreqs[-1][-1])
 
         spw.close()
+
+        if counter == 0 :
        
-        self.logger.info("\tChannel Width [kHz]:\t"+str(cfg_par['rfi']['chan_widths']/1e3))
-        self.logger.info("\tStart         [GHz]:\t"+str(cfg_par['rfi']['lowfreq']/1e9))
-        self.logger.info("\tEnd           [GHz]:\t"+str(cfg_par['rfi']['highfreq']/1e9)+'\n')
+            self.logger.warning("\tChannel Width [kHz]:\t"+str(cfg_par['rfi']['chan_widths']/1e3))
+            self.logger.warning("\tStart         [GHz]:\t"+str(cfg_par['rfi']['lowfreq']/1e9))
+            self.logger.warning("\tEnd           [GHz]:\t"+str(cfg_par['rfi']['highfreq']/1e9)+'\n')
 
 
         #determine start and end date
@@ -105,7 +119,7 @@ class rfi:
 
         t=tables.table(self.msfile)
 
-        if times !=0:
+        if counter !=0:
             value_end = times[1]
             value_start = times[0]
     
@@ -152,7 +166,8 @@ class rfi:
                 empty_table=0     
             else:
                 self.logger.warning('\t ### Table of selected interval is empty ')
-                self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
+                if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
+                    self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
                 empty_table=1
         
 
@@ -172,6 +187,7 @@ class rfi:
             cfg_par['rfi']['number_baseline'] = nrBaseline
             rfiST.predict_noise(cfg_par,self.channelWidths,self.interval,self.flag)
             cfg_par['rfi']['vis_alltimes_baseline'] = self.flag.shape[0]/nrBaseline
+
 
         self.logger.info("\t ... info from MS file loaded  \n\n")
 
