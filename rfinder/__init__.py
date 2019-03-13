@@ -582,7 +582,7 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
                 self.cfg_par = yaml.load(cfg)            
                 self.cfg_par['general']['workdir'] = workdir
                 self.cfg_par['general']['outdir'] = workdir
-                with open(workdir+'/'+DEFAULT_CONFIG, 'w') as outfile:
+                with open(workdir+DEFAULT_CONFIG, 'w') as outfile:
                     yaml.dump(self.cfg_par, outfile, default_flow_style=False)
 
                 if args.field ==False and args.input==False :
@@ -604,7 +604,7 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
                 self.logger.warning('------ Updating arguments given from terminal ------\n')
 
                 self.setArgs(args)
-                with open(workdir+'/'+DEFAULT_CONFIG, 'w') as outfile:
+                with open(workdir+DEFAULT_CONFIG, 'w') as outfile:
                     yaml.dump(self.cfg_par, outfile, default_flow_style=False)
  
         self.cfg_par['general']['template_folder'] = os.path.join(RFINDER_PATH,'rfinder/templates')
