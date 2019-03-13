@@ -81,7 +81,7 @@ If you wish to use a different configuration file (at your own risk!!), type: `r
 
 **Minimal instructions**
 
-- By default `rfinder` will scan the MSfile in chunks of 10 minutes averaging 10 channels together. The output product will be an `html` file where the `gis` scan through the time steps to show the identified RFI/flags.
+- Default `rfinder` will scan the MSfile in chunks of 10 minutes averaging 10 channels together. The output product will be an `html` file where the `gis` scan through the time steps to show the identified RFI/flags.
 
 - Running `rfinder -noCh` after `rfinder` will produce a `full_report.html` file containing both the analysis over time steps and the analysis of the dataset as a whole.
 
@@ -100,8 +100,6 @@ If `rfinder` runs correctly, you will find the following output products in your
 	- Within, there are the `.html` reports that you wished to generate. 
 - The configuration file `rfinder_default.yml` contains the parameters of the last run.
 - A `log` of the commands run by the program is stored in `log-rfinder.log`, in your working directory.
-
-***
 
 **Help**
 
@@ -172,7 +170,6 @@ rfinder
 rfinder -c path_to_config_file.yml
 rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>
 ```
-
 
 ***
 
