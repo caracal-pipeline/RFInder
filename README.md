@@ -73,14 +73,27 @@ Hence, you have to set the name of the MSfile you wish to analyse. There are two
  rfinder -i msname -fl <num> -tel <meerkat,apertif,wsrt>
 ```
 
-or, editing the `rfinder_default.yml` configuration file that has been copied in your current directory (workdir, in the configuration file). This configuration file is read automatically by RFInder through the command `rfinder`. A short explanation of the parameters is given in the configuration file, and by typing `rfinder -h` (see below).
+or, editing the `rfinder_default.yml` configuration file that has been copied in your current directory (workdir, in the configuration file). 
+
+This configuration file is read automatically by RFInder through the command `rfinder`. A short explanation of the parameters is given in the configuration file, and by typing `rfinder -h` (see below).
 
 If you wish to use a different configuration file (at your own risk!!), type: `rfinder -c <path_to_configuration_file>`.
+
+**Minimal instructions**
+
+- By default `rfinder` will scan the MSfile in chunks of 10 minutes averaging 10 channels together. The output product will be an `html` file where the `gis` scan through the time steps to show the identified RFI/flags.
+
+- Running `rfinder -noCh` after `rfinder` will produce a `full_report.html` file containing both the analysis over time steps and the analysis of the dataset as a whole.
+
+- Running `rfinder -noCh -noMov` will analyse the full dataset as a whole and generate the `full_report.html` without embedded movies.
+
+_Attention_: the option `rfinder -noCh` will end with a report successfully generated, only if it is run after `rfinder`. Otherwise run `rfinder -noCh -noMov`.
 
 (These [tutorials](https://github.com/Fil8/RFInder/tree/master/tutorials) show the different capabilities of `rfinder`. **outdated**)
 
 
 **Output products**
+
 If `rfinder` runs correctly, you will find the following output products in your current directory: 
 
 - the folder `rfi_pol` in your current directory, or in the directory specified by the `-odir` parameter (`pol` is the stokes parameters for which you analysed RFI). 
@@ -89,6 +102,7 @@ If `rfinder` runs correctly, you will find the following output products in your
 - A `log` of the commands run by the program is stored in `log-rfinder.log`, in your working directory.
 
 **Help**
+
 `rfinder -h` will show you a (minimal) help:
 
 ```
