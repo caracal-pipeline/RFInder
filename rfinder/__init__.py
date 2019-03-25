@@ -603,7 +603,7 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
 
                     self.logger.warning('''MSNAME & telescope missing
               \t\tplease edit rfinder_default.yml in your current directory
-              \t\tor run: rfinder -i msname -fl <field_number>x -tel <meerkat,apertif,wsrt>
+              \t\tor run: rfinder -i msname -fl <field_number> -tel <meerkat,apertif,wsrt>
               \t\t(assuming the observation is located in your current directory)
                     \n''')
                     self.logger.critical('''------ RFInder out ------\n''')
