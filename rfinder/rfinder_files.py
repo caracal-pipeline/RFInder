@@ -574,7 +574,9 @@ def cleanup(cfg_par):
     else:
         if os.path.exists(cfg_par[key]['plotdir']):
             shutil.rmtree(cfg_par[key]['plotdir'])
-
+        if os.path.exists(cfg_par[key]['tabledir']):
+            shutil.rmtree(cfg_par[key]['tabledir'])
+            
     fitsname = glob.glob(cfg_par[key]['rfidir']+'*.fits')
 
     if len(fitsname)>0:

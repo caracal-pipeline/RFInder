@@ -146,6 +146,11 @@ class rfinder:
             default=False,
             help='select output directory')
 
+        add('-l','--label',
+            type=str,
+            default=False,
+            help='ouput folder is called: rfi_polarization_label')
+
         add('-i', '--input',
             type=str,
             default=False,
@@ -224,6 +229,8 @@ class rfinder:
             action='store_true',
             help='enable cleanup of intermediate products')
 
+
+
         args = self.parser.parse_args(argv)
         
         return args
@@ -270,7 +277,13 @@ class rfinder:
             self.cfg_par['general']['cleanup_enable'] = False
         if args.yes_cleanup==True:
             self.cfg_par['general']['cleanup_enable'] = True
-
+        
+        if args.label !=False :
+            self.cfg_par['general']['outlabel'] = '_'+args.label
+        
+        else:
+            self.cfg_par['general']['outlabel'] = ''               
+        
         if (args.rfimode == 'rms_clip' or args.rfimode == 'rms') :
                 self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
                 if args.sigma_clip:
@@ -289,7 +302,7 @@ class rfinder:
         self.cfg_par[key]['msfullpath'] = msfile      
 
         outdir  = self.cfg_par[key].get('outdir', None)
-        rfidir  = outdir+'rfi_'+self.cfg_par['rfi']['polarization']+'/'
+        rfidir  = outdir+'rfi_'+self.cfg_par['rfi']['polarization']+self.cfg_par[key]['outlabel']+'/'
         self.cfg_par[key]['rfidir'] = rfidir
 
         tabledir = rfidir+'tables/'
@@ -351,6 +364,7 @@ class rfinder:
         self.cfg_par = cfg_par
         task = 'rfi'
         rfiFL.set_dirs(self.cfg_par)
+
         self.logger.warning("------ STARTING RFI analysis ------\n")
 
         if self.cfg_par[task]['rfi_enable']==True:
@@ -553,7 +567,7 @@ class rfinder:
         if args.help:  #rfinder -h 
             self.parser.print_help()
 
-            print("""\nRun a command. This can be: \nrfinder \nrfinder -c path_to_config_file.yml
+            print("""\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml
 rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
 
             sys.exit(0)
@@ -589,7 +603,7 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
 
                     self.logger.warning('''MSNAME & telescope missing
               \t\tplease edit rfinder_default.yml in your current directory
-              \t\tor run: rfinder -i msname -tel <meerkat,apertif,wsrt>
+              \t\tor run: rfinder -i msname -fl <field_number> -tel <meerkat,apertif,wsrt>
               \t\t(assuming the observation is located in your current directory)
                     \n''')
                     self.logger.critical('''------ RFInder out ------\n''')
