@@ -23,7 +23,7 @@ For a successfull installation make sure to have installed the following package
 - The `logging` module is used to print out warnings.
 - `.gif` file of multiple plots can be created if `ffmpeg` is installed.
 - `casacore` is utilized to open casa tables.
-    - install it through `python_casacore`: `pip install python-casacore` or `conda install -c conda-forge python-casacore` 
+    - install it with `python_casacore`: `pip install python-casacore` or `conda install -c conda-forge python-casacore` 
 - `texmaker` to plot latex fancy formulae
 - `dvipng`
 - `python tk`
