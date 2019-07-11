@@ -1,7 +1,8 @@
+import matplotlib
+matplotlib.use('agg')
 import os,string,sys, glob
 import numpy as np
 
-import matplotlib
 matplotlib.rcParams['text.usetex'] = True
 
 from astropy import units as u
