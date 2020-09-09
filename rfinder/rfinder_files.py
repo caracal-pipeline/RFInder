@@ -1,3 +1,4 @@
+import base64
 import os, string, sys, glob
 import numpy as np
 from astropy.io import fits as fits
@@ -88,9 +89,9 @@ def rfi_frequency(cfg_par,time_step=-1):
     For each channel the flag % and factor of noise increase are stored for all, long and short baselines
     Long and short baselines are separated in half, depending on the number of baselines
     '''
-    table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
+    table_tmp = str.split(cfg_par['general']['msname'][0],'.MS')
     if len(table_tmp) == 1:
-        table_tmp = string.split(cfg_par['general']['msname'][0],'.ms')
+        table_tmp = str.split(cfg_par['general']['msname'][0],'.ms')
 
     if time_step != -1:
         tabledir = cfg_par['general']['timetabledir'] 
@@ -149,7 +150,7 @@ def rfi_frequency(cfg_par,time_step=-1):
         azimuth = np.zeros(freqs.shape)+cfg_par['rfi']['altaz'].az
 
 
-        for i in xrange(0,datacube.shape[1]):
+        for i in range(0,datacube.shape[1]):
             
             flag_lin_tmp = np.divide(np.sum(datacube[:,i]),datacube.shape[0])
             flag_lin[i] = flag_lin_tmp
@@ -204,7 +205,7 @@ def rfi_frequency(cfg_par,time_step=-1):
             elevation_bin = np.zeros(freqs_bin.shape)+cfg_par['rfi']['altaz'].alt*u.deg
             azimuth_bin = np.zeros(freqs_bin.shape)+cfg_par['rfi']['altaz'].az*u.deg
 
-            for i in xrange(0, len(freqs_bin)-1):
+            for i in range(0, len(freqs_bin)-1):
                 #look for the right velocity bin
                 index = (freqs_bin[i] <= freqs) & (freqs < freqs_bin[i+1])
 
@@ -275,24 +276,23 @@ def write_html_fullreport(cfg_par):
         imagename1 = cfg_par['general']['plotdir']+'flags_base_full.png'
         imagename3 = cfg_par['general']['plotdir']+'noise_full_sl_flags.png'
     
-    data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
+    data_uri1 = base64.b64encode(open(imagename1, 'rb').read())
+    data_uri3 = base64.b64encode(open(imagename3, 'rb').read())
 
     imagename2 = cfg_par['general']['plotdir']+'AltAZ_full.png'
-    data_uri2 = open(imagename2, 'rb').read().encode('base64').replace('\n', '')
-
-    data_uri3 = open(imagename3, 'rb').read().encode('base64').replace('\n', '')
+    data_uri2 = base64.b64encode(open(imagename3, 'rb').read())
 
     video_name1 = cfg_par['general']['moviedir']+'AltAz_movie.gif'
     if os.path.exists(video_name1):
-        video_encoded1 = open(video_name1, "rb").read().encode("base64")
+        video_encoded1 = base64.b64encode(open(video_name1, "rb").read())
 
     video_name2 = cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
     if os.path.exists(video_name2):
-        video_encoded2 = open(video_name2, "rb").read().encode("base64")
+        video_encoded2 = base64.b64encode(open(video_name2, "rb").read())
 
     video_name3 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise.gif'
     if os.path.exists(video_name3):
-        video_encoded3 = open(video_name3, "rb").read().encode("base64")
+        video_encoded3 = base64.b64encode(open(video_name3, "rb").read())
 
     if cfg_par['plots']['movies']['movies_in_report'] == True:
         template = env.get_template('full_template.html')
@@ -371,19 +371,20 @@ def write_html_timereport(cfg_par):
     #data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
     video_name1 = cfg_par['general']['moviedir']+'AltAz_movie.gif'
     if os.path.exists(video_name1):
-        video_encoded1 = open(video_name1, "rb").read().encode("base64")
+        #video_encoded1 = open(video_name1, "rb").read().encode("base64")
+        video_encoded1 = base64.b64encode(open(video_name1, "rb").read())
     else:
         video_encoded1 = None
     
     video_name2 = cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
     if os.path.exists(video_name2):
-        video_encoded2 = open(video_name2, "rb").read().encode("base64")
+        video_encoded2 = base64.b64encode(open(video_name2, "rb").read())
     else:
-        video_encoded1 = None
+        video_encoded2 = None
 
     video_name3 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise.gif'
     if os.path.exists(video_name3):
-        video_encoded3 = open(video_name3, "rb").read().encode("base64")
+        video_encoded3 = base64.b64encode(open(video_name3, "rb").read())
     else:
         video_encoded3 = None
 
@@ -431,7 +432,7 @@ def find_altaz_plots(cfg_par):
     if cfg_par['rfi']['RFInder_mode']=='use_flags':
         filenames = glob.glob(cfg_par['general']['altazplotdir']+'/AltAZ_flags*')
 
-        for i in xrange(0,len(filenames)):
+        for i in range(0,len(filenames)):
             tmp = filenames[i].split('_flags')
             tmp_arr.append(tmp[1].split('MHz')[0])
         tmp_arr.sort()
@@ -442,7 +443,7 @@ def find_altaz_plots(cfg_par):
     elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
         filenames = glob.glob(cfg_par['general']['altazplotdir']+'/AltAZ_rfi*')
 
-        for i in xrange(0,len(filenames)):
+        for i in range(0,len(filenames)):
             tmp = filenames[i].split('_rfi')
             tmp_arr.append(tmp[1].split('MHz')[0])
         tmp_arr.sort()
@@ -460,7 +461,7 @@ def find_2d_plots(cfg_par):
         filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/rfi_base*')
 
     tmp_arr=[]
-    for i in xrange(0,len(filenames)):
+    for i in range(0,len(filenames)):
             tmp = filenames[i].split('base_')[1]
             tmp_arr.append(tmp.split('m.png')[0])
     tmp_arr.sort()
@@ -479,7 +480,7 @@ def find_1d_plots(cfg_par,name_root):
 
     tmp_arr=[]
 
-    for i in xrange(0,len(filenames)):
+    for i in range(0,len(filenames)):
         if cfg_par['rfi']['RFInder_mode']=='use_flags':
             if len(filenames[i].split('sl_rfi.'))>1:
                 continue
@@ -580,6 +581,6 @@ def cleanup(cfg_par):
     fitsname = glob.glob(cfg_par[key]['rfidir']+'*.fits')
 
     if len(fitsname)>0:
-        for i in xrange(0,len(fitsname)):
+        for i in range(0,len(fitsname)):
             os.remove(fitsname[i])
 
