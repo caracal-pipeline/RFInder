@@ -35,3 +35,20 @@ plots:
         1d_gif: true
         altaz_gif: true
         movies_in_report: true
+
+uzero:
+    __helpstr: plot rfi over different axes
+    uflag_enable: False
+    use_mstransform: True
+    transfer_flags: ''
+    method: 'madThreshold'
+    make_plots: True
+    cleanup: True
+    robust: 1.5
+    taper: 60
+    imsize: 400
+    cell: 20
+    chans: [0,100]
+    thresholds: 300
+    dilateU: 0
+    dilateV: 0

@@ -20,8 +20,6 @@ from astropy import units as u
 from astropy.time import Time, TimeDelta
 from astropy.table import Table, Column, MaskedColumn
 
-
-
 # get rfinder install directory
 RFINDER_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RFINDER_DIR = RFINDER_PATH+'/rfinder/'
@@ -366,6 +364,9 @@ class rfinder:
         rfiFL.set_dirs(self.cfg_par)
 
         self.logger.warning("------ STARTING RFI analysis ------\n")
+
+        if self.cfg_par['uzero']['uflag_enable']==True:
+
 
         if self.cfg_par[task]['rfi_enable']==True:
             
