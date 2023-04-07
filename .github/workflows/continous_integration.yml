@@ -41,7 +41,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Install caracal
+      - name: Install rfinder
         run: poetry install --extras "testing"
 
       - name: Lint with flake8
@@ -53,6 +53,6 @@ jobs:
       - name: Test with pytest
         run: poetry run pytest -s -vvv
 
-      - name: Test caracal command
+      - name: Test rfinder command
         run: |
           poetry run rfinder --help
