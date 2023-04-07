@@ -587,7 +587,7 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
             # read database here
             files =  args.config
             cfg = open(files)
-            self.cfg_par = yaml.load(cfg)
+            self.cfg_par = yaml.load(cfg, Loader=yaml.CLoader)
 
         else: #rfinder  or rfinder -options
             workdir = os.getcwd()
