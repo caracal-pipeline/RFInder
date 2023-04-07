@@ -374,7 +374,7 @@ class Rfinder:
                 times, start, end = rfiST.time_chunk(self.cfg_par)
                 self.logger.warning("------ Working on time chunks ------\n")
 
-                for i in xrange(0,len(times)-1):
+                for i in range(0,len(times)-1):
                     timez = [times[i],times[i+1]] 
                     
                     #time chunk properties
@@ -434,7 +434,7 @@ class Rfinder:
                 times, start, end = rfiST.time_chunk(self.cfg_par)
                 self.logger.warning(" ------ Plotting on time chunks ------\n")
 
-                for i in xrange(0,len(times)-1):
+                for i in range(0,len(times)-1):
 #                for i in xrange(0,2):
 
                     timez = [times[i],times[i+1]]            
