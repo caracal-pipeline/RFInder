@@ -9,7 +9,7 @@ pip install rfinder
 To create a local repository, type:
 
 ```
-git clone https://github.com/Fil8/RFInder
+git clone git@github.com:caracal-pipeline/RFInder.git
 ```
 
 ***
