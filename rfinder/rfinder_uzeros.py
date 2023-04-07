@@ -44,7 +44,7 @@ from collections import OrderedDict
 import time
 import argparse
 import shutil
-import caracal
+# import caracal
 import gc
 
 # from caracal import log
