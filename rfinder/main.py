@@ -75,7 +75,7 @@ def is_valid_file(parser, arg):
 
 
 
-class rfinder:
+class Rfinder:
     '''
 
     Class to investigate the RFI behaviour during observations
@@ -625,3 +625,32 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
         self.set_cfg_par()
 
         return self
+
+def driver():
+    logger = logging.getLogger('log-rfinder.log')
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    fh = logging.FileHandler('log-rfinder.log')
+    fh.setLevel(logging.INFO)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.WARNING)
+
+    formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+    formatter_ch = logging.Formatter('%(message)s')
+
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter_ch)
+
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+
+    RFInder = Rfinder.rfinder()
+    rfi_par = RFInder.main([a for a in sys.argv[1:]])
+
+    run = rfi_par.go(rfi_par.cfg_par)
+
+    if run == 0:
+        logger.warning('\t+------+\n\t  Done\n\t+------+')
