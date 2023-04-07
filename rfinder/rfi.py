@@ -265,7 +265,7 @@ class rfi:
         #if (pol == 'q' or pol == 'Q' or pol == 'i' or pol != 'I') and ( cfg_par['rfi']['RFInder_mode'] == 'use_flags'):
         #   self.datacube = np.zeros([len(self.baselines_sort),2*self.flag.shape[1],2*self.flag.shape[0]/(len(self.baselines_sort))])
         #else:
-        self.datacube = np.zeros([len(self.baselines_sort),self.flag.shape[1],self.flag.shape[0]/(len(self.baselines_sort))])
+        self.datacube = np.zeros([len(self.baselines_sort),int(self.flag.shape[1]),int(self.flag.shape[0]/(len(self.baselines_sort)))])
 
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
         #flag unused polarizations
@@ -293,7 +293,7 @@ class rfi:
 
 
         #flag autocorrelations and bad antennas
-        for i in xrange(0,self.flag.shape[0]):
+        for i in range(0,self.flag.shape[0]):
 
             if self.aperfi_badant != None:
                 if (any(x == self.ant1[i] for x in self.aperfi_badant) or any(x == self.ant2[i] for x in self.aperfi_badant)):
@@ -384,7 +384,7 @@ class rfi:
 
         if cfg_par['rfi']['RFInder_mode'] == 'rms_clip': 
 
-            for i in xrange(0,self.datacube.shape[0]):
+            for i in range(0,self.datacube.shape[0]):
                 
                 if self.datacube.shape[2] == 0:
                     rms[i,:] = 100.
@@ -396,7 +396,7 @@ class rfi:
                 
                     self.flag_lim_array[i] = flag_lim    
 
-                    for j in xrange(0,self.datacube.shape[1]):
+                    for j in range(0,self.datacube.shape[1]):
                         tmpar = self.datacube[i,j,:]
                         mean  = np.nanmean(tmpar)
                         tmpar = tmpar-mean
@@ -413,8 +413,8 @@ class rfi:
                         rms[i,j] = 100.*tmp_over/time_ax_len
 
         elif cfg_par['rfi']['RFInder_mode'] == 'use_flags': 
-            for i in xrange(0,self.datacube.shape[0]):
-                for j in xrange(0,self.datacube.shape[1]):
+            for i in range(0,self.datacube.shape[0]):
+                for j in range(0,self.datacube.shape[1]):
                     rms[i,j] = 100.*np.nansum(self.datacube[i,j,:])/time_ax_len
 
         rfi_files.write_freq_base(cfg_par,rms,time_step)
@@ -483,7 +483,7 @@ class rfi:
         self.logger.info('\t ... Flagging RFI ... \n')
 
 
-        for i in xrange(0,self.vis.shape[0]):
+        for i in range(0,self.vis.shape[0]):
             
             if any(x == self.ant1[i] for x in self.aperfi_badant) or any(x == self.ant2[i] for x in self.aperfi_badant):
                 continue
@@ -491,7 +491,7 @@ class rfi:
                 indice=self.blMatrix[self.ant1[i],self.ant2[i]]
                 flag_clip = self.flag_lim_array[indice]
             
-            for j in xrange(0,self.vis.shape[1]):
+            for j in range(0,self.vis.shape[1]):
                 mean = self.mean_array[indice,i]
                 if (np.abs(self.vis[i,j,0]) - mean ) > flag_clip:
                 
