@@ -1,9 +1,9 @@
-astropy==2.0.11
+astropy
 ffmpeg
 imageio
-ipython==5.8.0
+ipython
 jinja2
-matplotlib==2.2.3
+matplotlib
 numpy
 pyaml
 scipy
