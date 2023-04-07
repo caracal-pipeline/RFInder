@@ -31,6 +31,9 @@ import rfinder_stats as rfi_stats
 import rfinder_plots as rfi_plots
 import rfinder_files as rfiFL
 
+import rfinder_uzeros as flag_Uzeros
+
+
 rfi = rfi.rfi()
 rfiST = rfi_stats.rfi_stats()
 rfiPL = rfi_plots.rfi_plots()
@@ -359,13 +362,19 @@ class rfinder:
 
         # cont_sources
 
+ 
+
+        if self.cfg_par['flag_u_zeros']['uflag_enable']==True:
+
+            uZeros = flag_Uzeros.UzeroFlagger(self.cfg_par)
+            uZeros.run_flagUzeros(self.cfg_par['uzero']['msname'])
+
+
         self.cfg_par = cfg_par
         task = 'rfi'
         rfiFL.set_dirs(self.cfg_par)
 
         self.logger.warning("------ STARTING RFI analysis ------\n")
-
-        if self.cfg_par['uzero']['uflag_enable']==True:
 
 
         if self.cfg_par[task]['rfi_enable']==True:

@@ -1,6 +1,7 @@
 general:
     __helpstr: General INPUT directories and filenames
     workdir:  #full path to working directory
+    msdir: #
     outdir:  #full path to working directory
     outlabel:  #label of output directory: rfi_stokes_label
     msname: #name of input ms file
@@ -36,11 +37,10 @@ plots:
         altaz_gif: true
         movies_in_report: true
 
-uzero:
+flag_u_zeros:
     __helpstr: plot rfi over different axes
-    uflag_enable: False
-    use_mstransform: True
-    transfer_flags: ''
+    enable: False
+    transfer_flags:
     method: 'madThreshold'
     make_plots: True
     cleanup: True
