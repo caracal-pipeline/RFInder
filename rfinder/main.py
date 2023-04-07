@@ -647,7 +647,7 @@ def driver():
     logger.addHandler(fh)
 
 
-    RFInder = Rfinder.rfinder()
+    RFInder = Rfinder()
     rfi_par = RFInder.main([a for a in sys.argv[1:]])
 
     run = rfi_par.go(rfi_par.cfg_par)
