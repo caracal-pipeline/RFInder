@@ -367,7 +367,7 @@ class rfinder:
         if self.cfg_par['flag_u_zeros']['enable']==True:
 
             uZeros = flag_Uzeros.UzeroFlagger(self.cfg_par)
-            uZeros.run_flagUzeros(self.cfg_par['flag_u_zeros']['msname'])
+            uZeros.run_flagUzeros(self.cfg_par['general']['msname'])
 
 
         self.cfg_par = cfg_par
