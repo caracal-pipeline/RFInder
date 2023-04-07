@@ -132,18 +132,18 @@ class rfi_plots:
             freqs_plot_bin=np.array(freqs_plot_bin,dtype=int)
 
             freqs_plot_idx=np.zeros(freqs_plot_bin.shape)
-            for i in xrange(0,len(freqs_plot_bin)):
+            for i in range(0,len(freqs_plot_bin)):
                 idx = (np.abs(freqs_plot_bin[i]-freqs)).argmin()
                 freqs_plot_idx[i]=idx
 
             tele= cfg_par['general']['telescope']
             if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':    
                 input_baselines = np.zeros(6)
-                for i in xrange (0,len(input_baselines)):
+                for i in range (0,len(input_baselines)):
                     input_baselines[i] = 100.*np.power(2,i)
             elif tele == 'apertif' or tele == 'Apertif' or tele == 'APERTIF' or tele == 'wsrt':
                 input_baselines = np.zeros(7)
-                for i in xrange (0,len(input_baselines)):
+                for i in range (0,len(input_baselines)):
                     input_baselines[i] = 50.*np.power(2,i)
 
 
@@ -154,7 +154,7 @@ class rfi_plots:
             if input_baselines[-1] > baselines[0,-1]:
                 input_baselines[-1]=np.round(baselines[0,-1],0)
 
-            for i in xrange(0, len(input_baselines)):
+            for i in range(0, len(input_baselines)):
                 idx = (np.abs(input_baselines[i] - baselines[0,:])).argmin()
                 input_baselines_idx[i]=idx
             
@@ -283,9 +283,9 @@ class rfi_plots:
         self.logger.info("\t ... Plotting RFI in 1D ... \n")
 
 
-        table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
+        table_tmp = str.split(cfg_par['general']['msname'][0],'.MS')
         if len(table_tmp) == 1:
-            table_tmp = string.split(cfg_par['general']['msname'][0],'.ms')
+            table_tmp = str.split(cfg_par['general']['msname'][0],'.ms')
 
         if time_step != -1:
             tabledir = cfg_par['general']['timetabledir'] 
@@ -415,7 +415,7 @@ class rfi_plots:
             freqs_plot_bin=np.round(freqs_plot_bin,0)
             freqs_plot_bin=np.array(freqs_plot_bin,dtype=int)
 
-            #for i in xrange(0, len(freqs_plot_bin)):
+            #for i in range(0, len(freqs_plot_bin)):
             #    idx = (np.abs(freqs_plot_bin[i] - freqs)).argmin()
             #    freqs_plot_idx[i]=idx
             ax1.set_xticks(freqs_plot_bin)
@@ -522,9 +522,9 @@ class rfi_plots:
         if os.path.exists(cfg_par['general']['timetabledir']) == False:
             self.logger.error("\t Folder with time subsets missing")
 
-        table_tmp = string.split(cfg_par['general']['msname'][0],'.MS')
+        table_tmp = str.split(cfg_par['general']['msname'][0],'.MS')
         if len(table_tmp) == 1:
-            table_tmp = string.split(cfg_par['general']['msname'][0],'.ms')
+            table_tmp = str.split(cfg_par['general']['msname'][0],'.ms')
 
         freq_S = cfg_par['rfi']['lowfreq']/1e6
         freq_E = cfg_par['rfi']['highfreq']/1e6
@@ -535,13 +535,13 @@ class rfi_plots:
 
         pol = cfg_par['rfi']['polarization'] 
 
-        for j in xrange(0,len(freqs_bin)):
+        for j in range(0,len(freqs_bin)):
             spw = np.full((number_chunks),np.nan)
             azimuth = np.full((number_chunks),np.nan)
             altitude= np.full((number_chunks),np.nan)
             flags = np.full((number_chunks),np.nan)
 
-            for i in xrange(0,number_chunks):
+            for i in range(0,number_chunks):
             
                 tabledir = cfg_par['general']['timetabledir'] 
                 time_delta = float(cfg_par['rfi']['chunks']['time_step'])*i
@@ -769,7 +769,7 @@ class rfi_plots:
         azimuth = []
         altitude = []
 
-        for i in xrange(0,len(times)):
+        for i in range(0,len(times)):
         
             altaz = rfiST.alt_az(cfg_par,times[i])
             azimuth.append(altaz.az)
