@@ -2,7 +2,7 @@
 [tool.poetry]
 name = "rfinder"
 version = "1.1.0"
-description = "Tool for identify the presence of RFI in an observation, flagging and visualisation
+description = "Tool for identify the presence of RFI in an observation, flagging and visualisation"
 authors = ["Filippo Marcello Maccagni <filippo.maccagni@gmail.com>"]
 readme = "README.md"
 homepage = "https://github.com/caracal-pipeline/rfinder"
