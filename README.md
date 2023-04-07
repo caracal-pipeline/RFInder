@@ -27,7 +27,7 @@ For a successfull installation make sure to have installed the following package
 - `texmaker` to plot latex fancy formulae
 - `dvipng`
 - `python tk`
-
+- RFInder class `rfinder_uzero.py` which can be used to solve the [u=0 problem](https://archive-gw-1.kat.ac.za/public/repository/10.48479/bhpj-nz95/index.html) makes use of `wsclean`, which must have been previously installed.
 
 
 ***
