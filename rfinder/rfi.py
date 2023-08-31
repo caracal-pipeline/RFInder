@@ -230,7 +230,7 @@ class rfi:
 
         self.baselines_sort = sorted(baselines, key=lambda baselines: baselines[1])  
 
-        cfg_par['rfi']['baseline_lenghts'] = np.array(self.baselines_sort)[:,1]
+        cfg_par['rfi']['baseline_lenghts'] = np.array([b[1] for b in self.baselines_sort])
  
         #baseline statistics
         rfiST.baseline_stats(cfg_par)
