@@ -105,7 +105,8 @@ class rfi_stats:
         index_baselines = (np.abs(lenghts - baseline_cutoff)).argmin()
 
         nrBaseline = cfg_par['rfi']['number_baseline']
-        self.logger.info('\t\t Maximum baseline length     m = '+ str(np.round(lenghts[0],0)))
+
+        self.logger.info('\t\t Maximum baseline length     m = '+ str(np.round(lenghts[-1],0)))
         self.logger.info('\t\t Minimum baseline length     m = '+ str(np.round(lenghts[0],0)))
         self.logger.info('\t\t Total number of baselines     = '+ str(nrBaseline))
 

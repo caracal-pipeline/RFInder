@@ -320,6 +320,7 @@ def write_html_fullreport(cfg_par):
                 video_tag1 = '<img class="b" src="data:image/gif;base64,{0}">'.format(video_encoded1.decode()),
                 img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),
                 #video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
+                #video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),
                 video_tag2 = '<img class="e" src="data:image/gif;base64,{0}">'.format(video_encoded2.decode()),
                 video_tag3 = '<img class="f" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
             ))
