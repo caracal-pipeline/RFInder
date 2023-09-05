@@ -278,11 +278,11 @@ class Rfinder:
         if args.yes_cleanup==True:
             self.cfg_par['general']['cleanup_enable'] = True
         
-        if args.label !=False :
+        if args.label:
             self.cfg_par['general']['outlabel'] = '_'+args.label
         
         else:
-            self.cfg_par['general']['outlabel'] = ''               
+            self.cfg_par['general']['outlabel'] = '_'+self.cfg_par['general']['outlabel']
         
         if (args.rfimode == 'rms_clip' or args.rfimode == 'rms') :
                 self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
@@ -302,7 +302,7 @@ class Rfinder:
         self.cfg_par[key]['msfullpath'] = msfile      
 
         outdir  = self.cfg_par[key].get('outdir', None)
-        rfidir  = outdir+'rfi_'+self.cfg_par['rfi']['polarization']+self.cfg_par[key]['outlabel']+'/'
+        rfidir  = outdir+'rfi_'+self.cfg_par['rfi']['polarization']+'_'+self.cfg_par[key]['outlabel']+'/'
         self.cfg_par[key]['rfidir'] = rfidir
 
         tabledir = rfidir+'tables/'
@@ -577,7 +577,7 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
             # read database here
             files =  args.config
             cfg = open(files)
-            self.cfg_par = yaml.load(cfg)
+            self.cfg_par = yaml.load(cfg, Loader=yaml.Loader)
 
         else: #rfinder  or rfinder -options
             workdir = os.getcwd()
@@ -587,13 +587,13 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
                 self.logger.warning('------ Reading default parameter file in your directory ------\n')
                 file_default = os.path.join(workdir, DEFAULT_CONFIG)
                 cfg = open(file_default)
-                self.cfg_par = yaml.load(cfg)
+                self.cfg_par = yaml.load(cfg, Loader=yaml.Loader)
             else:
                 # Keep presets
                 self.logger.warning('------ Reading default installation parameter file ------\n')
                 file_default = os.path.join(RFINDER_DIR, DEFAULT_CONFIG)
                 cfg = open(file_default)
-                self.cfg_par = yaml.load(cfg)            
+                self.cfg_par = yaml.load(cfg, Loader=yaml.Loader)
                 self.cfg_par['general']['workdir'] = workdir
                 self.cfg_par['general']['outdir'] = workdir
                 with open(workdir+DEFAULT_CONFIG, 'w') as outfile:

@@ -101,12 +101,12 @@ class rfi_stats:
 
 
         baseline_cutoff = float(cfg_par['rfi']['baseline_cut'])
-        lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+        lenghts = cfg_par['rfi']['baseline_lenghts']
         index_baselines = (np.abs(lenghts - baseline_cutoff)).argmin()
 
         nrBaseline = cfg_par['rfi']['number_baseline']
-        self.logger.info('\t\t Maximum baseline length     m = '+ str(np.round(lenghts[0][-1],0)))
-        self.logger.info('\t\t Minimum baseline length     m = '+ str(np.round(lenghts[0][0],0)))
+        self.logger.info('\t\t Maximum baseline length     m = '+ str(np.round(lenghts[-1],0)))
+        self.logger.info('\t\t Minimum baseline length     m = '+ str(np.round(lenghts[0],0)))
         self.logger.info('\t\t Total number of baselines     = '+ str(nrBaseline))
 
 

@@ -3,7 +3,7 @@ matplotlib.use('agg')
 import os,string,sys, glob
 import numpy as np
 
-matplotlib.rcParams['text.usetex'] = True
+matplotlib.rcParams['text.usetex'] = False
 
 from astropy import units as u
 
@@ -185,8 +185,8 @@ class rfi_plots:
                       'ytick.major.width'   : 1,
                       'ytick.minor.size'    : 2,
                       'ytick.minor.width'   : 1, 
-                      'text.usetex'         : True,
-                      'text.latex.unicode'  : True
+                      'text.usetex'         : False,
+                      #'text.latex.unicode'  : True
                        }
             plt.rcParams.update(params)
             # Format axes
@@ -262,7 +262,7 @@ class rfi_plots:
             
             ax.set_title(title_plot)
          
-            plt.savefig(rfi_freq_base_plot,format='png' ,overwrite=True)
+            plt.savefig(rfi_freq_base_plot,format='png')
             plt.close(fig)        
             self.logger.info("\t ... RFI per baseline lenght and frequency plotted ... \n\n")
 
@@ -374,8 +374,8 @@ class rfi_plots:
                       'ytick.major.width'   : 1,
                       'ytick.minor.size'    : 2,
                       'ytick.minor.width'   : 1, 
-                      'text.usetex'         : True,
-                      'text.latex.unicode'  : True
+                      'text.usetex'         : False,
+                      #'text.latex.unicode'  : True
                        }
             plt.rcParams.update(params)
             #plt.rc('xtick', labelsize=20)
@@ -424,7 +424,7 @@ class rfi_plots:
                 (cfg_par['rfi']['highfreq']+5.*cfg_par['rfi']['chan_widths'])/1e6])
            
             if cfg_par['plots']['plot_noise'] != 'rfi':
-                ax1.set_yscale('log', basey=10)
+                ax1.set_yscale('log', base=10)
                 if np.isnan(np.sum(noise_all)):
                     noise_all=np.zeros([len(freqs)])+100.
                 if np.isnan(np.sum(noise_short)):
@@ -506,7 +506,7 @@ class rfi_plots:
             if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
                 rfi_freq_plot = out_plot+'_rfi.png'
 
-            plt.savefig(rfi_freq_plot,format='png',overwrite = True)      
+            plt.savefig(rfi_freq_plot,format='png')
             plt.close(fig)        
             self.logger.info("\t ... RFI in 1D plotted ...\n\n")
        
@@ -618,8 +618,8 @@ class rfi_plots:
                       'ytick.major.width'   : 1,
                       'ytick.minor.size'    : 2,
                       'ytick.minor.width'   : 1, 
-                      'text.usetex'         : True,
-                      'text.latex.unicode'  : True
+                      'text.usetex'         : False,
+                      #'text.latex.unicode'  : True
                        }
             plt.rcParams.update(params)
             #plt.rc('xtick', labelsize=20)
@@ -751,7 +751,7 @@ class rfi_plots:
 
 
             # Finish everything up
-            plt.savefig(altazplot,format='png',overwrite = True)
+            plt.savefig(altazplot,format='png')
             plt.close()
             self.logger.info(('\t ... ALT/AZ for spw: {0:d}-{1:d} MHz  ...\n').format(start_freq,end_freq))
 
@@ -814,8 +814,8 @@ class rfi_plots:
                   'ytick.major.width'   : 1,
                   'ytick.minor.size'    : 2,
                   'ytick.minor.width'   : 1, 
-                  'text.usetex'         : True,
-                  'text.latex.unicode'  : True
+                  'text.usetex'         : False,
+                  #'text.latex.unicode'  : True
                    }
         plt.rcParams.update(params)
 
@@ -874,7 +874,7 @@ class rfi_plots:
         ax_centre.set_title(title_plot)
 
         # Finish everything up
-        plt.savefig(altazplot,format='png',overwrite = True)
+        plt.savefig(altazplot,format='png')
         plt.close()
         self.logger.info(('\t ... ALT/AZ for {0:s} ...\n').format(cfg_par['general']['fieldname']))
 
