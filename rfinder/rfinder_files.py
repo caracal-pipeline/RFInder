@@ -317,11 +317,11 @@ def write_html_fullreport(cfg_par):
                 polnum = cfg_par['rfi']['polnum'],
                 noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
                 img_tag1 = '<img class="a" src="data:image/png;base64,{0}">'.format(data_uri1),
-                video_tag1 = '<img class="b" src="data:image/gif;base64,{0}">'.format(video_encoded1),
+                video_tag1 = '<img class="b" src="data:image/gif;base64,{0}">'.format(video_encoded1.decode()),
                 img_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(data_uri3),
                 #video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),
-                video_tag2 = '<img class="e" src="data:image/gif;base64,{0}">'.format(video_encoded2),
-                video_tag3 = '<img class="f" src="data:image/gif;base64,{0}">'.format(video_encoded3)
+                video_tag2 = '<img class="e" src="data:image/gif;base64,{0}">'.format(video_encoded2.decode()),
+                video_tag3 = '<img class="f" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
             ))
 
     elif cfg_par['plots']['movies']['movies_in_report'] == False:
@@ -410,9 +410,9 @@ def write_html_timereport(cfg_par):
                 exptime = np.round(cfg_par['rfi']['exptime']*60.,2),
                 polnum = cfg_par['rfi']['polnum'],
                 noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
-                video_tag1 = '<img class="b" src="data:image/gif;base64,{0}">'.format(video_encoded1),
-                video_tag2 = '<img class="a" src="data:image/gif;base64,{0}">'.format(video_encoded2),
-                video_tag3 = '<img class="c" src="data:image/gif;base64,{0}">'.format(video_encoded3)
+                video_tag1 = '<img class="b" src="data:image/gif;base64,{0}">'.format(video_encoded1.decode()),
+                video_tag2 = '<img class="a" src="data:image/gif;base64,{0}">'.format(video_encoded2.decode()),
+                video_tag3 = '<img class="c" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
             ))
 
     elif cfg_par['plots']['movies']['movies_in_report'] == False:
