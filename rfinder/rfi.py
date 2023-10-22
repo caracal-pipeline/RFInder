@@ -82,9 +82,11 @@ class rfi:
   
         antennas = tables.table(self.msfile +'/ANTENNA')
         self.ant_pos = np.array(antennas.getcol('POSITION'))
-        self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
+        self.ant_names = np.array(antennas.getcol('NAME'))
+
+        #self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
         
-        self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
+        #self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
         self.nant = len(self.ant_names)
 
         #logging
@@ -96,6 +98,7 @@ class rfi:
             self.logger.warning("\tAntenna names:\t\t"+str(self.ant_names))
 
         antennas.close()
+        self.ant_names = np.arange(0,self.ant_names.shape[0],1)
 
         spw=tables.table(self.msfile+'/SPECTRAL_WINDOW')
         self.channelWidths=spw.getcol('CHAN_WIDTH')
@@ -171,7 +174,6 @@ class rfi:
                 empty_table=1
         
 
-        t.close()
        
         if not self.aperfi_badant:
             nrbadant =len(int(self.aperfi_badant))
@@ -188,6 +190,8 @@ class rfi:
             rfiST.predict_noise(cfg_par,self.channelWidths,self.interval,self.flag)
             cfg_par['rfi']['vis_alltimes_baseline'] = self.flag.shape[0]/nrBaseline
 
+
+        t.close()
 
         self.logger.info("\t ... info from MS file loaded  \n\n")
 

@@ -10,7 +10,7 @@
   img.a{
   	position:absolute;
   	top: 75px;
-  	left: 580px;
+  	left: 520px;
 		height:400px;
 		width: 600px;
 		font-family: Veranda;
@@ -26,16 +26,45 @@
 	img.c{
   	position:absolute;
   	top: 525px;
-  	left: 580px;
+  	left: 520px;
 		height:372px;
 		width: 585px;
 		font-family: Veranda;
+        }
+	img.d{
+  	position:absolute;
+  	top: 525px;
+  	left: 1200px;
+		height:372px;
+		width: 585px;
+		font-family: Veranda;
+        }
+        img.g{
+        position:absolute;
+        top: 525px;
+        left: 1120px;
+                height:372px;
+                width: 585px;
+                font-family: Veranda;
+        }
+        img.h{
+        position:absolute;
+        top: 75px;
+        left: 1120px;
+                height:400px;
+                width: 600px;
+                font-family: Veranda;
+        }
+	p{
+	font-family: monospace;
+        width: 500px;
+        font-size: 14px;
   }
 </style>
 
 <body>
 <h1>{{ title }}</h1>
-<h2>Observation specs</h2>
+<h2>Observation Specifications</h2>
 <p><b>Field</b>: {{fieldname}} ( ID = {{field}})<br/>
 Start Date            = <tab1> {{startdate}}</tab1> {{video_tag2}}<br/>
 End   Date            = <tab1> {{enddate}} 	</tab1><br/><br/>
@@ -53,7 +82,7 @@ Total number of baselines   = <tab1> {{totbase}} </tab1><br/><br/>
 <b> Natural noise predictions </b> <br/>
 Time scan on source       = {{exptime}} minutes for {{polnum}} polarizations <br/>
 Stokes I natural r.m.s. [mJy/b]= {{noise}} <br/>
-{{video_tag1}} {{video_tag3}}<br/>
+{{video_tag1}} {{video_tag3}} {{video_tag4}}<br/>
 <br/><br/>
 RFInder automatically generated this report.
 </p>

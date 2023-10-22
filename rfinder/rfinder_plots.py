@@ -201,7 +201,7 @@ class rfi_plots:
             #box_y      = [left_h, bottom, 0.12, height]
             #box_cbar       = [left_h+0.13, bottom, 0.05, height]
 
-            fig = plt.figure(1, figsize=(12,8))
+            fig = plt.figure(1, figsize=(25,10))
 
             ax = plt.axes(box_centre)
             
@@ -313,13 +313,13 @@ class rfi_plots:
         
         #open file
         if os.path.exists(rfi_table) == False:
+            print(rfi_table)
             self.logger.error('### Table of RFI results does not exist ###')    
         else:    
             
             t = fits.open(rfi_table)
             data_vec = t[1].data
             cols = t[1].columns
-            
             freqs = np.array(data_vec['frequency'],dtype=float)
             flags = np.array(data_vec['percentage_flags'],dtype=float)
             noise_factor = np.array(data_vec['noise_factor'],dtype=float)
@@ -390,7 +390,7 @@ class rfi_plots:
             box_centre    = [left, bottom, width, height]
                     
             # initialize figure
-            fig = plt.figure(1, figsize=(12,8))
+            fig = plt.figure(1, figsize=(18,8))
             plt.rc('xtick', labelsize=20)
 
             # Initialize subplots
@@ -520,6 +520,7 @@ class rfi_plots:
         self.logger.info("\t ... Plotting Alt/Az for binned dataset ... \n")
       
         if os.path.exists(cfg_par['general']['timetabledir']) == False:
+            print(cfg_par['general']['timetabledir'])
             self.logger.error("\t Folder with time subsets missing")
 
         table_tmp = str.split(cfg_par['general']['msname'][0],'.MS')
@@ -564,6 +565,7 @@ class rfi_plots:
 
                 #open file
                 if os.path.exists(rfi_table) == False:
+                    print(rfi_table)
                     self.logger.error('### Table of RFI results does not exist ###')    
                     continue         
                 else:    
@@ -879,7 +881,6 @@ class rfi_plots:
         self.logger.info(('\t ... ALT/AZ for {0:s} ...\n').format(cfg_par['general']['fieldname']))
 
         return 0
-    
 
     def gif_me_up(self,cfg_par,filenames,outmovie):
         
@@ -892,7 +893,7 @@ class rfi_plots:
         for filename in filenames:
             images.append(io.imread(filename))
             
-        io.mimsave(outmovie,images,duration=1.5)
+        io.mimsave(outmovie,images,duration=1000,loop=1000)
 
 
         self.logger.info(('\t ... Movie written to file ...\n'))
