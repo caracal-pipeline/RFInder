@@ -1,12 +1,13 @@
 general:
     __helpstr: General INPUT directories and filenames
-    workdir:  /home/ramaila/working/PicA/msdir/ #full path to working directory
+    workdir:  /home/username/working/Project1/data/ #full path to working directory
     outdir:  results/  #full path to working directory
-    outlabel:  results_3 #label of output directory: rfi_stokes_label
-    msname: PicA-calibs.ms #name of input ms file
-    field: 2  #field ID of target of file
+    outlabel:  out_0 #label of output directory: rfi_stokes_label
+    msname: example.ms #name of input ms file
+    field: 0  #field ID of target of file
     telescope: meerkat #telescope of the observations (needed for antenna diameter)
     cleanup_enable: true
+    ncpu: 4
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold
@@ -16,7 +17,7 @@ rfi:
     RFInder_mode: 'use_flags' #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
     rms_clip: 5 #Threshold for RFI identification
     noise_measure_edges: [1.400e9, 1.420e9] #min frequency and maximum frequency where to measure average std of visibilities
-    baseline_cut: 2000 #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
+    baseline_cut: 200 #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
     chunks:
         __helpstr: separate visibilities in small time intervals and/or larger spectral windows 
         time_enable: true
@@ -29,8 +30,12 @@ plots:
     plot_enable: true
     plot_noise: 'rfi' #choose to plot % of RFI, 'rfi', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
     plot_long_short: true #plot all baselines, or only the short and the long
+    plot_summary:
+        enable: true
+        axis: [ant, scan, corr] # Avalable choices [ant, corr, scan]
     movies:
         __helpstr: make movies of output plots
+        summary_gif: true
         2d_gif: true 
         1d_gif: true
         altaz_gif: true
