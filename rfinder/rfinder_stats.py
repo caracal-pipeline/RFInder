@@ -8,6 +8,7 @@ import json
 import glob
 import casacore.tables as tables
 import logging
+import multiprocessing
 
 
 from astropy.time import Time
@@ -223,3 +224,97 @@ class rfi_stats:
         ##self.logger.info("\t ... Alt/Az done ... \n")
 
         return obs_altaz
+
+
+    def get_flags_summary_stats(self, cfg_par, axis):
+
+        def data_query(t, taql, name, axis='ant'):
+            flagtab = t.query(query=taql, columns='DATA_DESC_ID,FLAG')
+            cell_shape = flagtab.getcell('FLAG', 0).shape
+            flag_col = np.empty((flagtab.nrows(), cell_shape[0], cell_shape[1]), dtype=bool)
+            flagtab.getcolnp('FLAG', flag_col)
+            ddid_col = flagtab.getcol('DATA_DESC_ID')
+            flagtab.done()
+
+            if axis in ['corr']:
+                # For this we need to index that data appropriately
+                vals,counts = np.unique(flag_col[:,:,name],return_counts=True)
+                name = cfg_par['rfi']['corrs'][name]
+            else:
+                vals,counts = np.unique(flag_col,return_counts=True)
+                name = str(name)
+
+            if len(vals) == 1:
+                flag_percent = 100.0 if vals[0] else 0.0
+            else:
+                flag_percent = round(100.0*float(counts[1])/float(np.sum(counts)),2)
+
+            self.flag_percents[name] = flag_percent
+
+        def flag_bars(flag_stats, key):
+            """Displays output directly to the screen console or logfile
+               https://github.com/IanHeywood/ms_info/blob/master/ms_flags.py
+            """
+            self.logger.info('')
+            self.logger.info(f'Flagged percentages per {key}:')
+            self.logger.info('')
+            self.logger.info('                  0%       20%       40%       60%       80%       100%')
+            self.logger.info('                  |         |         |         |         |         |')
+            for fs in flag_stats.items():
+                name = fs[0]
+                average_pc = fs[1]
+                length = int(average_pc / 2.0)
+                self.logger.info(' %-9s %-7s %s'% (name,str(round(average_pc,1))+'%','∎' * length))
+            self.logger.info('')
+
+        ncpu = cfg_par['general']['ncpu']
+        self.logger.info("\t ...  Observing time Info ... \n")
+        self.msfile = cfg_par['general']['msfullpath']
+        t=tables.table(self.msfile)
+        t = t.query(query=f"FIELD_ID=={cfg_par['general']['field']}")
+        self.flag_percents = multiprocessing.Manager().dict()
+        processes = []
+        if axis in ['ant', 'antenna']:
+            for index, ant_name in enumerate(cfg_par['rfi']['ant_names']):
+                taql = f"ANTENNA1=={index} || ANTENNA2=={index}"
+                p = multiprocessing.Process(target=data_query, args=(t, taql, ant_name))
+                p.start()
+                processes.append(p)
+                if len(processes) == ncpu:
+                    for p in processes:
+                        p.join()
+                    processes = []
+            if len(processes) > 1:
+                for p in processes:
+                    p.join()
+        if axis in ['scan']:
+            scan_ids = list(set(t.getcol('SCAN_NUMBER')))
+            for index, scan_id in enumerate(scan_ids):
+                taql = f'SCAN_NUMBER=={str(scan_id)}'
+                p = multiprocessing.Process(target=data_query, args=(t, taql, scan_id))
+                p.start()
+                processes.append(p)
+                if len(processes) == ncpu:
+                    for p in processes:
+                        p.join()
+                    processes = []
+            if len(processes) > 1:
+                for p in processes:
+                    p.join()
+        if axis in ['corr']:
+            for index, corr_type in enumerate(cfg_par['rfi']['corrs']):
+                taql = f''
+                p = multiprocessing.Process(target=data_query, args=(t, taql, index, axis))
+                p.start()
+                processes.append(p)
+                if len(processes) == ncpu:
+                    for p in processes:
+                        p.join()
+                    processes = []
+            if len(processes) > 1:
+                for p in processes:
+                    p.join()
+        t.close()
+        flag_bars(self.flag_percents, axis)
+
+        return self.flag_percents

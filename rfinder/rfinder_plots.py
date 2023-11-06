@@ -882,6 +882,59 @@ class rfi_plots:
 
         return 0
 
+    def plot_summary_stats(self, flag_stats, cfg_par, key='corr'):
+
+        summaryplot = cfg_par['general']['plotdir'] + f'{key}-summary.png'
+
+        # initialize plotting parameters
+        params = {'font.family'         :' serif',
+                  'font.style'          : 'normal',
+                  'font.weight'         : 'book',
+                  'font.size'           : 20.0,
+                  'axes.linewidth'      : 1,
+                  'lines.linewidth'     : 1,
+                  'xtick.labelsize'     : 16,
+                  'ytick.labelsize'     : 16,
+                  'xtick.direction'     :'in',
+                  'ytick.direction'     :'in',
+                  'xtick.major.size'    : 4,
+                  'xtick.major.width'   : 1,
+                  'xtick.minor.size'    : 2,
+                  'xtick.minor.width'   : 1,
+                  'ytick.major.size'    : 4,
+                  'ytick.major.width'   : 1,
+                  'ytick.minor.size'    : 2,
+                  'ytick.minor.width'   : 1,
+                  'text.usetex'         : False,
+                   }
+        plt.rcParams.update(params)
+        fig, ax = plt.subplots(figsize=(16,9))
+        antenna_plot = ax.bar(flag_stats.keys(), flag_stats.values(), color="orange", ec="red", align='center')
+
+        if key in ["antenna", "ant"]:
+            plt.title("Antenna flags")
+            plt.xlabel("Antenna")
+            plt.ylabel("% flagged visibilities")
+            plt.xticks(rotation=90)
+            plt.savefig(summaryplot)
+        elif key in ["scan"]:
+            plt.title("Scan flags")
+            plt.xlabel("Scan Number")
+            plt.ylabel("% flagged visibilities")
+            #plt.xticks(rotation=90)
+            plt.savefig(summaryplot)
+        elif key in ["correlation", "corr"]:
+            plt.title("Correlation flags")
+            plt.xlabel("Correlation")
+            plt.ylabel("Flagged percentage (%)")
+            plt.ylabel("% flagged visibilities")
+            plt.xticks(rotation=90)
+            plt.savefig(summaryplot)
+        self.logger.info(f" ------ Saving: {summaryplot} ------\n")
+
+        return 0
+
+
     def gif_me_up(self,cfg_par,filenames,outmovie):
         
 
