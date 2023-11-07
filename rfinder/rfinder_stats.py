@@ -152,7 +152,7 @@ class rfi_stats:
             polnum = 2
         cfg_par['rfi']['polnum'] = polnum
 
-        tele= cfg_par['general']['telescope']
+        tele= cfg_par['general']['telescope']['name']
 
         if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':
             tsyseff = 30.             # Tsys/eff(K)
@@ -161,9 +161,9 @@ class rfi_stats:
             tsyseff = 93.
             diam = 25.
         else:
-            self.logger.error('\t Telescope not known or not specified, will use WSRT instead')
-            tsyseff = 93.
-            diam = 25.
+            self.logger.warning(f'\t Telescope {tele} not known or not specified, will use provided telescope info')
+            tsyseff =  cfg_par['general']['telescope']['tsyseff']
+            diam = cfg_par['general']['telescope']['diameter']
 
         Aant=np.pi*(diam/2)**2                      # collecting area of 1 antenna (m^2)
         SEFD=2*kB*tsyseff/Aant                  # frequency independent system equivalent flux density (Jy)

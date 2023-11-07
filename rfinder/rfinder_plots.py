@@ -136,7 +136,7 @@ class rfi_plots:
                 idx = (np.abs(freqs_plot_bin[i]-freqs)).argmin()
                 freqs_plot_idx[i]=idx
 
-            tele= cfg_par['general']['telescope']
+            tele= cfg_par['general']['telescope']['name']
             if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':    
                 input_baselines = np.zeros(6)
                 for i in range (0,len(input_baselines)):
