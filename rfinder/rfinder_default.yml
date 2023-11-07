@@ -8,9 +8,13 @@ general:
     cleanup_enable: true                               #remove intermediate results
     ncpu: 4                                            #number of cpu to get the total flagged data
     telescope:                                         #telescope of the observations (needed for antenna diameter)
-      name: meerkat                                    #name of telescope for auto completion of the following info. Available choices [meerkat, wsrti, apertif]
-      diameter:                                        #diameter of telescope in meters
-      tsyseff:                                         #effective system temperature in Kelvin
+        __helpstr: Telescope of the observations, needed for determining sefd and alt/az
+        name: meerkat                                  #name of telescope for auto completion of the following info. Available choices [meerkat, wsrti, apertif]
+        diameter:                                      #diameter of telescope in meters
+        tsyseff:                                       #effective system temperature in Kelvin
+        long:                                          #longitude of telescope
+        lat:                                           #latitude of telescope
+        height:                                        #height/atlitude of location
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold

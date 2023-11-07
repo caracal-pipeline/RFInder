@@ -201,7 +201,7 @@ class rfi_stats:
         self.logger.info("\t ... Altitude/Azimuth info ... \n")
 
         #open miriad observation
-        tele= cfg_par['general']['telescope']
+        tele= cfg_par['general']['telescope']['name']
         coord = cfg_par['rfi']['coords']
 
         if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':
@@ -210,7 +210,11 @@ class rfi_stats:
             # Set position of Westerbork (source: http://www.sonel.org/spip.php?page=gps&idStation=884)
             telescope = EarthLocation(lat= 52.91460037*u.deg, lon=6.60449982*u.deg, height=82.2786*u.m)        
         else:
-            self.logger.error('\t Observing location unknown, impossible to estimate Alt/Az')
+            self.logger.warning('\t Observing location unknown, will use provided info to estimate Alt/Az')
+            lon = cfg_par['general']['telescope']['lat']*u.deg
+            lat = cfg_par['general']['telescope']['long']*u.deg
+            height = cfg_par['general']['telescope']['height']*u.m
+            telescope = EarthLocation(lat=lat, lon=lon, height=height)
         
         time = Time(time/3600./24.,format='mjd',scale='utc')
         frame = AltAz(obstime=time, location=telescope)
