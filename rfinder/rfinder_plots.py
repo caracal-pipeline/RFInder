@@ -921,14 +921,12 @@ class rfi_plots:
             plt.title("Scan flags")
             plt.xlabel("Scan Number")
             plt.ylabel("% flagged visibilities")
-            #plt.xticks(rotation=90)
             plt.savefig(summaryplot)
         elif key in ["correlation", "corr"]:
             plt.title("Correlation flags")
             plt.xlabel("Correlation")
             plt.ylabel("Flagged percentage (%)")
             plt.ylabel("% flagged visibilities")
-            plt.xticks(rotation=90)
             plt.savefig(summaryplot)
         self.logger.info(f" ------ Saving: {summaryplot} ------\n")
 
