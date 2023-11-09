@@ -41,6 +41,7 @@ plots:
         __helpstr: plot total % flagged visibilities
         enable: true
         axis: [ant, scan, corr]                        # Avalable choices [ant, corr, scan]
+        report: true
     movies:
         __helpstr: make movies of output plots
         2d_gif: true 

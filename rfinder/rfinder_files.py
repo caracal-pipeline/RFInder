@@ -411,10 +411,10 @@ def write_html_timereport(cfg_par):
                 exptime = np.round(cfg_par['rfi']['exptime']*60.,2),
                 polnum = cfg_par['rfi']['polnum'],
                 noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
-                video_tag1 = '<img class="g" src="data:image/gif;base64,{0}">'.format(video_encoded1.decode()),
+                video_tag1 = '<img class="h" src="data:image/gif;base64,{0}">'.format(video_encoded1.decode()),
                 video_tag2 = '<img class="a" src="data:image/gif;base64,{0}">'.format(video_encoded2.decode()),
                 video_tag3 = '<img class="c" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode()),
-                video_tag4 = '<img class="h" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
+                #video_tag4 = '<img class="g" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
             ))
 
     elif cfg_par['plots']['movies']['movies_in_report'] == False:
@@ -424,6 +424,73 @@ def write_html_timereport(cfg_par):
         return 0
 
     logger.info('---- Html time report done ----\n')
+
+    return 0
+
+
+def write_html_summaryreport(cfg_par):
+
+    # Configure Jinja and ready the template
+    env = Environment(
+        loader=FileSystemLoader(cfg_par['general']['template_folder'])
+    )
+    template = env.get_template('summary_template.html')
+
+    #base_template = env.get_template('report.html')
+    # Content to be published
+    title = 'RFI summary report: {0:s}'.format(cfg_par['general']['msname'])
+
+    #imagename1 = '/Users/maccagni/Projects/RFI/rfinder_test/rfi/plots/altaz/AltAZ_rfi1297-1317MHz.png'
+    #data_uri1 = open(imagename1, 'rb').read().encode('base64').replace('\n', '')
+    image_name1 = cfg_par['general']['plotdir'] + 'ant-summary.png'
+    if os.path.exists(image_name1):
+        #video_encoded1 = open(video_name1, "rb").read().encode("base64")
+        image_encoded1 = base64.b64encode(open(image_name1, "rb").read())
+    else:
+        image_encoded1 = None
+
+    image_name2 = cfg_par['general']['plotdir'] + 'scan-summary.png'
+    if os.path.exists(image_name2):
+        image_encoded2 = base64.b64encode(open(image_name2, "rb").read())
+    else:
+        image_encoded2 = None
+
+    image_name3 = cfg_par['general']['plotdir'] + 'corr-summary.png'
+    if os.path.exists(image_name3):
+        image_encoded3 = base64.b64encode(open(image_name3, "rb").read())
+    else:
+        image_encoded3 = None
+
+    if cfg_par['plots']['plot_summary']['report'] == True:
+
+        with open(cfg_par['general']['rfidir']+'summary_report.html', "w") as f:
+#            lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
+            f.write(template.render(
+                title=title,
+                fieldname=cfg_par['general']['fieldname'],
+                field=cfg_par['general']['field'],
+                totchans = int(cfg_par['rfi']['total_channels']),
+                chan_widths=round(cfg_par['rfi']['chan_widths']/1e3,4),
+                lowfreq=round(cfg_par['rfi']['lowfreq']/1e6,3),
+                highfreq=round(cfg_par['rfi']['highfreq']/1e6,3),
+                startdate = ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['startdate'].datetime)),
+                enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
+                nant = cfg_par['rfi']['nant'],
+                ant_names = cfg_par['rfi']['ant_names'],
+ #               maxbase = str(np.round(lenghts[0][-1],0)),
+ #               minbase = str(np.round(lenghts[0][0],0)),
+ #               totbase = cfg_par['rfi']['number_baseline'],
+                exptime = np.round(cfg_par['rfi']['exptime']*60.,2),
+                polnum = cfg_par['rfi']['polnum'],
+                noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
+                video_tag1 = '<img class="h" src="data:image/png;base64,{0}">'.format(image_encoded1.decode()),
+                video_tag2 = '<img class="a" src="data:image/png;base64,{0}">'.format(image_encoded2.decode()),
+                video_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(image_encoded3.decode()),
+                #video_tag4 = '<img class="g" src="data:image/png;base64,{0}">'.format(image_encoded3.decode())
+            ))
+
+
+    logger.info('---- Html summary report done ----\n')
 
     return 0
 
