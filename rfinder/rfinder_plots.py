@@ -909,6 +909,8 @@ class rfi_plots:
                    }
         plt.rcParams.update(params)
         fig, ax = plt.subplots(figsize=(16,9))
+
+        plt.ylim(0, 100.0)
         antenna_plot = ax.bar(flag_stats.keys(), flag_stats.values(), color="orange", ec="red", align='center')
 
         if key in ["antenna", "ant"]:
@@ -929,6 +931,7 @@ class rfi_plots:
             plt.ylabel("% flagged visibilities")
             plt.savefig(summaryplot)
         self.logger.info(f" ------ Saving: {summaryplot} ------\n")
+        plt.close()
 
         return 0
 
