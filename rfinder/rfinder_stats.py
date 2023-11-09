@@ -231,8 +231,10 @@ class rfi_stats:
 
 
     def get_flags_summary_stats(self, cfg_par, axis):
+        """Get total flagged visibilities per given axis value"""
 
         def data_query(t, taql, name, axis='ant'):
+            """Query table for flagged data """
             flagtab = t.query(query=taql, columns='DATA_DESC_ID,FLAG')
             cell_shape = flagtab.getcell('FLAG', 0).shape
             flag_col = np.empty((flagtab.nrows(), cell_shape[0], cell_shape[1]), dtype=bool)
