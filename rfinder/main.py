@@ -428,17 +428,28 @@ class Rfinder:
                 self.logger.warning("------ End of RFI analysis ------\n")
       
         task = 'plots'
+
         if self.cfg_par[task]['plot_summary']['enable']==True:
+            summary_results = {}
             if not self.cfg_par['rfi']['rfi_enable']:
                 rfi.load_from_ms(self.cfg_par,0,0)
+
             for axis in  self.cfg_par[task]['plot_summary']['axis']:
                 flag_stats = rfiST.get_flags_summary_stats(self.cfg_par, axis)
+                summary_results[axis] = dict(flag_stats)
                 self.logger.warning(f" ------ Plotting {axis} summary plots ------\n")
                 rfiPL.plot_summary_stats(flag_stats, self.cfg_par, axis)
                 self.logger.info("------ Summary plot done ------\n")
 
+            if summary_results:
+                json_file = cfg_par['general']['rfidir'] + f'summary.json'
+                with open(json_file, 'w') as f:
+                    json.dump(summary_results, f)
+
+            rfiFL.write_html_summaryreport(self.cfg_par)
+
         if self.cfg_par[task]['plot_enable']==True:
-            
+
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
                 times, start, end = rfiST.time_chunk(self.cfg_par)
