@@ -9,12 +9,12 @@ general:
     ncpu: 4                                            #number of cpu to get the total flagged data
     telescope:                                         #telescope of the observations (needed for antenna diameter)
         __helpstr: Telescope of the observations, needed for determining sefd and alt/az
-        name: meerkat                                  #name of telescope for auto completion of the following info. Available choices [meerkat, wsrti, apertif]
-        diameter:                                      #diameter of telescope in meters
+        name: meerkat                                  #name of the telescope for auto-completion of the following info. Available choices [meerkat, wsrt, apertif]
+        diameter:                                      #diameter of the telescope in meters
         tsyseff:                                       #effective system temperature in Kelvin
-        long:                                          #longitude of telescope
-        lat:                                           #latitude of telescope
-        height:                                        #height/atlitude of location
+        long:                                          #longitude of the telescope
+        lat:                                           #latitude of the telescope
+        height:                                        #height/altitude of location
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold
