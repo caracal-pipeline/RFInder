@@ -351,6 +351,7 @@ class Rfinder:
             1: 2d plot of RFI flagged by frequency and baseline lenght (plot_rfi_im)
             2: 1d plot of RFI flagged by frequency channel (baselines_from_ms)
             3: 1d plot of noise increase by frequency channel (for long and short baselines) (priors_flag)
+            4: 1d plot of overall RFI flagged by scan, antenna and correlation.
         If cfg_par['rfi']['chunks']['time_chunks'] is enabled
             1: executes 'rfi' and 'plots' procedure dividing the observation in time-steps given by cfg_par['rfi']['chunks']['time_step']
             2: collects the info about the % of RFI for each time step in Alt/Az plots 
@@ -427,8 +428,28 @@ class Rfinder:
                 self.logger.warning("------ End of RFI analysis ------\n")
       
         task = 'plots'
+
+        if self.cfg_par[task]['plot_summary']['enable']==True:
+            summary_results = {}
+            if not self.cfg_par['rfi']['rfi_enable']:
+                rfi.load_from_ms(self.cfg_par,0,0)
+
+            for axis in  self.cfg_par[task]['plot_summary']['axis']:
+                flag_stats = rfiST.get_flags_summary_stats(self.cfg_par, axis)
+                summary_results[axis] = dict(flag_stats)
+                self.logger.warning(f" ------ Plotting {axis} summary plots ------\n")
+                rfiPL.plot_summary_stats(flag_stats, self.cfg_par, axis)
+                self.logger.info("------ Summary plot done ------\n")
+
+            if summary_results:
+                json_file = cfg_par['general']['rfidir'] + f'summary.json'
+                with open(json_file, 'w') as f:
+                    json.dump(summary_results, f)
+
+            rfiFL.write_html_summaryreport(self.cfg_par)
+
         if self.cfg_par[task]['plot_enable']==True:
-            
+
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
                 times, start, end = rfiST.time_chunk(self.cfg_par)

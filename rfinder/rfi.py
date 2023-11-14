@@ -60,6 +60,14 @@ class rfi:
         Chan_width, Chan_freq
 
         '''
+        STOKES_TYPES = {
+            0: "Undefined", 1: "I", 2: "Q", 3: "U", 4: "V",
+            5: "RR", 6: "RL", 7: "LR", 8: "LL",
+            9: "XX", 10: "XY", 11: "YX", 12: "YY",
+            13: "RX", 14: "RY", 15: "LX", 16: "LY",
+            17: "XR", 18: "XL", 19: "YR", 20: "YL",
+            21: "PP", 22: "PQ", 23: "QP", 24: "QQ"
+        }
 
         if counter == 0 :
             self.logger.warning("\t ... Field, Antenna & Bandwidth Info ...\n")
@@ -82,9 +90,11 @@ class rfi:
   
         antennas = tables.table(self.msfile +'/ANTENNA')
         self.ant_pos = np.array(antennas.getcol('POSITION'))
-        self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
+        self.ant_names = np.array(antennas.getcol('NAME'))
+
+        #self.ant_wsrtnames = np.array(antennas.getcol('NAME'))
         
-        self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
+        #self.ant_names = np.arange(0,self.ant_wsrtnames.shape[0],1)
         self.nant = len(self.ant_names)
 
         #logging
@@ -96,11 +106,14 @@ class rfi:
             self.logger.warning("\tAntenna names:\t\t"+str(self.ant_names))
 
         antennas.close()
+        self.ant_names = np.arange(0,self.ant_names.shape[0],1)
+
 
         spw=tables.table(self.msfile+'/SPECTRAL_WINDOW')
         self.channelWidths=spw.getcol('CHAN_WIDTH')
 
         self.channelFreqs=spw.getcol('CHAN_FREQ')
+        cfg_par['rfi']['freqs'] = self.channelFreqs[0]
         cfg_par['rfi']['chan_widths'] = self.channelWidths[0][0]
         cfg_par['rfi']['lowfreq'] = float(self.channelFreqs[0][0])
         cfg_par['rfi']['highfreq'] = float(self.channelFreqs[-1][-1])
@@ -118,6 +131,12 @@ class rfi:
         times_tm, start_tmp, end_tmp = rfiST.time_chunk(cfg_par)
 
         t=tables.table(self.msfile)
+
+        if counter == 0 :
+            cfg_par['rfi']['scans']  = list(set(t.getcol('SCAN_NUMBER')))
+            corr = tables.table(self.msfile +'/POLARIZATION')
+            corr_types = corr.getcol('CORR_TYPE')[0]
+            cfg_par['rfi']['corrs'] = [STOKES_TYPES[corr_type] for corr_type in corr_types]
 
         if counter !=0:
             value_end = times[1]
@@ -169,9 +188,6 @@ class rfi:
                 if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
                     self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
                 empty_table=1
-        
-
-        t.close()
        
         if not self.aperfi_badant:
             nrbadant =len(int(self.aperfi_badant))
@@ -188,10 +204,12 @@ class rfi:
             rfiST.predict_noise(cfg_par,self.channelWidths,self.interval,self.flag)
             cfg_par['rfi']['vis_alltimes_baseline'] = self.flag.shape[0]/nrBaseline
 
+        t.close()
 
         self.logger.info("\t ... info from MS file loaded  \n\n")
 
         return empty_table
+
 
     def baselines_from_ms(self,cfg_par):
         '''

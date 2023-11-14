@@ -136,7 +136,7 @@ class rfi_plots:
                 idx = (np.abs(freqs_plot_bin[i]-freqs)).argmin()
                 freqs_plot_idx[i]=idx
 
-            tele= cfg_par['general']['telescope']
+            tele= cfg_par['general']['telescope']['name']
             if tele == 'meerkat' or tele == 'MeerKAT' or tele == 'meerKAT' or tele == 'meer':    
                 input_baselines = np.zeros(6)
                 for i in range (0,len(input_baselines)):
@@ -201,7 +201,7 @@ class rfi_plots:
             #box_y      = [left_h, bottom, 0.12, height]
             #box_cbar       = [left_h+0.13, bottom, 0.05, height]
 
-            fig = plt.figure(1, figsize=(12,8))
+            fig = plt.figure(1, figsize=(25,10))
 
             ax = plt.axes(box_centre)
             
@@ -313,13 +313,13 @@ class rfi_plots:
         
         #open file
         if os.path.exists(rfi_table) == False:
+            print(rfi_table)
             self.logger.error('### Table of RFI results does not exist ###')    
         else:    
             
             t = fits.open(rfi_table)
             data_vec = t[1].data
             cols = t[1].columns
-            
             freqs = np.array(data_vec['frequency'],dtype=float)
             flags = np.array(data_vec['percentage_flags'],dtype=float)
             noise_factor = np.array(data_vec['noise_factor'],dtype=float)
@@ -390,7 +390,7 @@ class rfi_plots:
             box_centre    = [left, bottom, width, height]
                     
             # initialize figure
-            fig = plt.figure(1, figsize=(12,8))
+            fig = plt.figure(1, figsize=(18,8))
             plt.rc('xtick', labelsize=20)
 
             # Initialize subplots
@@ -520,6 +520,7 @@ class rfi_plots:
         self.logger.info("\t ... Plotting Alt/Az for binned dataset ... \n")
       
         if os.path.exists(cfg_par['general']['timetabledir']) == False:
+            print(cfg_par['general']['timetabledir'])
             self.logger.error("\t Folder with time subsets missing")
 
         table_tmp = str.split(cfg_par['general']['msname'][0],'.MS')
@@ -564,6 +565,7 @@ class rfi_plots:
 
                 #open file
                 if os.path.exists(rfi_table) == False:
+                    print(rfi_table)
                     self.logger.error('### Table of RFI results does not exist ###')    
                     continue         
                 else:    
@@ -879,7 +881,60 @@ class rfi_plots:
         self.logger.info(('\t ... ALT/AZ for {0:s} ...\n').format(cfg_par['general']['fieldname']))
 
         return 0
-    
+
+    def plot_summary_stats(self, flag_stats, cfg_par, key='corr'):
+
+        summaryplot = cfg_par['general']['plotdir'] + f'{key}-summary.png'
+
+        # initialize plotting parameters
+        params = {'font.family'         :' serif',
+                  'font.style'          : 'normal',
+                  'font.weight'         : 'book',
+                  'font.size'           : 20.0,
+                  'axes.linewidth'      : 1,
+                  'lines.linewidth'     : 1,
+                  'xtick.labelsize'     : 16,
+                  'ytick.labelsize'     : 16,
+                  'xtick.direction'     :'in',
+                  'ytick.direction'     :'in',
+                  'xtick.major.size'    : 4,
+                  'xtick.major.width'   : 1,
+                  'xtick.minor.size'    : 2,
+                  'xtick.minor.width'   : 1,
+                  'ytick.major.size'    : 4,
+                  'ytick.major.width'   : 1,
+                  'ytick.minor.size'    : 2,
+                  'ytick.minor.width'   : 1,
+                  'text.usetex'         : False,
+                   }
+        plt.rcParams.update(params)
+        fig, ax = plt.subplots(figsize=(16,9))
+
+        plt.ylim(0, 100.0)
+        antenna_plot = ax.bar(flag_stats.keys(), flag_stats.values(), color="orange", ec="red", align='center')
+
+        if key in ["antenna", "ant"]:
+            plt.title("Antenna flags")
+            plt.xlabel("Antenna")
+            plt.ylabel("% flagged visibilities")
+            plt.xticks(rotation=90)
+            plt.savefig(summaryplot)
+        elif key in ["scan"]:
+            plt.title("Scan flags")
+            plt.xlabel("Scan Number")
+            plt.ylabel("% flagged visibilities")
+            plt.savefig(summaryplot)
+        elif key in ["correlation", "corr"]:
+            plt.title("Correlation flags")
+            plt.xlabel("Correlation")
+            plt.ylabel("Flagged percentage (%)")
+            plt.ylabel("% flagged visibilities")
+            plt.savefig(summaryplot)
+        self.logger.info(f" ------ Saving: {summaryplot} ------\n")
+        plt.close()
+
+        return 0
+
 
     def gif_me_up(self,cfg_par,filenames,outmovie):
         
@@ -892,7 +947,7 @@ class rfi_plots:
         for filename in filenames:
             images.append(io.imread(filename))
             
-        io.mimsave(outmovie,images,duration=1.5)
+        io.mimsave(outmovie,images,duration=1000,loop=1000)
 
 
         self.logger.info(('\t ... Movie written to file ...\n'))
