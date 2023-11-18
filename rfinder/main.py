@@ -426,13 +426,15 @@ class Rfinder:
                 rfiFL.rfi_frequency(self.cfg_par,-1)
                 self.logger.warning("------ RFI saved to table ------\n")
                 self.logger.warning("------ End of RFI analysis ------\n")
+
+        else:
+            rfi.load_from_ms(self.cfg_par,0,0)
+            self.logger.warning("------ MSfile Loaded -----\n")
       
         task = 'plots'
 
         if self.cfg_par[task]['plot_summary']['enable']==True:
             summary_results = {}
-            if not self.cfg_par['rfi']['rfi_enable']:
-                rfi.load_from_ms(self.cfg_par,0,0)
 
             for axis in  self.cfg_par[task]['plot_summary']['axis']:
                 flag_stats = rfiST.get_flags_summary_stats(self.cfg_par, axis)
@@ -448,7 +450,7 @@ class Rfinder:
 
             rfiFL.write_html_summaryreport(self.cfg_par)
 
-        if self.cfg_par[task]['plot_enable']==True:
+        if self.cfg_par[task]['plot_details']['enable']==True:
 
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
@@ -483,39 +485,40 @@ class Rfinder:
 
                     rfiPL.plot_rfi_imshow(self.cfg_par,i)
                     self.logger.info("------ RFI in 2D plotted ------\n")
-                    self.cfg_par['plots']['plot_noise'] = 'rfi'
-                    self.cfg_par['plots']['long_short'] = False
+                    self.cfg_par['plots']['plot_details']['plot_noise'] = 'rfi'
+                    self.cfg_par['plots']['plot_details']['long_short'] = False
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
-                    self.cfg_par['plots']['long_short'] = True
+                    self.cfg_par['plots']['plot_details']['long_short'] = True
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
-                    self.cfg_par['plots']['plot_noise'] = 'noise_factor'
+                    self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise_factor'
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
-                    self.cfg_par['plots']['plot_noise'] = 'noise'
+                    self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise'
                     rfiPL.plot_noise_frequency(self.cfg_par,i)         
                     self.logger.warning("------ RFI in 1D plotted ------\n")
                 
                 rfiPL.plot_altaz(self.cfg_par,68)
                 self.logger.warning("------ RFI in ALT/AZ plotted ------\n")
         
-                if (self.cfg_par['plots']['movies']['altaz_gif']==True or self.cfg_par['plots']['movies']['2d_gif']==True or 
-                    self.cfg_par['plots']['movies']['1d_gif']==True):
+                if (self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True or
+                    self.cfg_par['plots']['plot_details']['movies']['2d_gif']==True or
+                    self.cfg_par['plots']['plot_details']['movies']['1d_gif']==True):
                     self.logger.warning("------ Making movies ------\n")
      
-                if self.cfg_par['plots']['movies']['altaz_gif']==True:
+                if self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True:
 
                     out_animation = self.cfg_par['general']['moviedir']+'AltAz_movie.gif'
                     filenames = rfiFL.find_altaz_plots(self.cfg_par)
                     rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
                     self.logger.info("------ AltAz movie done ------\n")
                 
-                if self.cfg_par['plots']['movies']['2d_gif']==True:
+                if self.cfg_par['plots']['plot_details']['movies']['2d_gif']==True:
                     out_animation = self.cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
                     filenames = rfiFL.find_2d_plots(self.cfg_par)
                     rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
                 
                     self.logger.info("------ 2D movie done ------\n")
                 
-                if self.cfg_par['plots']['movies']['1d_gif']==True:
+                if self.cfg_par['plots']['plot_details']['movies']['1d_gif']==True:
                     out_animation = self.cfg_par['general']['moviedir']+'TimeChunks_1D_flags.gif'
                     root_name = 'flags'
                     filenames = rfiFL.find_1d_plots(self.cfg_par,root_name)
@@ -532,8 +535,9 @@ class Rfinder:
                     rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)         
                     self.logger.info("------ 1D movies done ------\n")
                 
-                if (self.cfg_par['plots']['movies']['altaz_gif']==True or self.cfg_par['plots']['movies']['2d_gif']==True or 
-                    self.cfg_par['plots']['movies']['1d_gif']==True):
+                if (self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True or
+                    self.cfg_par['plots']['plot_details']['movies']['2d_gif']==True or
+                    self.cfg_par['plots']['plot_details']['movies']['1d_gif']==True):
                     self.logger.warning("------ Movies done ------\n")
 
                 rfiFL.write_html_timereport(self.cfg_par)                 
@@ -554,14 +558,14 @@ class Rfinder:
                 self.logger.warning("------ Alt/Az plotted ------\n")                            
                 rfiPL.plot_rfi_imshow(self.cfg_par,-1)
                 self.logger.warning("------ RFI in 2D plotted ------\n")
-                self.cfg_par['plots']['plot_noise'] = 'rfi'
-                self.cfg_par['plots']['long_short'] = False
+                self.cfg_par['plots']['plot_details']['plot_noise'] = 'rfi'
+                self.cfg_par['plots']['plot_details']['long_short'] = False
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
-                self.cfg_par['plots']['long_short'] = True
+                self.cfg_par['plots']['plot_details']['long_short'] = True
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
-                self.cfg_par['plots']['plot_noise'] = 'noise_factor'
+                self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise_factor'
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
-                self.cfg_par['plots']['plot_noise'] = 'noise'
+                self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise'
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
                 self.logger.warning("------ RFI in 1D plotted ------\n")
 

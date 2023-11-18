@@ -32,7 +32,7 @@ class rfi:
     def __init__(self):
 
         self.logger = logging.getLogger('log-rfinder.log')
-        #self.logger.setLevel(logging.INFO)
+        self.logger.setLevel(logging.INFO)
 
         #fh = logging.FileHandler('log-rfinder.log')
         #fh.setLevel(logging.INFO)
