@@ -172,7 +172,7 @@ class rfi_stats:
         self.logger.info('\t Assumptions on {0:s} telescope'.format(tele))
         self.logger.info('\t\tDish diameter = {0:.1f} m'.format(diam))
         self.logger.info('\t\t ... and SEFD = {0:0f} Jy'.format(SEFD))
-        self.logger.info('\t\t ... and Tsys = {0:.1f} K'.format(tsyseff))
+        self.logger.info('\t\t ... and Tsys = {0:.1f} K\n'.format(tsyseff))
 
         self.logger.info('\t Properties of observation'.format(tele))
         nrBaseline = cfg_par['rfi']['number_baseline']
@@ -221,11 +221,11 @@ class rfi_stats:
         obs_altaz = coord.transform_to(frame)
         cfg_par['rfi']['altaz'] = obs_altaz
        
-        #self.logger.info(list(map(('\t\t ... Altitude = {0:s}').format(cfg_par['rfi']['altaz'].alt))))
-        ##self.logger.info(('\t\t ... Altitude = {0:s}').format(cfg_par['rfi']['altaz'].alt))
-        ##self.logger.info(('\t\t ... Azimuth = {0:s}\n').format(cfg_par['rfi']['altaz'].az))
+        #self.logger.info(list(map((f"\t\t ... Altitude = {cfg_par['rfi']['altaz'].alt}"))))
+        self.logger.info(f"\t\t ... Altitude = {cfg_par['rfi']['altaz'].alt}")
+        self.logger.info(f"\t\t ... Azimuth = {cfg_par['rfi']['altaz'].az}\n")
 
-        ##self.logger.info("\t ... Alt/Az done ... \n")
+        self.logger.info("\t ... Alt/Az done ... \n")
 
         return obs_altaz
 
@@ -246,6 +246,9 @@ class rfi_stats:
                 # For this we need to index that data appropriately
                 vals,counts = np.unique(flag_col[:,:,name],return_counts=True)
                 name = cfg_par['rfi']['corrs'][name]
+            if axis in ['freq']:
+                vals,counts = np.unique(flag_col[:,name,:],return_counts=True)
+                name = cfg_par['rfi']['freqs'][name]
             else:
                 vals,counts = np.unique(flag_col,return_counts=True)
                 name = str(name)
@@ -274,7 +277,7 @@ class rfi_stats:
             self.logger.info('')
 
         ncpu = cfg_par['general']['ncpu']
-        self.logger.info("\t ...  Observing time Info ... \n")
+        self.logger.info("\t ...  Flag Summary Info ... \n")
         self.msfile = cfg_par['general']['msfullpath']
         t=tables.table(self.msfile)
         t = t.query(query=f"FIELD_ID=={cfg_par['general']['field']}")
@@ -282,7 +285,13 @@ class rfi_stats:
         processes = []
         if axis in ['ant', 'antenna']:
             for index, ant_name in enumerate(cfg_par['rfi']['ant_names']):
-                taql = f"ANTENNA1=={index} || ANTENNA2=={index}"
+                if cfg_par['plots']['plot_summary']['antenna']:
+                    if ant_name in [cfg_par['plots']['plot_summary']['antenna']]:
+                        taql = f"ANTENNA1=={str(index)} || ANTENNA2=={str(index)}"
+                    else:
+                        continue
+                else:
+                    taql = f"ANTENNA1=={index} || ANTENNA2=={index}"
                 p = multiprocessing.Process(target=data_query, args=(t, taql, ant_name))
                 p.start()
                 processes.append(p)
@@ -290,13 +299,16 @@ class rfi_stats:
                     for p in processes:
                         p.join()
                     processes = []
-            if len(processes) > 1:
+            if len(processes) > 0:
                 for p in processes:
                     p.join()
         if axis in ['scan']:
             scan_ids = list(set(t.getcol('SCAN_NUMBER')))
             for index, scan_id in enumerate(scan_ids):
                 taql = f'SCAN_NUMBER=={str(scan_id)}'
+                if cfg_par['plots']['plot_summary']['antenna']:
+                    ant_id = list(cfg_par['rfi']['ant_names']).index(cfg_par['plots']['plot_summary']['antenna'])
+                    taql += f"&& ANTENNA1=={str(ant_id)} || ANTENNA2=={str(ant_id)}"
                 p = multiprocessing.Process(target=data_query, args=(t, taql, scan_id))
                 p.start()
                 processes.append(p)
@@ -304,12 +316,15 @@ class rfi_stats:
                     for p in processes:
                         p.join()
                     processes = []
-            if len(processes) > 1:
+            if len(processes) > 0:
                 for p in processes:
                     p.join()
         if axis in ['corr']:
             for index, corr_type in enumerate(cfg_par['rfi']['corrs']):
                 taql = f''
+                if cfg_par['plots']['plot_summary']['antenna']:
+                    ant_id = list(cfg_par['rfi']['ant_names']).index(cfg_par['plots']['plot_summary']['antenna'])
+                    taql += f"ANTENNA1=={str(ant_id)} || ANTENNA2=={str(ant_id)}"
                 p = multiprocessing.Process(target=data_query, args=(t, taql, index, axis))
                 p.start()
                 processes.append(p)
@@ -317,7 +332,23 @@ class rfi_stats:
                     for p in processes:
                         p.join()
                     processes = []
-            if len(processes) > 1:
+            if len(processes) > 0:
+                for p in processes:
+                    p.join()
+        if axis in ['freq']:
+            for index, freq_id in enumerate(cfg_par['rfi']['freqs']):
+                taql = f''
+                if cfg_par['plots']['plot_summary']['antenna']:
+                    ant_id = list(cfg_par['rfi']['ant_names']).index(cfg_par['plots']['plot_summary']['antenna'])
+                    taql += f"ANTENNA1=={str(ant_id)} || ANTENNA2=={str(ant_id)}"
+                p = multiprocessing.Process(target=data_query, args=(t, taql, index, axis))
+                p.start()
+                processes.append(p)
+                if len(processes) == ncpu:
+                    for p in processes:
+                        p.join()
+                    processes = []
+            if len(processes) > 0:
                 for p in processes:
                     p.join()
         t.close()

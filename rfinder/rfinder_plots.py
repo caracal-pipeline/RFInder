@@ -930,6 +930,14 @@ class rfi_plots:
             plt.ylabel("Flagged percentage (%)")
             plt.ylabel("% flagged visibilities")
             plt.savefig(summaryplot)
+        elif key in ["frequency", "freq"]:
+            plt.title("Frequency flags")
+            plt.xlabel("Frequency (Hz)")
+            plt.ylabel("% flagged visibilities")
+            ax2 = ax.twiny()
+            ax2.set_xlabel("Channel Number")
+            ax2.bar(list(range(len(flag_stats.keys()))), flag_stats.values(), color="orange", ec="red", align='center')
+            plt.savefig(summaryplot)
         self.logger.info(f" ------ Saving: {summaryplot} ------\n")
         plt.close()
 
