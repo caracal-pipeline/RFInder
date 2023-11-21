@@ -49,4 +49,5 @@ plots:
         __helpstr: plot total % flagged visibilities
         enable: true
         axis: [ant, scan, corr, freq]                  #avalable choices [ant, corr, scan, freq]
-        report: true
+        antenna: m001                                  #select an antenna to get summary
+        report: false
