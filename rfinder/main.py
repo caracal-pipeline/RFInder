@@ -444,6 +444,7 @@ class Rfinder:
                 self.logger.info("------ Summary plot done ------\n")
 
             if summary_results:
+                self.logger.warning(f'------ Total % Flagged: {sum(summary_results[axis].values())/len(summary_results[axis].values())}% ------')
                 json_file = cfg_par['general']['rfidir'] + f'summary.json'
                 with open(json_file, 'w') as f:
                     json.dump(summary_results, f)
@@ -651,10 +652,13 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
 
         return self
 
+
 def driver():
     logger = logging.getLogger('log-rfinder.log')
     logger.setLevel(logging.INFO)
     logger.propagate = False
+    logger.debug('info')
+    logger.info('info')
 
     fh = logging.FileHandler('log-rfinder.log')
     fh.setLevel(logging.INFO)
@@ -662,7 +666,7 @@ def driver():
     ch = logging.StreamHandler()
     ch.setLevel(logging.WARNING)
 
-    formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s; %(levelname)s - %(filename)s - %(message)s')
     formatter_ch = logging.Formatter('%(message)s')
 
     fh.setFormatter(formatter)
