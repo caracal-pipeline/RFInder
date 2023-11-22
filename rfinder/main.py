@@ -444,7 +444,7 @@ class Rfinder:
                 self.logger.info("------ Summary plot done ------\n")
 
             if summary_results:
-                self.logger.warning(f'------ Total % Flagged: {sum(summary_results[axis].values())/len(summary_results[axis].values())}% ------')
+                self.logger.warning(f'------ Total % Flagged: {round(sum(summary_results[axis].values())/len(summary_results[axis].values()),2)} ------')
                 json_file = cfg_par['general']['rfidir'] + f'summary.json'
                 with open(json_file, 'w') as f:
                     json.dump(summary_results, f)

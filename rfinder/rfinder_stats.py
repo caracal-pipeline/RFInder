@@ -336,7 +336,7 @@ class rfi_stats:
                 for p in processes:
                     p.join()
         if axis in ['freq']:
-            for index, freq_id in enumerate(cfg_par['rfi']['freqs']):
+            for index, freq in enumerate(cfg_par['rfi']['freqs']):
                 taql = f''
                 if cfg_par['plots']['plot_summary']['antenna']:
                     ant_id = list(cfg_par['rfi']['ant_names']).index(cfg_par['plots']['plot_summary']['antenna'])

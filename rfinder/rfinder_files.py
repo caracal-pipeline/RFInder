@@ -461,6 +461,12 @@ def write_html_summaryreport(cfg_par):
     else:
         image_encoded3 = None
 
+    image_name4 = cfg_par['general']['plotdir'] + 'freq-summary.png'
+    if os.path.exists(image_name4):
+        image_encoded4 = base64.b64encode(open(image_name4, "rb").read())
+    else:
+        image_encoded4 = None
+
     if cfg_par['plots']['plot_summary']['report'] == True:
 
         with open(cfg_par['general']['rfidir']+'summary_report.html', "w") as f:
@@ -486,7 +492,7 @@ def write_html_summaryreport(cfg_par):
                 video_tag1 = '<img class="h" src="data:image/png;base64,{0}">'.format(image_encoded1.decode()),
                 video_tag2 = '<img class="a" src="data:image/png;base64,{0}">'.format(image_encoded2.decode()),
                 video_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(image_encoded3.decode()),
-                #video_tag4 = '<img class="g" src="data:image/png;base64,{0}">'.format(image_encoded3.decode())
+                video_tag4 = '<img class="g" src="data:image/png;base64,{0}">'.format(image_encoded4.decode())
             ))
 
 
