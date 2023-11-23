@@ -697,7 +697,7 @@ def driver():
     ch.setLevel(logging.INFO)
 
     formatter = logging.Formatter('%(asctime)s; %(levelname)s - %(filename)s - %(message)s')
-    formatter_ch = logging.Formatter('%(asctime)s'; '%(message)s')
+    formatter_ch = logging.Formatter('%(asctime)s; %(message)s')
 
     fh.setFormatter(formatter)
     ch.setFormatter(formatter_ch)
