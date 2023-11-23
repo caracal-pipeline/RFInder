@@ -18,7 +18,7 @@ general:
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold
-    rfi_enable: true                                   #if True this module is enabled else only obs info will logged
+    rfi_enable: false                                   #if True this module is enabled else only obs info will logged
     polarization: 'q'                                  #xx, yy, xy, yx, q (also in CAPS)
     bad_antenna: '[]'                                  #list of bad antennas: for no antennas try '[]'
     RFInder_mode: 'use_flags'                          #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
@@ -34,9 +34,9 @@ rfi:
 
 plots:
     __helpstr: plot rfi over different axes
-    plot_detail:
+    plot_details:
         __helpstr: plot formats
-        enable: true
+        enable: false
         plot_noise: 'rfi'                              #choose to plot % of RFI, 'rfi', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
         plot_long_short: true                          #plot all baselines, or only the short and the long
         movies:
@@ -47,7 +47,7 @@ plots:
             movies_in_report: true
     plot_summary:
         __helpstr: plot total % flagged visibilities
-        enable: true
+        enable: false
         axis: [ant, scan, corr, freq]                  #avalable choices [ant, corr, scan, freq]
         antenna:                                       #select an antenna to get summary
         report: true                                   #generate html report with the results

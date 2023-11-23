@@ -229,7 +229,25 @@ class Rfinder:
             action='store_true',
             help='enable cleanup of intermediate products')
 
+        add('-pltDet','--plot_details',
+            action='store_true',
+            help="plot percentage of RFI, 'rfi', or noise, 'noise', or factor of noise increase")
 
+        add('-pltSum','--plot_summary',
+            action='store_true',
+            help='plot percentage of RFI per ant,scan,freq,corr')
+
+        add('-summary','--summary_options',
+            choices=['ant', 'corr', 'scan', 'freq'],
+            default=['corr'],
+            nargs='+',
+            type=str,
+            help='enable cleanup of intermediate products')
+
+        add('-ncpu', '--ncpu',
+            type=int,
+            default=False,
+            help='Number of cpu to use when generating summary stats')
 
         args = self.parser.parse_args(argv)
         
@@ -246,8 +264,10 @@ class Rfinder:
             self.cfg_par['general']['msname'] = args.input
         if args.field != None:
             self.cfg_par['general']['field'] = args.field
+        if args.ncpu:
+            self.cfg_par['general']['ncpu'] = args.ncpu
         if args.telescope:
-            self.cfg_par['general']['telescope'] = args.telescope
+            self.cfg_par['general']['telescope']['name'] = args.telescope
         if args.polarization:
             self.cfg_par['rfi']['polarization'] = args.polarization
         if args.baseline_cut:
@@ -284,12 +304,22 @@ class Rfinder:
         else:
             self.cfg_par['general']['outlabel'] = '_'+self.cfg_par['general']['outlabel']
         
-        if (args.rfimode == 'rms_clip' or args.rfimode == 'rms') :
-                self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
-                if args.sigma_clip:
-                    self.cfg_par['rfi']['rms_clip'] = args.sigma_clip
-                if args.frequency_interval:
-                    self.cfg_par['rfi']['noise_measure_edges'] = args.frequency_interval
+        if (args.rfimode == 'rms_clip' or args.rfimode == 'rms'):
+            self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
+            if args.sigma_clip:
+                self.cfg_par['rfi']['rms_clip'] = args.sigma_clip
+            if args.frequency_interval:
+                self.cfg_par['rfi']['noise_measure_edges'] = args.frequency_interval
+        else:
+            self.cfg_par['rfi']['rfi_enable'] = False
+
+        if args.plot_details:
+            self.cfg_par['plots']['plot_details']['enable'] = True
+
+        if args.plot_summary:
+            self.cfg_par['plots']['plot_summary']['enable'] = True
+            if args.summary_options:
+                self.cfg_par['plots']['plot_summary']['axis'] = args.summary_options
 
         return self
 
@@ -451,7 +481,7 @@ class Rfinder:
 
             rfiFL.write_html_summaryreport(self.cfg_par)
 
-        if self.cfg_par[task]['plot_details']['enable']==True:
+        if self.cfg_par[task]['plot_detail']['enable']==True:
 
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
@@ -486,7 +516,7 @@ class Rfinder:
 
                     rfiPL.plot_rfi_imshow(self.cfg_par,i)
                     self.logger.info("------ RFI in 2D plotted ------\n")
-                    self.cfg_par['plots']['plot_details']['plot_noise'] = 'rfi'
+                    self.cfg_par['plots']['plot_detail']['plot_noise'] = 'rfi'
                     self.cfg_par['plots']['plot_details']['long_short'] = False
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['plot_details']['long_short'] = True
@@ -664,10 +694,10 @@ def driver():
     fh.setLevel(logging.INFO)
 
     ch = logging.StreamHandler()
-    ch.setLevel(logging.WARNING)
+    ch.setLevel(logging.INFO)
 
     formatter = logging.Formatter('%(asctime)s; %(levelname)s - %(filename)s - %(message)s')
-    formatter_ch = logging.Formatter('%(message)s')
+    formatter_ch = logging.Formatter('%(asctime)s'; '%(message)s')
 
     fh.setFormatter(formatter)
     ch.setFormatter(formatter_ch)
