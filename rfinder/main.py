@@ -481,7 +481,7 @@ class Rfinder:
 
             rfiFL.write_html_summaryreport(self.cfg_par)
 
-        if self.cfg_par[task]['plot_detail']['enable']==True:
+        if self.cfg_par[task]['plot_details']['enable']==True:
 
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
@@ -516,7 +516,7 @@ class Rfinder:
 
                     rfiPL.plot_rfi_imshow(self.cfg_par,i)
                     self.logger.info("------ RFI in 2D plotted ------\n")
-                    self.cfg_par['plots']['plot_detail']['plot_noise'] = 'rfi'
+                    self.cfg_par['plots']['plot_details']['plot_noise'] = 'rfi'
                     self.cfg_par['plots']['plot_details']['long_short'] = False
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['plot_details']['long_short'] = True
