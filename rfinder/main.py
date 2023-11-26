@@ -244,6 +244,11 @@ class Rfinder:
             type=str,
             help='enable cleanup of intermediate products')
 
+        add('-fbin', '--freq_bin',
+            type=int,
+            default=False,
+            help='Number of frequencies to bin into a single channel')
+
         add('-ncpu', '--ncpu',
             type=int,
             default=False,
@@ -320,6 +325,8 @@ class Rfinder:
             self.cfg_par['plots']['plot_summary']['enable'] = True
             if args.summary_options:
                 self.cfg_par['plots']['plot_summary']['axis'] = args.summary_options
+            if args.freq_bin:
+                self.cfg_par['plots']['plot_summary']['freq_bin'] = args.freq_bin
 
         return self
 
