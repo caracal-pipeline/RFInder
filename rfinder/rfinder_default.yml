@@ -50,4 +50,5 @@ plots:
         enable: false
         axis: [ant, scan, corr, freq]                  #avalable choices [ant, corr, scan, freq]
         antenna:                                       #select an antenna to get summary
+        freq_bin: 4                                    #bin frequency channels
         report: true                                   #generate html report with the results

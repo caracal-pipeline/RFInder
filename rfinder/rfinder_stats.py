@@ -248,7 +248,7 @@ class rfi_stats:
                 name = cfg_par['rfi']['corrs'][name]
             if axis in ['freq']:
                 vals,counts = np.unique(flag_col[:,name,:],return_counts=True)
-                name = cfg_par['rfi']['freqs'][name]
+                name = cfg_par['rfi']['freqs'][name[0]]
             else:
                 vals,counts = np.unique(flag_col,return_counts=True)
                 name = str(name)
@@ -338,12 +338,21 @@ class rfi_stats:
         if axis in ['freq']:
             for index, freq in enumerate(cfg_par['rfi']['freqs']):
                 taql = f''
+                i = index
+                if cfg_par['plots']['plot_summary']['freq_bin']:
+                    index = range(index, index + int(cfg_par['plots']['plot_summary']['freq_bin']))
+                else:
+                    cfg_par['plots']['plot_summary']['freq_bin'] = 1
+                    index = range(index, index + int(cfg_par['plots']['plot_summary']['freq_bin']))
+
                 if cfg_par['plots']['plot_summary']['antenna']:
                     ant_id = list(cfg_par['rfi']['ant_names']).index(cfg_par['plots']['plot_summary']['antenna'])
                     taql += f"ANTENNA1=={str(ant_id)} || ANTENNA2=={str(ant_id)}"
-                p = multiprocessing.Process(target=data_query, args=(t, taql, index, axis))
-                p.start()
-                processes.append(p)
+
+                if (i/float(cfg_par['plots']['plot_summary']['freq_bin'])).is_integer():
+                    p = multiprocessing.Process(target=data_query, args=(t, taql, index, axis))
+                    p.start()
+                    processes.append(p)
                 if len(processes) == ncpu:
                     for p in processes:
                         p.join()
