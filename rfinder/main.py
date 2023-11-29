@@ -28,10 +28,10 @@ RFINDER_DIR = RFINDER_PATH+'/rfinder/'
 
 sys.path.append(os.path.join(RFINDER_PATH, 'rfinder'))
 
-import rfi
-import rfinder_stats as rfi_stats
-import rfinder_plots as rfi_plots
-import rfinder_files as rfiFL
+from rfinder import rfi
+from rfinder import rfinder_stats as rfi_stats
+from rfinder import rfinder_plots as rfi_plots
+from rfinder import rfinder_files as rfiFL
 
 rfi = rfi.rfi()
 rfiST = rfi_stats.rfi_stats()

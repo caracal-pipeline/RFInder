@@ -26,9 +26,9 @@ import imageio as io
 
 import logging
 
-import rfi
+from rfinder import rfi
 rfi = rfi.rfi()
-import rfinder_stats as rfi_stats
+from rfinder import rfinder_stats as rfi_stats
 rfiST = rfi_stats.rfi_stats()
 
 

@@ -17,10 +17,9 @@ from astropy import units as u
 from astropy.io import fits, ascii
 from astropy import units as u
 from astropy.table import Table, Column, MaskedColumn
-import rfinder
 
-import rfinder_stats as rfi_stats
-import rfinder_files as rfi_files
+from rfinder import rfinder_stats as rfi_stats
+from rfinder import rfinder_files as rfi_files
 
 
 rfiST = rfi_stats.rfi_stats()

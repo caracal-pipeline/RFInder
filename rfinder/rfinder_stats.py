@@ -6,23 +6,19 @@ import numpy as np
 import yaml
 import json
 import glob
-import casacore.tables as tables
 import logging
 import multiprocessing
+import casacore.tables as tables
 
 
 from astropy.time import Time
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.io import fits, ascii
 from astropy import units as u
 from astropy.table import Table, Column, MaskedColumn
-
-
-import rfinder
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 
 
 class rfi_stats:
-
 
 
     def __init__(self):

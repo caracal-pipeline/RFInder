@@ -1,11 +1,11 @@
 import base64
-import os, string, sys, glob
+import shutil
 import numpy as np
+import os, string, sys, glob
 from astropy.io import fits as fits
 from astropy import units as u
 from jinja2 import FileSystemLoader, Environment
-import shutil
-import rfinder_stats as rfi_stats 
+from rfinder import rfinder_stats as rfi_stats
 rfiST = rfi_stats.rfi_stats()
 
 import logging
