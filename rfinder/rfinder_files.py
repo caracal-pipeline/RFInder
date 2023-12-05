@@ -294,7 +294,7 @@ def write_html_fullreport(cfg_par):
     if os.path.exists(video_name3):
         video_encoded3 = base64.b64encode(open(video_name3, "rb").read())
 
-    if cfg_par['plots']['movies']['movies_in_report'] == True:
+    if cfg_par['plots']['plot_details']['movies']['movies_in_report'] == True:
         template = env.get_template('full_template.html')
         with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
             lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
@@ -325,7 +325,7 @@ def write_html_fullreport(cfg_par):
                 video_tag3 = '<img class="f" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
             ))
 
-    elif cfg_par['plots']['movies']['movies_in_report'] == False:
+    elif cfg_par['plots']['plot_details']['movies']['movies_in_report'] == False:
         template = env.get_template('fullshort_template.html')
         with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
             lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
@@ -389,7 +389,7 @@ def write_html_timereport(cfg_par):
     else:
         video_encoded3 = None
 
-    if cfg_par['plots']['movies']['movies_in_report'] == True:
+    if cfg_par['plots']['plot_details']['movies']['movies_in_report'] == True:
 
         with open(cfg_par['general']['rfidir']+'time_report.html', "w") as f:
             lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
@@ -417,7 +417,7 @@ def write_html_timereport(cfg_par):
                 #video_tag4 = '<img class="g" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
             ))
 
-    elif cfg_par['plots']['movies']['movies_in_report'] == False:
+    elif cfg_par['plots']['plot_details']['movies']['movies_in_report'] == False:
 
         logger.info('\t ERROR:  movies in report must be set to TRUE\n')
 

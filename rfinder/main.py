@@ -296,7 +296,7 @@ class Rfinder:
             self.cfg_par['rfi']['chunks']['spw_enable'] = True
 
         if args.no_movies == True : 
-            self.cfg_par['plots']['movies']['movies_in_report'] = False
+            self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = False
 
         if args.no_cleanup==True:
             self.cfg_par['general']['cleanup_enable'] = False
@@ -631,7 +631,7 @@ class Rfinder:
             self.parser.print_help()
 
             print("""\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml
-rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
+                  rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
 
             sys.exit(0)
 

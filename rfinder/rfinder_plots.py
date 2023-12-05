@@ -166,11 +166,11 @@ class rfi_plots:
             params = {'font.family'         :' serif',
                       'font.style'          : 'normal',
                       'font.weight'         : 'book',
-                      'font.size'           : 18.0,
+                      'font.size'           : 24.0,
                       'axes.linewidth'      : 1,
                       'lines.linewidth'     : 1,
-                      'xtick.labelsize'     : 16,
-                      'ytick.labelsize'     : 16, 
+                      'xtick.labelsize'     : 18,
+                      'ytick.labelsize'     : 18,
                       'xtick.direction'     :'in',
                       'ytick.direction'     :'in',
                       #'xtick.top'           : True,   # draw ticks on the top side
@@ -191,7 +191,7 @@ class rfi_plots:
             plt.rcParams.update(params)
             # Format axes
             nullfmt        = NullFormatter() 
-            left, width    = 0.05, 0.9                                                                     #|These determine where the subplots go
+            left, width    = 0.06, 0.89                                                                     #|These determine where the subplots go
             bottom, height = 0.1, 0.85
             #left_h = left+width+0.015
             #bottom_h = left+height+0.015
@@ -221,7 +221,7 @@ class rfi_plots:
             ax.set_yticklabels(input_baselines)
                     
             ax.set_xlabel('Frequency [MHz]')
-            ax.set_ylabel('Baseline lenght [m]')
+            ax.set_ylabel('Baseline length [m]')
             
             # colorbar
 
@@ -263,8 +263,10 @@ class rfi_plots:
             ax.set_title(title_plot)
          
             plt.savefig(rfi_freq_base_plot,format='png')
+            if cfg_par['plots']['plot_details']['plot_eps']:
+                plt.savefig(rfi_freq_base_plot.replace('png', 'eps'), format='eps')
             plt.close(fig)        
-            self.logger.info("\t ... RFI per baseline lenght and frequency plotted ... \n\n")
+            self.logger.info("\t ... RFI per baseline length and frequency plotted ... \n\n")
 
     def plot_noise_frequency(self,cfg_par,time_step=-1):
         '''
@@ -313,7 +315,6 @@ class rfi_plots:
         
         #open file
         if os.path.exists(rfi_table) == False:
-            print(rfi_table)
             self.logger.error('### Table of RFI results does not exist ###')    
         else:    
             
@@ -355,11 +356,12 @@ class rfi_plots:
             params = {'font.family'         :' serif',
                       'font.style'          : 'normal',
                       'font.weight'         : 'book',
-                      'font.size'           : 18.0,
+                      #'font.size'           : 18.0,
+                      'font.size'           : 26.0,
                       'axes.linewidth'      : 1,
                       'lines.linewidth'     : 1,
-                      'xtick.labelsize'     : 16,
-                      'ytick.labelsize'     : 16, 
+                      'xtick.labelsize'     : 18,
+                      'ytick.labelsize'     : 18,
                       'xtick.direction'     :'in',
                       'ytick.direction'     :'in',
                       #'xtick.top'           : True,   # draw ticks on the top side
@@ -382,7 +384,7 @@ class rfi_plots:
 
             # Format axes
             nullfmt        = NullFormatter() 
-            left, width    = 0.05, 0.9                                                                     #|These determine where the subplots go
+            left, width    = 0.06, 0.89                                                                     #|These determine where the subplots go
             bottom, height = 0.1, 0.85
             #left_h = left+width+0.015
             #bottom_h = left+height+0.015
@@ -391,6 +393,7 @@ class rfi_plots:
                     
             # initialize figure
             fig = plt.figure(1, figsize=(18,8))
+
             plt.rc('xtick', labelsize=20)
 
             # Initialize subplots
@@ -507,6 +510,8 @@ class rfi_plots:
                 rfi_freq_plot = out_plot+'_rfi.png'
 
             plt.savefig(rfi_freq_plot,format='png')
+            if cfg_par['plots']['plot_details']['plot_eps']:
+                plt.savefig(rfi_freq_plot.replace('png', 'eps'), format='eps')
             plt.close(fig)        
             self.logger.info("\t ... RFI in 1D plotted ...\n\n")
        
@@ -520,7 +525,6 @@ class rfi_plots:
         self.logger.info("\t ... Plotting Alt/Az for binned dataset ... \n")
       
         if os.path.exists(cfg_par['general']['timetabledir']) == False:
-            print(cfg_par['general']['timetabledir'])
             self.logger.error("\t Folder with time subsets missing")
 
         table_tmp = str.split(cfg_par['general']['msname'][0],'.MS')
@@ -565,7 +569,6 @@ class rfi_plots:
 
                 #open file
                 if os.path.exists(rfi_table) == False:
-                    print(rfi_table)
                     self.logger.error('### Table of RFI results does not exist ###')    
                     continue         
                 else:    
@@ -601,11 +604,11 @@ class rfi_plots:
             params = {'font.family'         :' serif',
                       'font.style'          : 'normal',
                       'font.weight'         : 'book',
-                      'font.size'           : 18.0,
+                      'font.size'           : 20.0,
                       'axes.linewidth'      : 1,
                       'lines.linewidth'     : 1,
-                      'xtick.labelsize'     : 16,
-                      'ytick.labelsize'     : 16, 
+                      'xtick.labelsize'     : 17,
+                      'ytick.labelsize'     : 17,
                       'xtick.direction'     :'in',
                       'ytick.direction'     :'in',
                       #'xtick.top'           : True,   # draw ticks on the top side
@@ -804,8 +807,8 @@ class rfi_plots:
                   'font.size'           : 18.0,
                   'axes.linewidth'      : 1,
                   'lines.linewidth'     : 1,
-                  'xtick.labelsize'     : 16,
-                  'ytick.labelsize'     : 16, 
+                  'xtick.labelsize'     : 18,
+                  'ytick.labelsize'     : 18,
                   'xtick.direction'     :'in',
                   'ytick.direction'     :'in',
                   'xtick.major.size'    : 4,
@@ -890,11 +893,12 @@ class rfi_plots:
         params = {'font.family'         :' serif',
                   'font.style'          : 'normal',
                   'font.weight'         : 'book',
-                  'font.size'           : 20.0,
+                  #'font.size'           : 20.0,
+                  'font.size'           : 26.0,
                   'axes.linewidth'      : 1,
                   'lines.linewidth'     : 1,
-                  'xtick.labelsize'     : 16,
-                  'ytick.labelsize'     : 16,
+                  'xtick.labelsize'     : 18,
+                  'ytick.labelsize'     : 18,
                   'xtick.direction'     :'in',
                   'ytick.direction'     :'in',
                   'xtick.major.size'    : 4,
@@ -909,6 +913,7 @@ class rfi_plots:
                    }
         plt.rcParams.update(params)
         fig, ax = plt.subplots(figsize=(16,9))
+        fig.subplots_adjust(bottom=0.2)
 
         plt.ylim(0, 100.0)
         antenna_plot = ax.bar(flag_stats.keys(), flag_stats.values(), color="orange", ec="red", align='center')
@@ -920,17 +925,23 @@ class rfi_plots:
             if len(flag_stats.keys()) > 30:
                 plt.xticks(rotation=90)
             plt.savefig(summaryplot)
+            if cfg_par['plots']['plot_details']['plot_eps']:
+                plt.savefig(summaryplot.replace('png', 'eps'), format='eps')
         elif key in ["scan"]:
             plt.title("Scan flags")
             plt.xlabel("Scan Number")
             plt.ylabel("% flagged visibilities")
             plt.savefig(summaryplot)
+            if cfg_par['plots']['plot_details']['plot_eps']:
+                plt.savefig(summaryplot.replace('png', 'eps'), format='eps')
         elif key in ["correlation", "corr"]:
             plt.title("Correlation flags")
             plt.xlabel("Correlation")
             plt.ylabel("Flagged percentage (%)")
             plt.ylabel("% flagged visibilities")
             plt.savefig(summaryplot)
+            if cfg_par['plots']['plot_details']['plot_eps']:
+                plt.savefig(summaryplot.replace('png', 'eps'), format='eps')
         elif key in ["frequency", "freq"]:
             plt.title("Frequency flags")
             plt.xlabel("Frequency (Hz)")
@@ -939,6 +950,8 @@ class rfi_plots:
             ax2.set_xlabel("Channel Bin")
             ax2.bar(list(range(len(flag_stats.keys()))), flag_stats.values(), color="orange", ec="orange", align='center')
             plt.savefig(summaryplot)
+            if cfg_par['plots']['plot_details']['plot_eps']:
+                plt.savefig(summaryplot.replace('png', 'eps'), format='eps')
         self.logger.info(f" ------ Saving: {summaryplot} ------\n")
         plt.close()
 
