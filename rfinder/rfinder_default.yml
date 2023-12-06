@@ -18,10 +18,10 @@ general:
 
 rfi: 
     __helpstr: Find RFI in msfile over threshold
-    rfi_enable: false                                   #if True this module is enabled else only obs info will logged
+    rfi_enable: false                                  #if True this module is enabled else only obs info will logged
     polarization: 'q'                                  #xx, yy, xy, yx, q (also in CAPS)
     bad_antenna: '[]'                                  #list of bad antennas: for no antennas try '[]'
-    RFInder_mode: 'rms_clip'                          #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
+    RFInder_mode: 'rms_clip'                           #uses RFI clip method or simply reads the FLAG column 'use_flags' / 'rms_clip'
     rms_clip: 5                                        #Threshold for RFI identification
     noise_measure_edges: [1.400e9, 1.420e9]            #min frequency and maximum frequency where to measure average std of visibilities
     baseline_cut: 200                                  #Cutoff baseline lenght: <  = Short, > = Long (615m midpoint of baselines of WSRT)
@@ -39,7 +39,7 @@ plots:
         enable: false
         plot_noise: 'rfi'                              #choose to plot % of RFI, 'rfi', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
         plot_long_short: true                          #plot all baselines, or only the short and the long
-        plot_eps: true                                 #also generate eps plots. If false only pngs/movies
+        plot_eps: false                                #also generate eps plots. If false only pngs/movies
         movies:
             __helpstr: make movies of output plots
             2d_gif: true
@@ -49,7 +49,7 @@ plots:
     plot_summary:
         __helpstr: plot total % flagged visibilities
         enable: false
-        axis: [ant, scan, corr, freq]                  #avalable choices [ant, corr, scan, freq]
+        axis: [ant, scan]                              #avalable choices [ant, corr, scan, freq]
         antenna:                                       #select an antenna to get summary
         freq_bin: 4                                    #bin frequency channels
         report: true                                   #generate html report with the results

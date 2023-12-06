@@ -309,7 +309,7 @@ class Rfinder:
         else:
             self.cfg_par['general']['outlabel'] = '_'+self.cfg_par['general']['outlabel']
         
-        if (args.rfimode == 'rms_clip' or args.rfimode == 'rms'):
+        if (args.rfimode == 'rms_clip' or args.rfimode == 'use_flag'):
             self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
             if args.sigma_clip:
                 self.cfg_par['rfi']['rms_clip'] = args.sigma_clip
@@ -630,8 +630,9 @@ class Rfinder:
         if args.help:  #rfinder -h 
             self.parser.print_help()
 
-            print("""\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml
-                  rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
+            print("\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml" +
+                  "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>" +
+                  "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt> -mode rms_clip -plotSum")
 
             sys.exit(0)
 
