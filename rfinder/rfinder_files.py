@@ -1,11 +1,11 @@
 import base64
-import os, string, sys, glob
+import shutil
 import numpy as np
+import os, string, sys, glob
 from astropy.io import fits as fits
 from astropy import units as u
 from jinja2 import FileSystemLoader, Environment
-import shutil
-import rfinder_stats as rfi_stats 
+from rfinder import rfinder_stats as rfi_stats
 rfiST = rfi_stats.rfi_stats()
 
 import logging
@@ -294,7 +294,7 @@ def write_html_fullreport(cfg_par):
     if os.path.exists(video_name3):
         video_encoded3 = base64.b64encode(open(video_name3, "rb").read())
 
-    if cfg_par['plots']['movies']['movies_in_report'] == True:
+    if cfg_par['plots']['plot_details']['movies']['movies_in_report'] == True:
         template = env.get_template('full_template.html')
         with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
             lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
@@ -325,7 +325,7 @@ def write_html_fullreport(cfg_par):
                 video_tag3 = '<img class="f" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
             ))
 
-    elif cfg_par['plots']['movies']['movies_in_report'] == False:
+    elif cfg_par['plots']['plot_details']['movies']['movies_in_report'] == False:
         template = env.get_template('fullshort_template.html')
         with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
             lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
@@ -389,7 +389,7 @@ def write_html_timereport(cfg_par):
     else:
         video_encoded3 = None
 
-    if cfg_par['plots']['movies']['movies_in_report'] == True:
+    if cfg_par['plots']['plot_details']['movies']['movies_in_report'] == True:
 
         with open(cfg_par['general']['rfidir']+'time_report.html', "w") as f:
             lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
@@ -417,7 +417,7 @@ def write_html_timereport(cfg_par):
                 #video_tag4 = '<img class="g" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
             ))
 
-    elif cfg_par['plots']['movies']['movies_in_report'] == False:
+    elif cfg_par['plots']['plot_details']['movies']['movies_in_report'] == False:
 
         logger.info('\t ERROR:  movies in report must be set to TRUE\n')
 
@@ -461,10 +461,24 @@ def write_html_summaryreport(cfg_par):
     else:
         image_encoded3 = None
 
+    image_name4 = cfg_par['general']['plotdir'] + 'freq-summary.png'
+    if os.path.exists(image_name4):
+        image_encoded4 = base64.b64encode(open(image_name4, "rb").read())
+    else:
+        image_encoded4 = None
+
     if cfg_par['plots']['plot_summary']['report'] == True:
+        image_tags = {}
+        if image_encoded1:
+            image_tags['video_tag1'] = '<img class="h" src="data:image/png;base64,{0}">'.format(image_encoded1.decode())
+        if image_encoded2:
+            image_tags['video_tag2'] = '<img class="a" src="data:image/png;base64,{0}">'.format(image_encoded2.decode())
+        if image_encoded3:
+            image_tags['video_tag3'] = '<img class="c" src="data:image/png;base64,{0}">'.format(image_encoded3.decode())
+        if image_encoded4:
+            image_tags['video_tag4'] = '<img class="g" src="data:image/png;base64,{0}">'.format(image_encoded4.decode())
 
         with open(cfg_par['general']['rfidir']+'summary_report.html', "w") as f:
-#            lenghts = np.array([cfg_par['rfi']['baseline_lenghts']])+0.
             f.write(template.render(
                 title=title,
                 fieldname=cfg_par['general']['fieldname'],
@@ -477,16 +491,10 @@ def write_html_summaryreport(cfg_par):
                 enddate =   ('{0:%y}{0:%b}{0:%d} {0:%X}'.format(cfg_par['rfi']['enddate'].datetime)),
                 nant = cfg_par['rfi']['nant'],
                 ant_names = cfg_par['rfi']['ant_names'],
- #               maxbase = str(np.round(lenghts[0][-1],0)),
- #               minbase = str(np.round(lenghts[0][0],0)),
- #               totbase = cfg_par['rfi']['number_baseline'],
                 exptime = np.round(cfg_par['rfi']['exptime']*60.,2),
                 polnum = cfg_par['rfi']['polnum'],
                 noise = np.round(cfg_par['rfi']['theo_rms'][0]*1e3,5),
-                video_tag1 = '<img class="h" src="data:image/png;base64,{0}">'.format(image_encoded1.decode()),
-                video_tag2 = '<img class="a" src="data:image/png;base64,{0}">'.format(image_encoded2.decode()),
-                video_tag3 = '<img class="c" src="data:image/png;base64,{0}">'.format(image_encoded3.decode()),
-                #video_tag4 = '<img class="g" src="data:image/png;base64,{0}">'.format(image_encoded3.decode())
+                **image_tags
             ))
 
 

@@ -28,10 +28,10 @@ RFINDER_DIR = RFINDER_PATH+'/rfinder/'
 
 sys.path.append(os.path.join(RFINDER_PATH, 'rfinder'))
 
-import rfi
-import rfinder_stats as rfi_stats
-import rfinder_plots as rfi_plots
-import rfinder_files as rfiFL
+from rfinder import rfi
+from rfinder import rfinder_stats as rfi_stats
+from rfinder import rfinder_plots as rfi_plots
+from rfinder import rfinder_files as rfiFL
 
 rfi = rfi.rfi()
 rfiST = rfi_stats.rfi_stats()
@@ -229,7 +229,30 @@ class Rfinder:
             action='store_true',
             help='enable cleanup of intermediate products')
 
+        add('-pltDet','--plot_details',
+            action='store_true',
+            help="plot percentage of RFI, 'rfi', or noise, 'noise', or factor of noise increase")
 
+        add('-pltSum','--plot_summary',
+            action='store_true',
+            help='plot percentage of RFI per ant,scan,freq,corr')
+
+        add('-summary','--summary_options',
+            choices=['ant', 'corr', 'scan', 'freq'],
+            default=['corr'],
+            nargs='+',
+            type=str,
+            help='enable cleanup of intermediate products')
+
+        add('-fbin', '--freq_bin',
+            type=int,
+            default=False,
+            help='Number of frequencies to bin into a single channel')
+
+        add('-ncpu', '--ncpu',
+            type=int,
+            default=False,
+            help='Number of cpu to use when generating summary stats')
 
         args = self.parser.parse_args(argv)
         
@@ -246,8 +269,10 @@ class Rfinder:
             self.cfg_par['general']['msname'] = args.input
         if args.field != None:
             self.cfg_par['general']['field'] = args.field
+        if args.ncpu:
+            self.cfg_par['general']['ncpu'] = args.ncpu
         if args.telescope:
-            self.cfg_par['general']['telescope'] = args.telescope
+            self.cfg_par['general']['telescope']['name'] = args.telescope
         if args.polarization:
             self.cfg_par['rfi']['polarization'] = args.polarization
         if args.baseline_cut:
@@ -271,7 +296,7 @@ class Rfinder:
             self.cfg_par['rfi']['chunks']['spw_enable'] = True
 
         if args.no_movies == True : 
-            self.cfg_par['plots']['movies']['movies_in_report'] = False
+            self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = False
 
         if args.no_cleanup==True:
             self.cfg_par['general']['cleanup_enable'] = False
@@ -284,12 +309,24 @@ class Rfinder:
         else:
             self.cfg_par['general']['outlabel'] = '_'+self.cfg_par['general']['outlabel']
         
-        if (args.rfimode == 'rms_clip' or args.rfimode == 'rms') :
-                self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
-                if args.sigma_clip:
-                    self.cfg_par['rfi']['rms_clip'] = args.sigma_clip
-                if args.frequency_interval:
-                    self.cfg_par['rfi']['noise_measure_edges'] = args.frequency_interval
+        if (args.rfimode == 'rms_clip' or args.rfimode == 'use_flag'):
+            self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
+            if args.sigma_clip:
+                self.cfg_par['rfi']['rms_clip'] = args.sigma_clip
+            if args.frequency_interval:
+                self.cfg_par['rfi']['noise_measure_edges'] = args.frequency_interval
+        else:
+            self.cfg_par['rfi']['rfi_enable'] = False
+
+        if args.plot_details:
+            self.cfg_par['plots']['plot_details']['enable'] = True
+
+        if args.plot_summary:
+            self.cfg_par['plots']['plot_summary']['enable'] = True
+            if args.summary_options:
+                self.cfg_par['plots']['plot_summary']['axis'] = args.summary_options
+            if args.freq_bin:
+                self.cfg_par['plots']['plot_summary']['freq_bin'] = args.freq_bin
 
         return self
 
@@ -426,13 +463,15 @@ class Rfinder:
                 rfiFL.rfi_frequency(self.cfg_par,-1)
                 self.logger.warning("------ RFI saved to table ------\n")
                 self.logger.warning("------ End of RFI analysis ------\n")
+
+        else:
+            rfi.load_from_ms(self.cfg_par,0,0)
+            self.logger.warning("------ MSfile Loaded -----\n")
       
         task = 'plots'
 
         if self.cfg_par[task]['plot_summary']['enable']==True:
             summary_results = {}
-            if not self.cfg_par['rfi']['rfi_enable']:
-                rfi.load_from_ms(self.cfg_par,0,0)
 
             for axis in  self.cfg_par[task]['plot_summary']['axis']:
                 flag_stats = rfiST.get_flags_summary_stats(self.cfg_par, axis)
@@ -442,13 +481,14 @@ class Rfinder:
                 self.logger.info("------ Summary plot done ------\n")
 
             if summary_results:
+                self.logger.warning(f'------ Total % Flagged: {round(sum(summary_results[axis].values())/len(summary_results[axis].values()),2)} ------')
                 json_file = cfg_par['general']['rfidir'] + f'summary.json'
                 with open(json_file, 'w') as f:
                     json.dump(summary_results, f)
 
             rfiFL.write_html_summaryreport(self.cfg_par)
 
-        if self.cfg_par[task]['plot_enable']==True:
+        if self.cfg_par[task]['plot_details']['enable']==True:
 
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
@@ -483,39 +523,40 @@ class Rfinder:
 
                     rfiPL.plot_rfi_imshow(self.cfg_par,i)
                     self.logger.info("------ RFI in 2D plotted ------\n")
-                    self.cfg_par['plots']['plot_noise'] = 'rfi'
-                    self.cfg_par['plots']['long_short'] = False
+                    self.cfg_par['plots']['plot_details']['plot_noise'] = 'rfi'
+                    self.cfg_par['plots']['plot_details']['long_short'] = False
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
-                    self.cfg_par['plots']['long_short'] = True
+                    self.cfg_par['plots']['plot_details']['long_short'] = True
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
-                    self.cfg_par['plots']['plot_noise'] = 'noise_factor'
+                    self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise_factor'
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
-                    self.cfg_par['plots']['plot_noise'] = 'noise'
+                    self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise'
                     rfiPL.plot_noise_frequency(self.cfg_par,i)         
                     self.logger.warning("------ RFI in 1D plotted ------\n")
                 
                 rfiPL.plot_altaz(self.cfg_par,68)
                 self.logger.warning("------ RFI in ALT/AZ plotted ------\n")
         
-                if (self.cfg_par['plots']['movies']['altaz_gif']==True or self.cfg_par['plots']['movies']['2d_gif']==True or 
-                    self.cfg_par['plots']['movies']['1d_gif']==True):
+                if (self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True or
+                    self.cfg_par['plots']['plot_details']['movies']['2d_gif']==True or
+                    self.cfg_par['plots']['plot_details']['movies']['1d_gif']==True):
                     self.logger.warning("------ Making movies ------\n")
      
-                if self.cfg_par['plots']['movies']['altaz_gif']==True:
+                if self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True:
 
                     out_animation = self.cfg_par['general']['moviedir']+'AltAz_movie.gif'
                     filenames = rfiFL.find_altaz_plots(self.cfg_par)
                     rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
                     self.logger.info("------ AltAz movie done ------\n")
                 
-                if self.cfg_par['plots']['movies']['2d_gif']==True:
+                if self.cfg_par['plots']['plot_details']['movies']['2d_gif']==True:
                     out_animation = self.cfg_par['general']['moviedir']+'Time_2Dplot_movie.gif'
                     filenames = rfiFL.find_2d_plots(self.cfg_par)
                     rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)
                 
                     self.logger.info("------ 2D movie done ------\n")
                 
-                if self.cfg_par['plots']['movies']['1d_gif']==True:
+                if self.cfg_par['plots']['plot_details']['movies']['1d_gif']==True:
                     out_animation = self.cfg_par['general']['moviedir']+'TimeChunks_1D_flags.gif'
                     root_name = 'flags'
                     filenames = rfiFL.find_1d_plots(self.cfg_par,root_name)
@@ -532,8 +573,9 @@ class Rfinder:
                     rfiPL.gif_me_up(self.cfg_par,filenames,out_animation)         
                     self.logger.info("------ 1D movies done ------\n")
                 
-                if (self.cfg_par['plots']['movies']['altaz_gif']==True or self.cfg_par['plots']['movies']['2d_gif']==True or 
-                    self.cfg_par['plots']['movies']['1d_gif']==True):
+                if (self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True or
+                    self.cfg_par['plots']['plot_details']['movies']['2d_gif']==True or
+                    self.cfg_par['plots']['plot_details']['movies']['1d_gif']==True):
                     self.logger.warning("------ Movies done ------\n")
 
                 rfiFL.write_html_timereport(self.cfg_par)                 
@@ -554,14 +596,14 @@ class Rfinder:
                 self.logger.warning("------ Alt/Az plotted ------\n")                            
                 rfiPL.plot_rfi_imshow(self.cfg_par,-1)
                 self.logger.warning("------ RFI in 2D plotted ------\n")
-                self.cfg_par['plots']['plot_noise'] = 'rfi'
-                self.cfg_par['plots']['long_short'] = False
+                self.cfg_par['plots']['plot_details']['plot_noise'] = 'rfi'
+                self.cfg_par['plots']['plot_details']['long_short'] = False
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
-                self.cfg_par['plots']['long_short'] = True
+                self.cfg_par['plots']['plot_details']['long_short'] = True
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
-                self.cfg_par['plots']['plot_noise'] = 'noise_factor'
+                self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise_factor'
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
-                self.cfg_par['plots']['plot_noise'] = 'noise'
+                self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise'
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
                 self.logger.warning("------ RFI in 1D plotted ------\n")
 
@@ -588,8 +630,9 @@ class Rfinder:
         if args.help:  #rfinder -h 
             self.parser.print_help()
 
-            print("""\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml
-rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
+            print("\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml" +
+                  "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>" +
+                  "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt> -mode rms_clip -plotSum")
 
             sys.exit(0)
 
@@ -647,19 +690,22 @@ rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>\n""")
 
         return self
 
+
 def driver():
     logger = logging.getLogger('log-rfinder.log')
     logger.setLevel(logging.INFO)
     logger.propagate = False
+    logger.debug('info')
+    logger.info('info')
 
     fh = logging.FileHandler('log-rfinder.log')
     fh.setLevel(logging.INFO)
 
     ch = logging.StreamHandler()
-    ch.setLevel(logging.WARNING)
+    ch.setLevel(logging.INFO)
 
-    formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
-    formatter_ch = logging.Formatter('%(message)s')
+    formatter = logging.Formatter('%(asctime)s; %(levelname)s - %(filename)s - %(message)s')
+    formatter_ch = logging.Formatter('%(asctime)s; %(message)s')
 
     fh.setFormatter(formatter)
     ch.setFormatter(formatter_ch)
