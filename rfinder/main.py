@@ -309,8 +309,9 @@ class Rfinder:
         else:
             self.cfg_par['general']['outlabel'] = '_'+self.cfg_par['general']['outlabel']
         
-        if (args.rfimode == 'rms_clip' or args.rfimode == 'use_flag'):
+        if (args.rfimode == 'rms_clip' or args.rfimode == 'use_flags'):
             self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
+            self.cfg_par['rfi']['rfi_enable'] = True
             if args.sigma_clip:
                 self.cfg_par['rfi']['rms_clip'] = args.sigma_clip
             if args.frequency_interval:
