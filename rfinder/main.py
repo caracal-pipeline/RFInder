@@ -6,7 +6,7 @@ import numpy as np
 import yaml
 import json
 import glob
-import argparse
+import click
 from  argparse import ArgumentParser
 import textwrap as _textwrap
 import logging
@@ -20,7 +20,8 @@ from astropy import units as u
 from astropy.time import Time, TimeDelta
 from astropy.table import Table, Column, MaskedColumn
 
-
+from scabha.schema_utils import clickify_parameters
+from omegaconf import OmegaConf
 
 # get rfinder install directory
 RFINDER_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,6 +33,9 @@ from rfinder import rfi
 from rfinder import rfinder_stats as rfi_stats
 from rfinder import rfinder_plots as rfi_plots
 from rfinder import rfinder_files as rfiFL
+
+
+schemas = OmegaConf.load(os.path.join(os.path.dirname(__file__), "rfinder.yaml"))
 
 rfi = rfi.rfi()
 rfiST = rfi_stats.rfi_stats()
@@ -56,24 +60,6 @@ except pkg_resources.DistributionNotFound:
 
 ####################################################################################################
 
-class MultilineFormatter(argparse.HelpFormatter):
-    def _fill_text(self, text, width, indent):
-        text = self._whitespace_matcher.sub(' ', text).strip()
-        paragraphs = text.split('|n ')
-        multiline_text = ''
-        for paragraph in paragraphs:
-            formatted_paragraph = _textwrap.fill(paragraph, width, initial_indent=indent, subsequent_indent=indent) + '\n\n'
-            multiline_text = multiline_text + formatted_paragraph
-        return multiline_text
-
-
-def is_valid_file(parser, arg):
-    if not os.path.exists(arg):
-        parser.error("The file '%s' does not exist!" % arg)
-
-    return arg
-
-
 
 class Rfinder:
     '''
@@ -91,243 +77,78 @@ class Rfinder:
 
         '''
 
-        # set self.logger
-        #with open(RFINDER_DIR+'/templates/logcfg.yml', 'r') as f:
-        #    config = yaml.safe_load(f.read())
-        #    logging.config.dictConfig(config)
-
         self.logger = logging.getLogger('log-rfinder.log')
-        #self.logger.setLevel(logging.INFO)
-
-        #fh = logging.FileHandler('log-rfinder.log')
-        #fh.setLevel(logging.INFO)
-
-        #ch = logging.StreamHandler()
-        #ch.setLevel(logging.WARNING)
-
-        #formatter = logging.Formatter('%(levelname)s - %(filename)s - %(message)s')
-        #fh.setFormatter(formatter)
-        #ch.setFormatter(formatter)
-
-        #self.logger.addHandler(ch)
-        #self.logger.addHandler(fh)
+        self.logger.setLevel(logging.INFO)
 
 
-    def readArgs(self,argv):
-
-
-        self.parser = ArgumentParser(description='RFInder: package to visualize the flagged RFI in a dataset '
-                                '|n version {:s} |n install path {:s} |n '
-                                'Filippo Maccagni <filippo.maccagni@gmial.com>'.format(__version__,
-                                                                                   os.path.dirname(__file__)),
-                                formatter_class=MultilineFormatter,
-                                add_help=False)
-
-        add = self.parser.add_argument
-
-        add("-h", "--help",  action="store_true",
-                help="Print help message and exit")
-
-        add("-v","--version", action='version',
-                version='{:s} version {:s}'.format(self.parser.prog, __version__))
-
-        add('-c', '--config',
-            type=lambda a: is_valid_file(self.parser, a),
-            default=False,
-            help='RFInder configuration file (YAML format)')
-
-        add('-idir', '--input_dir',
-            type= str,
-            default = False,
-            help= 'select working directory (MS file assumed to be here)')
-
-        add('-odir', '--output_dir',
-            type=str,
-            default=False,
-            help='select output directory')
-
-        add('-l','--label',
-            type=str,
-            default=False,
-            help='ouput folder is called: rfi_polarization_label')
-
-        add('-i', '--input',
-            type=str,
-            default=False,
-            help='''input ['MS'] file''')
-
-        add('-fl', '--field',
-            type=int,
-            default=False,
-            help='select field of MS file to analyze')
-
-        add('-tel', '--telescope',
-            type=str,
-            default=False,
-            help='select telescope: meerkat, apertif, wsrt')
-
-        add('-mode', '--rfimode',
-            type=str,
-            default=False,
-            help='select mode where to investigate RFI: use_flags or rms_clip')
-
-        add('-pol', '--polarization',
-            type=str,
-            default=False,
-            help='select stokes parameter: xx, yy, xy, yx, q (also in CAPS)')
-
-        add('-fint', '--frequency_interval',
-            nargs='*',
-            default=False,
-            help='select frequency interval where to measure noise in GHz')
-
-        add('-spwAv', '--spw_av',
-            type=int,
-            default=False,
-            help='select number of channels to average')
-
-        add('-tStep', '--time_step',
-            type=int,
-            default=False,
-            help='select time step in minutes in which divide the analysis of the MSfile')
-
-        add('-sig', '--sigma_clip',
-            type=int,
-            default=False,
-            help='select sigma clip for rms_clip mode to find RFI')
-
-        add('-baseCut', '--baseline_cut',
-            type=int,
-            default=False,
-            help='select cut in baseline lenght [m] for differential RFI analysis')
-
-        add('-noCh', '--no_chunks',
-            action='store_true',
-            help='desable chunking in time')
-
-        add('-yesCh','--yes_chunks',
-            action='store_true',
-            help='enable chunking in time')
-
-        add('-noMov', '--no_movies',
-            action='store_true',
-            help='disable movies (use if dataset is read as a whole)')
-
-        add('-noSpw', '--no_spw_av',
-            action='store_true',
-            help='disable averaging in channels')
-
-        add('-yesSpw','--yes_spw_av',
-            action='store_true',
-            help='enable averaging in channels')
-
-        add('-noClp','--no_cleanup',
-            action='store_true',
-            help='disable cleanup of intermediate products')
-
-        add('-yesClp','--yes_cleanup',
-            action='store_true',
-            help='enable cleanup of intermediate products')
-
-        add('-pltDet','--plot_details',
-            action='store_true',
-            help="plot percentage of RFI, 'rfi', or noise, 'noise', or factor of noise increase")
-
-        add('-pltSum','--plot_summary',
-            action='store_true',
-            help='plot percentage of RFI per ant,scan,freq,corr')
-
-        add('-summary','--summary_options',
-            choices=['ant', 'corr', 'scan', 'freq'],
-            default=['corr'],
-            nargs='+',
-            type=str,
-            help='enable cleanup of intermediate products')
-
-        add('-fbin', '--freq_bin',
-            type=int,
-            default=False,
-            help='Number of frequencies to bin into a single channel')
-
-        add('-ncpu', '--ncpu',
-            type=int,
-            default=False,
-            help='Number of cpu to use when generating summary stats')
-
-        args = self.parser.parse_args(argv)
-        
-        return args
-
-
-    def setArgs(self,args):
-
-        if args.input_dir:
-            self.cfg_par['general']['workdir'] = args.input_dir
-        if args.output_dir:
-            self.cfg_par['general']['outdir'] = args.output_dir
-        if args.input:
-            self.cfg_par['general']['msname'] = args.input
-        if args.field != None:
-            self.cfg_par['general']['field'] = args.field
-        if args.ncpu:
-            self.cfg_par['general']['ncpu'] = args.ncpu
-        if args.telescope:
-            self.cfg_par['general']['telescope']['name'] = args.telescope
-        if args.polarization:
-            self.cfg_par['rfi']['polarization'] = args.polarization
-        if args.baseline_cut:
-            self.cfg_par['rfi']['baseline_cut'] = args.baseline_cut
-        if args.time_step:
+    def setArgs(self, kwargs):
+        if kwargs.get('indir'):
+            self.cfg_par['general']['workdir'] = kwargs['indir']
+        if kwargs.get('outdir'):
+            self.cfg_par['general']['outdir'] = kwargs['outdir']
+        if kwargs.get('msname'):
+            self.cfg_par['general']['msname'] = kwargs['msname']
+        if kwargs.get('field'):
+            self.cfg_par['general']['field'] = kwargs['field']
+        if kwargs.get('ncpu'):
+            self.cfg_par['general']['ncpu'] = kwargs['ncpu']
+        if kwargs.get('telescope'):
+            self.cfg_par['general']['telescope']['name'] = kwargs['telescope']
+        if kwargs.get('polarization'):
+            self.cfg_par['rfi']['polarization'] = kwargs['polarization']
+        if kwargs.get('baseline_cut'):
+            self.cfg_par['rfi']['baseline_cut'] = kwargs['baseline_cut']
+        if kwargs.get('chunks_time_step'):
             self.cfg_par['rfi']['chunks']['time_enable'] = True
-            self.cfg_par['rfi']['chunks']['time_step'] = args.time_step
-        if args.spw_av:
+            self.cfg_par['rfi']['chunks']['time_step'] = kwargs['chunks_time_step']
+        if kwargs.get('chunks_spw_width'):
             self.cfg_par['rfi']['chunks']['spw_enable'] = True
-            self.cfg_par['rfi']['chunks']['spw_width'] = args.spw_av
- 
-        if args.no_chunks==True:
-                self.cfg_par['rfi']['chunks']['time_enable'] = False
-        if args.yes_chunks == True:
-                self.cfg_par['rfi']['chunks']['time_enable'] = True
+            self.cfg_par['rfi']['chunks']['spw_width'] = kwargs['chunks_spw_width']
 
-        if args.no_spw_av==True:
+        if kwargs.get('no_chunks_time_enable'):
+            self.cfg_par['rfi']['chunks']['time_enable'] = False
+        if kwargs.get('chunks_time_enable'):
+            self.cfg_par['rfi']['chunks']['time_enable'] = True
+
+        if kwargs.get('no_chunks_spw_enable'):
             self.cfg_par['rfi']['chunks']['spw_enable'] = False
-        
-        if args.yes_spw_av==True:
+        if kwargs.get('chunks_spw_enable'):
             self.cfg_par['rfi']['chunks']['spw_enable'] = True
 
-        if args.no_movies == True : 
+        if kwargs.get('no_plot_details_movies_movies_in_report'):
             self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = False
 
-        if args.no_cleanup==True:
+        if kwargs.get('no_cleanup_enable'):
             self.cfg_par['general']['cleanup_enable'] = False
-        if args.yes_cleanup==True:
+        if kwargs.get('cleanup_enable'):
             self.cfg_par['general']['cleanup_enable'] = True
-        
-        if args.label:
-            self.cfg_par['general']['outlabel'] = '_'+args.label
-        
+
+        if kwargs.get('label'):
+            self.cfg_par['general']['outlabel'] = '_' + kwargs['label']
         else:
-            self.cfg_par['general']['outlabel'] = '_'+self.cfg_par['general']['outlabel']
-        
-        if (args.rfimode == 'rms_clip' or args.rfimode == 'use_flags'):
-            self.cfg_par['rfi']['RFInder_mode'] = args.rfimode
-            self.cfg_par['rfi']['rfi_enable'] = True
-            if args.sigma_clip:
-                self.cfg_par['rfi']['rms_clip'] = args.sigma_clip
-            if args.frequency_interval:
-                self.cfg_par['rfi']['noise_measure_edges'] = args.frequency_interval
+            self.cfg_par['general']['outlabel'] = '_' + self.cfg_par['general']['outlabel']
+        if kwargs.get('rfi_enable'):
+            if kwargs.get('rfimode') in ['rms_clip', 'use_flags']:
+                self.cfg_par['rfi']['RFInder_mode'] = kwargs['rfimode']
+                self.cfg_par['rfi']['rfi_enable'] = True
+                if kwargs.get('rms_clip'):
+                    self.cfg_par['rfi']['rms_clip'] = kwargs['rms_clip']
+                if kwargs.get('frequency_interval'):
+                    self.cfg_par['rfi']['noise_measure_edges'] = kwargs['frequency_interval']
         else:
             self.cfg_par['rfi']['rfi_enable'] = False
 
-        if args.plot_details:
+        if kwargs.get('plot_details_enable'):
             self.cfg_par['plots']['plot_details']['enable'] = True
 
-        if args.plot_summary:
+        if kwargs.get('plot_summary_enable'):
             self.cfg_par['plots']['plot_summary']['enable'] = True
-            if args.summary_options:
-                self.cfg_par['plots']['plot_summary']['axis'] = args.summary_options
-            if args.freq_bin:
-                self.cfg_par['plots']['plot_summary']['freq_bin'] = args.freq_bin
+            if kwargs.get('plot_summary_options'):
+                self.cfg_par['plots']['plot_summary']['axis'] = kwargs['plot_summary_options']
+            if kwargs.get('freq_bin'):
+                self.cfg_par['plots']['plot_summary']['freq_bin'] = kwargs['plot_summary_freq_bin']
+            if kwargs.get('freq_bin'):
+                self.cfg_par['plots']['plot_summary']['report'] = kwargs['plot_summary_report']
 
         return self
 
@@ -620,28 +441,13 @@ class Rfinder:
         return 0
 
 
+    def main (self, **kwargs):
+        config = kwargs.get('_config')
 
-    def main (self,argv):
-        
-        for i, arg in enumerate(argv):
-            if (arg[0] == '-') and arg[1].isdigit(): argv[i] = ' ' + arg
-
-        args = self.readArgs(argv)
-
-        if args.help:  #rfinder -h 
-            self.parser.print_help()
-
-            print("\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml" +
-                  "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>" +
-                  "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt> -mode rms_clip -plotSum")
-
-            sys.exit(0)
-
-        elif args.config:    #rfinder -c config_file.yml         
+        if config:    #rfinder -c config_file.yml
             self.logger.warning('------ Reading your parameter file ------\n')
             # read database here
-            files =  args.config
-            cfg = open(files)
+            cfg = open(config)
             self.cfg_par = yaml.load(cfg, Loader=yaml.Loader)
 
         else: #rfinder  or rfinder -options
@@ -664,7 +470,7 @@ class Rfinder:
                 with open(workdir+DEFAULT_CONFIG, 'w') as outfile:
                     yaml.dump(self.cfg_par, outfile, default_flow_style=False)
 
-                if args.field ==False and args.input==False :
+                if kwargs['field'] == None and kwargs['msname'] == None :
 
                     self.logger.warning('''MSNAME & telescope missing
               \t\tplease edit rfinder_default.yml in your current directory
@@ -677,12 +483,11 @@ class Rfinder:
 
                 else:
                     self.logger.warning('''------ you provided MSname and telescope in your first run, 
-            \tassuming MS is your current directory ------\n''')
- 
-            if all(x==False for x in vars(args).values()) == False and (args.help==False and args.config == False):
+                                        \tassuming MS is your current directory ------\n''')
+            if any(kwargs.values()) and not (kwargs.get('help') or kwargs.get('config')):
                 self.logger.warning('------ Updating arguments given from terminal ------\n')
 
-                self.setArgs(args)
+                self.setArgs(kwargs)
                 with open(workdir+DEFAULT_CONFIG, 'w') as outfile:
                     yaml.dump(self.cfg_par, outfile, default_flow_style=False)
  
@@ -692,7 +497,22 @@ class Rfinder:
         return self
 
 
-def driver():
+@click.command("rfinder")
+@clickify_parameters(schemas.cabs.get("rfinder"))
+@click.option('-h', '--help', is_flag=True, help="Show this message and exit.")
+def driver(help, **kw):
+
+    if help:  #rfinder -h
+        print('RFInder: package to visualize the flagged RFI in a dataset\n'
+              'version {:s}\n'
+              'install path {:s}\n'
+              'Filippo Maccagni <filippo.maccagni@gmial.com>\n'.format(__version__, os.path.dirname(__file__)))
+        click.echo(driver.get_help(click.Context(driver)))
+        print("\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml" +
+                "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>" +
+                "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt> -mode rms_clip -plotSum")
+        sys.exit(0)
+
     logger = logging.getLogger('log-rfinder.log')
     logger.setLevel(logging.INFO)
     logger.propagate = False
@@ -716,7 +536,7 @@ def driver():
 
 
     RFInder = Rfinder()
-    rfi_par = RFInder.main([a for a in sys.argv[1:]])
+    rfi_par = RFInder.main(**kw)
 
     run = rfi_par.go(rfi_par.cfg_par)
 
