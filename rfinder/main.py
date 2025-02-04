@@ -13,7 +13,7 @@ import logging
 import logging.config
 
 import warnings
-import pkg_resources
+from importlib.metadata import version, PackageNotFoundError
 
 from astropy.io import fits, ascii
 from astropy import units as u
@@ -52,11 +52,11 @@ if os.path.exists(LOG_FILE) == True:
 if not sys.warnoptions:
     warnings.simplefilter("ignore")
 
-
 try:
-    __version__ = pkg_resources.require("rfinder")[0].version
-except pkg_resources.DistributionNotFound:
-    __version__ = "dev"
+        __version__ = version("rfinder")
+except PackageNotFoundError:
+        __version__ = "dev"
+
 
 ####################################################################################################
 
