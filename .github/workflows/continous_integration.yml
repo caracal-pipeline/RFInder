@@ -3,10 +3,18 @@
 
 name: Ubuntu CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - "**"   # Triggers on push to any branch, including new ones
+    tags:
+      - "*"    # Triggers on push to any tag
+  pull_request:
+  schedule:
+    - cron: '30 2 * * 1'  # Every Monday at 2:30 AM UTC
 
 env:
-  POETRY_VERSION: 1.4.0
+  POETRY_VERSION: 2.0.1
 
 jobs:
   test:
@@ -22,17 +30,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Cache Installations
-        id: cache-installs
-        uses: actions/cache@v3
-        with:
-          path: ~/.local
-          key: install-${{ env.INSTALL_CACHE_HASH }}-2
-
       - name: Install Poetry
-        if: steps.cache-installs.outputs.cache-hit != 'true'
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 - --version ${{ env.POETRY_VERSION }}
+        uses: abatilo/actions-poetry@v3
+        with:
+          poetry-version: ${{ env.POETRY_VERSION }}
+
       - name: Test poetry
         run: poetry --version
 
@@ -53,6 +55,14 @@ jobs:
 #      - name: Test with pytest
 #        run: poetry run pytest -s -vvv
 
+
+      - name: Download test dataset
+        run: curl https://ratt-public-data.s3.af-south-1.amazonaws.com/test-data/HLTau_B6cont.calavg.tav300s.tar.xz | tar xJf -
+
       - name: Test rfinder command
         run: |
           poetry run rfinder --help
+
+      - name: Run end to end test
+        run: |
+          rfinder -i HLTau_B6cont.calavg.tav300s -fl 0 -tel meerkat -l test
