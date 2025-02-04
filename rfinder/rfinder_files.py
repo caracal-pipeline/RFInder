@@ -119,7 +119,7 @@ def rfi_frequency(cfg_par,time_step=-1):
 
     #open file
     if os.path.exists(rfi_freq_base) == False:
-        logger.error('### Image of RFI sorted by frequency over baseline lenght does not exist ###')    
+        logger.error('### Image of RFI sorted by frequency over baseline length does not exist ###')
     else:    
         
         # read data and header
@@ -539,10 +539,11 @@ def find_2d_plots(cfg_par):
 
     tmp_arr=[]
     for i in range(0,len(filenames)):
-            tmp = filenames[i].split('base_')[1]
-            tmp_arr.append(tmp.split('m.png')[0])
+        tmp = filenames[i].split('base_')[1]
+        tmp_arr.append(tmp.split('m.png')[0])
     tmp_arr.sort()
 
+    import IPython; IPython.embed()
     tmp = filenames[0].split('base_')
     filenames = [tmp[0]+'base_' + s for s in tmp_arr] 
     filenames = [s + 'm.png' for s in filenames] 
@@ -553,30 +554,19 @@ def find_1d_plots(cfg_par,name_root):
 
     #select files
     filenames = glob.glob(cfg_par['general']['timeplotdir1D']+'/'+name_root+'_*')
-    #print filenames 
-
     tmp_arr=[]
 
     for i in range(0,len(filenames)):
         if cfg_par['rfi']['RFInder_mode']=='use_flags':
-            if len(filenames[i].split('sl_rfi.'))>1:
+            if len(filenames[i].split('sl_flags.'))>1:
                 continue
         elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
-            if  len(filenames[i].split('sl_flags.'))>1:
+            if  len(filenames[i].split('sl_rfi.'))>1:
                 continue
-        tmp = filenames[i].split(name_root+'_')
-        tmp_arr.append(tmp[1].split('m_sl_rfi.png')[0])
+        tmp_arr.append(filenames[i].split('m_sl_rfi.png')[0])
 
     tmp_arr.sort()
-    tmp = filenames[0].split(name_root+'_')
-
-    filenames = [tmp[0]+name_root+'_' + s for s in tmp_arr]
-    #if cfg_par['rfi']['RFInder_mode']=='use_flags':
-    #    filenames = [s + 'm_sl_flags.png' for s in filenames] 
-    #elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
-    #    filenames = [s + 'm_sl_rfi.png' for s in filenames] 
-    
-    #print filenames
+    filenames = tmp_arr
 
     return filenames
 

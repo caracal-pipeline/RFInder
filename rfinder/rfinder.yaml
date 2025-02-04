@@ -1,0 +1,183 @@
+cabs:
+  rfinder:
+    info: "Tool to investigate the presence of Radio Frequency Interference (https://github.com/caracal-pipeline/RFInder)"
+    command: rfinder
+    backend:
+      rlimits:
+        NOFILE: 1024
+    inputs:
+      indir:
+        info: "Full path to the working directory"
+        dtype: Directory
+      config:
+        info: "RFInder configuration file (YAML format)"
+        dtype: File
+        required: false
+        abbreviation: c
+      msname:
+        info: "Name of the input Measurement Set (MS) file"
+        dtype: MS
+        required: false
+        abbreviation: i
+      field:
+        info: "Field ID of the target in the file"
+        dtype: int
+        default: 0
+        abbreviation: fl
+      cleanup-enable:
+        info: "Remove intermediate results"
+        dtype: bool
+        default: true
+      ncpu:
+        info: "Number of CPUs to get the total flagged data"
+        dtype: int
+        default: 4
+        abbreviation: j
+      label:
+        info: "Label of the output directory. Result: rfi_<stokes>_<label>"
+        dtype: str
+        abbreviation: l
+      telescope:
+        name:
+          info: "Name of the telescope."
+          dtype: str
+          choices:
+            - meerkat
+            - wsrt
+            - apertif
+          abbreviation: tel
+        diameter:
+          info: "Diameter of the telescope in meters"
+          dtype: float
+          required: false
+        tsyseff:
+          info: "Effective system temperature in Kelvin"
+          dtype: float
+        long:
+          info: "Longitude of the telescope"
+          dtype: float
+        lat:
+          info: "Latitude of the telescope"
+          dtype: float
+        height:
+          info: "Height/altitude of the telescope location"
+          dtype: float
+
+      rfi-enable:
+        info: "Enable or disable the RFI detection module"
+        dtype: bool
+        default: false
+      polarization:
+        info: "Polarization type (e.g., 'xx', 'yy', 'q')"
+        dtype: str
+        default: 'q'
+        abbreviation: pol
+      bad-antenna:
+        info: "List of bad antennas"
+        dtype: List[str]
+        default: []
+        policies:
+          repeat: ','
+      rfimode:
+        info: "Mode of RFI detection ('rms_clip' or 'use_flags')"
+        dtype: str
+        choices:
+          - rms_clip
+          - use_flags
+        default: 'rms_clip'
+        abbreviation: mode
+      rms-clip:
+        info: "Threshold for RFI identification"
+        dtype: float
+        default: 5
+      frequency-interval:
+        info: "Frequency range to measure average STD of visibilities"
+        dtype: List[float]
+        #default: [1.400e9, 1.420e9]
+        policies:
+          repeat: '[]'
+        abbreviation: fint
+      baseline-cut:
+        info: "Cutoff baseline length"
+        dtype: int
+        default: 200
+      chunks:
+        time-enable:
+          info: "Enable splitting by time intervals"
+          dtype: bool
+          default: true
+        time-step:
+          info: "Time chunk size in minutes"
+          dtype: int
+          default: 60
+        spw-enable:
+          info: "Enable splitting by spectral windows"
+          dtype: bool
+          default: true
+        spw-width:
+          info: "Channel width of rebinned output table in MHz"
+          dtype: int
+          default: 200
+
+      plot-details:
+        enable:
+          info: "Enable detailed plotting"
+          dtype: bool
+          default: false
+        plot-noise:
+          info: "Type of noise/RFI to plot ('rfi', 'noise', or 'noise_factor')"
+          dtype: str
+          default: 'rfi'
+        plot-long-short:
+          info: "Plot all baselines or only long/short baselines"
+          dtype: bool
+          default: true
+        plot-eps:
+          info: "Generate EPS plots"
+          dtype: bool
+          default: false
+        movies:
+          2d-gif:
+            info: "Generate 2D GIF movies"
+            dtype: bool
+            default: true
+          1d-gif:
+            info: "Generate 1D GIF movies"
+            dtype: bool
+            default: true
+          altaz-gif:
+            info: "Generate Alt/Az GIF movies"
+            dtype: bool
+            default: true
+          movies-in-report:
+            info: "Include movies in the generated report"
+            dtype: bool
+            default: true
+      plot-summary:
+        enable:
+          info: "Enable summary plotting of % flagged visibilities"
+          dtype: bool
+          default: true
+        axis:
+          info: "Axes for summary plotting"
+          dtype: List[str]
+          default: ['ant', 'scan']
+          policies:
+            repeat: '[]'
+        antenna:
+          info: "Select an antenna for summary"
+          dtype: str
+          required: false
+        freq-bin:
+          info: "Bin frequency channels for summary plotting"
+          dtype: int
+          default: 4
+        report:
+          info: "Generate HTML report with results"
+          dtype: bool
+          default: true
+
+    outputs:
+      outdir:
+        info: "Full path to the working output directory"
+        dtype: Directory
