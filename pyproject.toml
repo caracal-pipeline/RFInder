@@ -38,7 +38,7 @@ numpy = "^1.24.2"
 pyaml = "^21.10.1"
 python-casacore = "^3.5.2"
 scipy = "^1.9.3"
-stimela = ">=2.0"
+stimela = ">=2.0.2"
 pytest = { version = "^7.2.2", optional=true }
 pytest-flake8 = { version = "^1.1.1", optional=true }
 
