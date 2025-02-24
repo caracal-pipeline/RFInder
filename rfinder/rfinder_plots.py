@@ -709,8 +709,8 @@ class rfi_plots:
 
             legend = ax_centre.legend(loc=1,fontsize=14,handletextpad=0.1,borderpad=0.2)
             legend.get_frame().set_edgecolor('black')
-            legend.legendHandles[0].set_color('black')
-            legend.legendHandles[0]._sizes = [35]
+            legend.legend_handles[0].set_color('black')
+            legend.legend_handles[0]._sizes = [35]
 
             start = cfg_par['rfi']['startdate']
             end = cfg_par['rfi']['enddate']
