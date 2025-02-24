@@ -532,7 +532,7 @@ def find_altaz_plots(cfg_par):
 def find_2d_plots(cfg_par):
 
     if cfg_par['rfi']['RFInder_mode']=='use_flags':
-        filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/flags_base*')
+        filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/rfi_base*')
     elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
         filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/rfi_base*')
 
