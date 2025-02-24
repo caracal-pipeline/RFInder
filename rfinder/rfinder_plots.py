@@ -307,9 +307,9 @@ class rfi_plots:
             time_name = 'full' 
 
         if cfg_par['rfi']['RFInder_mode']== 'use_flags':
-            table_name = str(table_tmp[0])+'_flags_'+time_name+'.fits'
+            table_name = str(table_tmp[0])+'_flags_'+time_name+'_spwbin.fits'
         if cfg_par['rfi']['RFInder_mode']== 'rms_clip':
-            table_name = str(table_tmp[0])+'_rfi_'+time_name+'.fits'
+            table_name = str(table_tmp[0])+'_rfi_'+time_name+'_spwbin.fits'
 
         rfi_table = tabledir+table_name
         

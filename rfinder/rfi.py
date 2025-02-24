@@ -279,12 +279,11 @@ class rfi:
         self.logger.info('\t ... Flagging a-prioris  ...\n')
         pol = cfg_par['rfi']['polarization']
 
-        #if (pol == 'q' or pol == 'Q' or pol == 'i' or pol != 'I') and ( cfg_par['rfi']['RFInder_mode'] == 'use_flags'):
-        #   self.datacube = np.zeros([len(self.baselines_sort),2*self.flag.shape[1],2*self.flag.shape[0]/(len(self.baselines_sort))])
-        #else:
-        self.datacube = np.zeros([len(self.baselines_sort),int(self.flag.shape[1]),int(self.flag.shape[0]/(len(self.baselines_sort)))])
-
+        self.datacube = np.zeros([len(self.baselines_sort),
+                                 self.flag.shape[1], self.flag.shape[0] // len(self.baselines_sort)  # Use // for integer division
+        ])
         baseline_counter = np.zeros((self.nant,self.nant),dtype=int)
+
         #flag unused polarizations
         if (pol == 'xx' or pol == 'XX'):
             self.flag[:,:,1] = True #YY
@@ -310,13 +309,13 @@ class rfi:
 
 
         #flag autocorrelations and bad antennas
-        for i in range(0,self.flag.shape[0]):
+        for i in range(self.flag.shape[0]):
 
-            if self.aperfi_badant != None:
+            if self.aperfi_badant not in [None, '[]', []]:
                 if (any(x == self.ant1[i] for x in self.aperfi_badant) or any(x == self.ant2[i] for x in self.aperfi_badant)):
                     self.flag[i,:,0] = True
             if self.ant1[i] == self.ant2[i]:
-                self.flag[i,:,0] = True            
+                self.flag[i,:,0] = True
             else:
                 a1 = self.ant1[i]
                 a2 = self.ant2[i]

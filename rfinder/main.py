@@ -83,9 +83,9 @@ class Rfinder:
 
     def setArgs(self, kwargs):
         if kwargs.get('indir'):
-            self.cfg_par['general']['workdir'] = kwargs['indir']
+            self.cfg_par['general']['workdir'] = kwargs['input_dir']
         if kwargs.get('outdir'):
-            self.cfg_par['general']['outdir'] = kwargs['outdir']
+            self.cfg_par['general']['outdir'] = kwargs['output_dir']
         if kwargs.get('msname'):
             self.cfg_par['general']['msname'] = kwargs['msname']
         if kwargs.get('field'):
@@ -117,6 +117,8 @@ class Rfinder:
 
         if kwargs.get('no_plot_details_movies_movies_in_report'):
             self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = False
+        else:
+            self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = True
 
         if kwargs.get('no_cleanup_enable'):
             self.cfg_par['general']['cleanup_enable'] = False
@@ -132,14 +134,15 @@ class Rfinder:
                 self.cfg_par['rfi']['RFInder_mode'] = kwargs['rfimode']
                 self.cfg_par['rfi']['rfi_enable'] = True
                 if kwargs.get('rms_clip'):
-                    self.cfg_par['rfi']['rms_clip'] = kwargs['rms_clip']
+                    self.cfg_par['rfi']['rms_clip'] = kwargs['sigma_clip']
                 if kwargs.get('frequency_interval'):
                     self.cfg_par['rfi']['noise_measure_edges'] = kwargs['frequency_interval']
+                if kwargs.get('plot_details_enable'):
+                    self.cfg_par['plots']['plot_details']['enable'] = True
         else:
             self.cfg_par['rfi']['rfi_enable'] = False
-
-        if kwargs.get('plot_details_enable'):
             self.cfg_par['plots']['plot_details']['enable'] = True
+
 
         if kwargs.get('plot_summary_enable'):
             self.cfg_par['plots']['plot_summary']['enable'] = True
@@ -500,6 +503,7 @@ class Rfinder:
 @click.command("rfinder")
 @clickify_parameters(schemas.cabs.get("rfinder"))
 @click.option('-h', '--help', is_flag=True, help="Show this message and exit.")
+@click.version_option(version=__version__)
 def driver(help, **kw):
 
     if help:  #rfinder -h

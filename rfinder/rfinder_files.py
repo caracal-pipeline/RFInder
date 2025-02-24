@@ -217,39 +217,38 @@ def rfi_frequency(cfg_par,time_step=-1):
                 rms_lin_bin_long[i] = np.nanmean(rms_lin_long[index])
                 natural_rms_bin[i] = np.nanmean(natural_rms[index])
 
-            # save fits table        
+            # save fits table
             c1 = fits.Column(name='frequency', format='D', unit='MHz', array=freqs_bin)
             c2 = fits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin_bin)
             c3 = fits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin_bin)
             c4 = fits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_bin_short)
             c5 = fits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_bin_short)
             c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_bin_long)
-            c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_bin_long)        
-            c8 = fits.Column(name='natural_rms', format='D', array=natural_rms_bin)        
-            c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation_bin)        
-            c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth_bin)        
+            c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_bin_long)
+            c8 = fits.Column(name='natural_rms', format='D', array=natural_rms_bin)
+            c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation_bin)
+            c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth_bin)
 
-            fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10])    
+            fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8, c9, c10])
 
             fits_table.writeto(rfi_table_bin, overwrite = True)
+        else:
+            # save fits table
+            c1 = fits.Column(name='frequency', format='D', unit='MHz', array=freqs)
+            c2 = fits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin)
+            c3 = fits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin)
+            c4 = fits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_short)
+            c5 = fits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_short)
+            c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_long)
+            c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_long)
+            c8 = fits.Column(name='natural_rms', format='D', array=natural_rms)
+            c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation)
+            c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth)
 
+            fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])
 
-        # save fits table        
-        c1 = fits.Column(name='frequency', format='D', unit='MHz', array=freqs)
-        c2 = fits.Column(name='percentage_flags', format='D', unit='-', array=flag_lin)
-        c3 = fits.Column(name='noise_factor', format='D', unit = '-', array=rms_lin)
-        c4 = fits.Column(name='percentage_flags_short', format='D', unit='-', array=flag_lin_short)
-        c5 = fits.Column(name='noise_factor_short', format='D', unit = '-', array=rms_lin_short)
-        c6 = fits.Column(name='percentage_flags_long', format='D', unit='-', array=flag_lin_long)
-        c7 = fits.Column(name='noise_factor_long', format='D', array=rms_lin_long)        
-        c8 = fits.Column(name='natural_rms', format='D', array=natural_rms)        
-        c9 = fits.Column(name='altitude', format='D', unit='deg', array=elevation)        
-        c10 = fits.Column(name='azimuth', format='D', unit='deg', array=azimuth)        
-        
-        fits_table = fits.BinTableHDU.from_columns([c1, c2, c3, c4, c5, c6, c7, c8])    
-        
-        fits_table.writeto(rfi_table, overwrite = True)
-      
+            fits_table.writeto(rfi_table, overwrite = True)
+
         logger.info("\t ... RFI table saved ...\n")
 
         return 0
@@ -543,7 +542,6 @@ def find_2d_plots(cfg_par):
         tmp_arr.append(tmp.split('m.png')[0])
     tmp_arr.sort()
 
-    import IPython; IPython.embed()
     tmp = filenames[0].split('base_')
     filenames = [tmp[0]+'base_' + s for s in tmp_arr] 
     filenames = [s + 'm.png' for s in filenames] 

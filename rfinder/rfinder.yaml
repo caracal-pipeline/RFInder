@@ -6,9 +6,10 @@ cabs:
       rlimits:
         NOFILE: 1024
     inputs:
-      indir:
+      input_dir:
         info: "Full path to the working directory"
         dtype: Directory
+        abbreviation: idir
       config:
         info: "RFInder configuration file (YAML format)"
         dtype: File
@@ -75,9 +76,8 @@ cabs:
       bad-antenna:
         info: "List of bad antennas"
         dtype: List[str]
-        default: []
         policies:
-          repeat: ','
+          repeat: '[]'
       rfimode:
         info: "Mode of RFI detection ('rms_clip' or 'use_flags')"
         dtype: str
@@ -86,10 +86,11 @@ cabs:
           - use_flags
         default: 'rms_clip'
         abbreviation: mode
-      rms-clip:
+      sigma-clip:
         info: "Threshold for RFI identification"
         dtype: float
         default: 5
+        abbreviation: -sig
       frequency-interval:
         info: "Frequency range to measure average STD of visibilities"
         dtype: List[float]
@@ -109,7 +110,8 @@ cabs:
         time-step:
           info: "Time chunk size in minutes"
           dtype: int
-          default: 60
+          default: 10
+          abbreviation: tStep
         spw-enable:
           info: "Enable splitting by spectral windows"
           dtype: bool
@@ -178,6 +180,7 @@ cabs:
           default: true
 
     outputs:
-      outdir:
+      output-dir:
         info: "Full path to the working output directory"
         dtype: Directory
+        abbreviation: odir
