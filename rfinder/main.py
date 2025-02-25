@@ -110,20 +110,20 @@ class Rfinder:
         elif kwargs.get('chunks_time_enable') is False:
             self.cfg_par['rfi']['chunks']['time_enable'] = False
 
-        if kwargs.get('no_chunks_spw_enable'):
-            self.cfg_par['rfi']['chunks']['spw_enable'] = False
-        if kwargs.get('chunks_spw_enable'):
+        if kwargs.get('chunks_spw_enable') is True:
             self.cfg_par['rfi']['chunks']['spw_enable'] = True
+        elif kwargs.get('chunks_spw_enable') is False:
+            self.cfg_par['rfi']['chunks']['spw_enable'] = False
 
-        if kwargs.get('no_plot_details_movies_movies_in_report'):
-            self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = False
-        else:
+        if kwargs.get('plot_details_movies_movies_in_report') is True:
             self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = True
+        elif kwargs.get('plot_details_movies_movies_in_report') is False:
+            self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = False
 
-        if kwargs.get('no_cleanup_enable'):
-            self.cfg_par['general']['cleanup_enable'] = False
-        if kwargs.get('cleanup_enable'):
+        if kwargs.get('cleanup_enable') is True:
             self.cfg_par['general']['cleanup_enable'] = True
+        elif kwargs.get('cleanup_enable') is False:
+            self.cfg_par['general']['cleanup_enable'] = False
 
         if kwargs.get('label'):
             self.cfg_par['general']['outlabel'] = '_' + kwargs['label']
@@ -509,7 +509,7 @@ def driver(help, **kw):
         click.echo(driver.get_help(click.Context(driver)))
         print("\nRun a command. This can be:\n \nrfinder \nrfinder -c path_to_config_file.yml" +
                 "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>" +
-                "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt> -mode rms_clip -plotSum")
+                "\nrfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt> -rfi -mode rms_clip")
         sys.exit(0)
 
     logger = logging.getLogger('log-rfinder.log')

@@ -67,6 +67,7 @@ cabs:
       rfi-enable:
         info: "Enable or disable the RFI detection module"
         dtype: bool
+        abbreviation: rfi
         default: false
       polarization:
         info: "Polarization type (e.g., 'xx', 'yy', 'q')"
@@ -120,6 +121,7 @@ cabs:
           info: "Channel width of rebinned output table in MHz"
           dtype: int
           default: 120
+          abbreviation: spwAv
 
       plot-details:
         enable:
