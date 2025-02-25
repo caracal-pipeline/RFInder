@@ -140,7 +140,6 @@ class Rfinder:
                 if kwargs.get('plot_details_enable'):
                     self.cfg_par['plots']['plot_details']['enable'] = True
         else:
-            self.cfg_par['rfi']['rfi_enable'] = False
             self.cfg_par['plots']['plot_details']['enable'] = True
 
 

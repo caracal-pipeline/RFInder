@@ -548,20 +548,6 @@ def find_2d_plots(cfg_par):
 
     return filenames
 
-
-
-    tmp_arr=[]
-    for i in range(0,len(filenames)):
-        tmp = filenames[i].split('base_')[1]
-        tmp_arr.append(tmp.split('m.png')[0])
-    tmp_arr.sort()
-
-    tmp = filenames[0].split('base_')
-    filenames = [tmp[0]+'base_' + s for s in tmp_arr] 
-    filenames = [s + 'm.png' for s in filenames] 
-
-    return filenames
-
 def find_1d_plots(cfg_par,name_root):
 
     #select files
