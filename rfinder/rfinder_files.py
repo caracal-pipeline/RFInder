@@ -582,7 +582,6 @@ def find_1d_plots(cfg_par,name_root):
         match = re.search(r'_(\d+)m_', filename)
         return int(match.group(1)) if match else float('inf')
 
-    import IPython; IPython.embed()
     filenames = sorted(tmp_arr, key=extract_number)
 
     return filenames
