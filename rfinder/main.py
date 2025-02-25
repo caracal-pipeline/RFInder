@@ -237,7 +237,7 @@ class Rfinder:
                 times, start, end = rfiST.time_chunk(self.cfg_par)
                 self.logger.warning("------ Working on time chunks ------\n")
 
-                for i in range(0,len(times)-1):
+                for i in range(len(times)-1):
                     timez = [times[i],times[i+1]] 
                     
                     #time chunk properties
@@ -295,24 +295,6 @@ class Rfinder:
       
         task = 'plots'
 
-        if self.cfg_par[task]['plot_summary']['enable']==True:
-            summary_results = {}
-
-            for axis in  self.cfg_par[task]['plot_summary']['axis']:
-                flag_stats = rfiST.get_flags_summary_stats(self.cfg_par, axis)
-                summary_results[axis] = dict(flag_stats)
-                self.logger.warning(f" ------ Plotting {axis} summary plots ------\n")
-                rfiPL.plot_summary_stats(flag_stats, self.cfg_par, axis)
-                self.logger.info("------ Summary plot done ------\n")
-
-            if summary_results:
-                self.logger.warning(f'------ Total % Flagged: {round(sum(summary_results[axis].values())/len(summary_results[axis].values()),2)} ------')
-                json_file = cfg_par['general']['rfidir'] + f'summary.json'
-                with open(json_file, 'w') as f:
-                    json.dump(summary_results, f)
-
-            rfiFL.write_html_summaryreport(self.cfg_par)
-
         if self.cfg_par[task]['plot_details']['enable']==True:
 
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
@@ -320,8 +302,7 @@ class Rfinder:
                 times, start, end = rfiST.time_chunk(self.cfg_par)
                 self.logger.warning(" ------ Plotting on time chunks ------\n")
 
-                for i in range(0,len(times)-1):
-#                for i in xrange(0,2):
+                for i in range(len(times)-1):
 
                     timez = [times[i],times[i+1]]            
                     
@@ -415,7 +396,7 @@ class Rfinder:
                         rfi.baselines_from_ms(self.cfg_par)
                         self.logger.info("------ Dataset sorted by baseline lenght ------\n")
                     else:
-                        self.logger.info("------ This dataset is empyy ------\n")
+                        self.logger.info("------ This dataset is empty ------\n")
 
                 rfiPL.plot_altaz_short(self.cfg_par)
                 self.logger.warning("------ Alt/Az plotted ------\n")                            
@@ -431,8 +412,25 @@ class Rfinder:
                 self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise'
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
                 self.logger.warning("------ RFI in 1D plotted ------\n")
-
                 rfiFL.write_html_fullreport(self.cfg_par)
+
+        if self.cfg_par[task]['plot_summary']['enable']==True:
+            summary_results = {}
+
+            for axis in  self.cfg_par[task]['plot_summary']['axis']:
+                flag_stats = rfiST.get_flags_summary_stats(self.cfg_par, axis)
+                summary_results[axis] = dict(flag_stats)
+                self.logger.warning(f" ------ Plotting {axis} summary plots ------\n")
+                rfiPL.plot_summary_stats(flag_stats, self.cfg_par, axis)
+                self.logger.info("------ Summary plot done ------\n")
+
+            if summary_results:
+                self.logger.warning(f'------ Total % Flagged: {round(sum(summary_results[axis].values())/len(summary_results[axis].values()),2)} ------')
+                json_file = cfg_par['general']['rfidir'] + f'summary.json'
+                with open(json_file, 'w') as f:
+                    json.dump(summary_results, f)
+
+            rfiFL.write_html_summaryreport(self.cfg_par)
 
         self.logger.info("------ cleaning up ------\n")
         

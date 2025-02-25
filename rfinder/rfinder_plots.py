@@ -329,9 +329,9 @@ class rfi_plots:
             noise_factor_short = np.array(data_vec['noise_factor_short'],dtype=float)
             flags_short = np.array(data_vec['percentage_flags_short'],dtype=float)
 
-           
+
             if cfg_par['plots']['plot_details']['plot_noise'] == 'noise':
-                rms = np.array(cfg_par['rfi']['theo_rms']*1e3,dtype=float)
+                rms = np.array(cfg_par['rfi']['theo_rms'][0]*1e3,dtype=float)
                 noise_all = noise_factor*rms
                 noise_short = noise_factor_short*rms
                 noise_long = noise_factor_long*rms
@@ -960,7 +960,6 @@ class rfi_plots:
 
     def gif_me_up(self,cfg_par,filenames,outmovie):
         
-
         self.logger.info(('\t ... Creating movie ...'))
        
         # initiate an empty  list of "plotted" images 

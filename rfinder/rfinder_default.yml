@@ -30,13 +30,13 @@ rfi:
         time_enable: true
         time_step: 60                                  #time chunks in minutes
         spw_enable: true
-        spw_width: 200                                 #channel width of rebinned output table [MHz]
+        spw_width: 20                                 #channel width of rebinned output table [MHz]
 
 plots:
     __helpstr: plot rfi over different axes
     plot_details:
         __helpstr: plot formats
-        enable: false
+        enable: true
         plot_noise: 'rfi'                              #choose to plot % of RFI, 'rfi', or noise, 'noise', or factor of noise increase, 'noise_factor' in 1D plots
         plot_long_short: true                          #plot all baselines, or only the short and the long
         plot_eps: false                                #also generate eps plots. If false only pngs/movies

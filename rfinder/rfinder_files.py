@@ -1,7 +1,7 @@
 import base64
 import shutil
 import numpy as np
-import os, string, sys, glob
+import re, os, string, sys, glob
 from astropy.io import fits as fits
 from astropy import units as u
 from jinja2 import FileSystemLoader, Environment
@@ -532,9 +532,23 @@ def find_altaz_plots(cfg_par):
 def find_2d_plots(cfg_par):
 
     if cfg_par['rfi']['RFInder_mode']=='use_flags':
-        filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/rfi_base*')
+        filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/flags*')
     elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
         filenames = glob.glob(cfg_par['general']['timeplotdir2D']+'/rfi_base*')
+
+    if not filenames:
+        return []  # Return empty if no files are found
+
+    # Extract numeric part and sort
+    def extract_number(filename):
+        match = re.search(r'base_(\d+)m\.png', filename)
+        return int(match.group(1)) if match else float('inf')
+
+    filenames = sorted(filenames, key=extract_number)
+
+    return filenames
+
+
 
     tmp_arr=[]
     for i in range(0,len(filenames)):
@@ -556,15 +570,20 @@ def find_1d_plots(cfg_par,name_root):
 
     for i in range(0,len(filenames)):
         if cfg_par['rfi']['RFInder_mode']=='use_flags':
-            if len(filenames[i].split('sl_flags.'))>1:
+            if len(filenames[i].split('sl_rfi.'))>1:
                 continue
         elif cfg_par['rfi']['RFInder_mode']=='rms_clip':
-            if  len(filenames[i].split('sl_rfi.'))>1:
+            if  len(filenames[i].split('sl_flags.'))>1:
                 continue
-        tmp_arr.append(filenames[i].split('m_sl_rfi.png')[0])
+        tmp_arr.append(filenames[i])
 
-    tmp_arr.sort()
-    filenames = tmp_arr
+    # Extract numerical values and sort
+    def extract_number(filename):
+        match = re.search(r'_(\d+)m_', filename)
+        return int(match.group(1)) if match else float('inf')
+
+    import IPython; IPython.embed()
+    filenames = sorted(tmp_arr, key=extract_number)
 
     return filenames
 
