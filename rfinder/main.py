@@ -105,10 +105,10 @@ class Rfinder:
             self.cfg_par['rfi']['chunks']['spw_enable'] = True
             self.cfg_par['rfi']['chunks']['spw_width'] = kwargs['chunks_spw_width']
 
-        if kwargs.get('no_chunks_time_enable'):
-            self.cfg_par['rfi']['chunks']['time_enable'] = False
         if kwargs.get('chunks_time_enable'):
             self.cfg_par['rfi']['chunks']['time_enable'] = True
+        elif kwargs.get('chunks_time_enable') is False:
+            self.cfg_par['rfi']['chunks']['time_enable'] = False
 
         if kwargs.get('no_chunks_spw_enable'):
             self.cfg_par['rfi']['chunks']['spw_enable'] = False
@@ -129,22 +129,20 @@ class Rfinder:
             self.cfg_par['general']['outlabel'] = '_' + kwargs['label']
         else:
             self.cfg_par['general']['outlabel'] = '_' + self.cfg_par['general']['outlabel']
-        if kwargs.get('rfi_enable'):
-            if kwargs.get('rfimode') in ['rms_clip', 'use_flags']:
-                self.cfg_par['rfi']['RFInder_mode'] = kwargs['rfimode']
-                self.cfg_par['rfi']['rfi_enable'] = True
-                if kwargs.get('rms_clip'):
-                    self.cfg_par['rfi']['rms_clip'] = kwargs['sigma_clip']
-                if kwargs.get('frequency_interval'):
-                    self.cfg_par['rfi']['noise_measure_edges'] = kwargs['frequency_interval']
-                if kwargs.get('plot_details_enable'):
-                    self.cfg_par['plots']['plot_details']['enable'] = True
-        else:
-            self.cfg_par['plots']['plot_details']['enable'] = True
-
-
-        if kwargs.get('plot_summary_enable'):
-            self.cfg_par['plots']['plot_summary']['enable'] = True
+        if kwargs.get('rfimode') in ['rms_clip', 'use_flags']:
+            self.cfg_par['rfi']['RFInder_mode'] = kwargs['rfimode']
+            self.cfg_par['rfi']['rfi_enable'] = True
+            if kwargs.get('rms_clip'):
+                self.cfg_par['rfi']['rms_clip'] = kwargs['sigma_clip']
+            if kwargs.get('frequency_interval'):
+                self.cfg_par['rfi']['noise_measure_edges'] = kwargs['frequency_interval']
+            if kwargs.get('plot_details_enable'):
+                self.cfg_par['plots']['plot_details']['enable'] = True
+        if kwargs.get('rfi_enable') is False:
+            self.cfg_par['rfi']['rfi_enable'] = False
+            self.cfg_par['plots']['plot_details']['enable'] = False
+        if kwargs.get('plot_summary_enable') is False:
+            self.cfg_par['plots']['plot_summary']['enable'] = False
             if kwargs.get('plot_summary_options'):
                 self.cfg_par['plots']['plot_summary']['axis'] = kwargs['plot_summary_options']
             if kwargs.get('freq_bin'):

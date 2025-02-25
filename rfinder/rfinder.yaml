@@ -84,7 +84,7 @@ cabs:
         choices:
           - rms_clip
           - use_flags
-        default: 'rms_clip'
+        default: 'use_flags'
         abbreviation: mode
       sigma-clip:
         info: "Threshold for RFI identification"
@@ -119,7 +119,7 @@ cabs:
         spw-width:
           info: "Channel width of rebinned output table in MHz"
           dtype: int
-          default: 200
+          default: 120
 
       plot-details:
         enable:
