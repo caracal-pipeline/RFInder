@@ -95,14 +95,12 @@ cabs:
       frequency-interval:
         info: "Frequency range to measure average STD of visibilities"
         dtype: List[float]
-        #default: [1.400e9, 1.420e9]
         policies:
           repeat: '[]'
         abbreviation: fint
       baseline-cut:
         info: "Cutoff baseline length"
         dtype: int
-        default: 200
       chunks:
         time-enable:
           info: "Enable splitting by time intervals"
@@ -111,7 +109,6 @@ cabs:
         time-step:
           info: "Time chunk size in minutes"
           dtype: int
-          default: 30
           abbreviation: tStep
         spw-enable:
           info: "Enable splitting by spectral windows"
@@ -120,7 +117,6 @@ cabs:
         spw-width:
           info: "Channel width of rebinned output table in MHz"
           dtype: int
-          default: 60
           abbreviation: spwAv
 
       plot-details:
@@ -165,21 +161,22 @@ cabs:
         axis:
           info: "Axes for summary plotting"
           dtype: List[str]
-          default: ['ant', 'scan']
+          choices:
+            - scan
+            - ant
+            - freq
+            - corr
           policies:
             repeat: '[]'
         antenna:
           info: "Select an antenna for summary"
           dtype: str
-          required: false
         freq-bin:
           info: "Bin frequency channels for summary plotting"
           dtype: int
-          default: 4
         report:
           info: "Generate HTML report with results"
           dtype: bool
-          default: true
 
     outputs:
       output-dir:
