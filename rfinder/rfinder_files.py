@@ -293,7 +293,7 @@ def write_html_fullreport(cfg_par):
     if os.path.exists(video_name3):
         video_encoded3 = base64.b64encode(open(video_name3, "rb").read())
 
-    video_name4 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise_factor.gif'
+    video_name4 = cfg_par['general']['moviedir']+'TimeChunks_1D_noisefactor.gif'
     if os.path.exists(video_name4):
         video_encoded4 = base64.b64encode(open(video_name4, "rb").read())
 
@@ -393,7 +393,7 @@ def write_html_timereport(cfg_par):
     else:
         video_encoded3 = None
 
-    video_name4 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise_factor.gif'
+    video_name4 = cfg_par['general']['moviedir']+'TimeChunks_1D_noisefactor.gif'
     if os.path.exists(video_name4):
         video_encoded4 = base64.b64encode(open(video_name4, "rb").read())
     else:
