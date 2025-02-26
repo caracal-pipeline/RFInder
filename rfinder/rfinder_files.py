@@ -293,6 +293,10 @@ def write_html_fullreport(cfg_par):
     if os.path.exists(video_name3):
         video_encoded3 = base64.b64encode(open(video_name3, "rb").read())
 
+    video_name4 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise_factor.gif'
+    if os.path.exists(video_name34):
+        video_encoded4 = base64.b64encode(open(video_name3, "rb").read())
+
     if cfg_par['plots']['plot_details']['movies']['movies_in_report'] == True:
         template = env.get_template('full_template.html')
         with open(cfg_par['general']['rfidir']+'full_report.html', "w") as f:
@@ -321,7 +325,8 @@ def write_html_fullreport(cfg_par):
                 #video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),        
                 #video_tag1 = '<img class="d" src="data:video/gif;base64,{0}">'.format(video_encoded1),
                 video_tag2 = '<img class="e" src="data:image/gif;base64,{0}">'.format(video_encoded2.decode()),
-                video_tag3 = '<img class="f" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
+                video_tag3 = '<img class="f" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode()),
+                video_tag4 = '<img class="d" src="data:image/gif;base64,{0}">'.format(video_encoded4.decode())
             ))
 
     elif cfg_par['plots']['plot_details']['movies']['movies_in_report'] == False:
