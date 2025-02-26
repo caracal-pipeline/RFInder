@@ -148,7 +148,7 @@ class Rfinder:
             self.cfg_par['plots']['plot_summary']['enable'] = True
             if kwargs.get('plot_summary_axis'):
                 self.cfg_par['plots']['plot_summary']['axis'] = kwargs['plot_summary_axis']
-            if kwargs.get('--plot-summary-freq-bin'):
+            if kwargs.get('plot_summary_freq_bin'):
                 self.cfg_par['plots']['plot_summary']['freq_bin'] = kwargs['plot_summary_freq_bin']
             if kwargs.get('plot_summary_report'):
                 self.cfg_par['plots']['plot_summary']['report'] = kwargs['plot_summary_report']
@@ -157,7 +157,7 @@ class Rfinder:
                 self.cfg_par['plots']['plot_summary']['enable'] = False
             if kwargs.get('plot_summary_axis'):
                 self.cfg_par['plots']['plot_summary']['axis'] = kwargs['plot_summary_axis']
-            if kwargs.get('--plot-summary-freq-bin'):
+            if kwargs.get('plot_summary_freq_bin'):
                 self.cfg_par['plots']['plot_summary']['freq_bin'] = kwargs['plot_summary_freq_bin']
             if kwargs.get('plot_summary_report'):
                 self.cfg_par['plots']['plot_summary']['report'] = kwargs['plot_summary_report']
