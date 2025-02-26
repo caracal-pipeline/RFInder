@@ -418,7 +418,7 @@ def write_html_timereport(cfg_par):
                 video_tag1 = '<img class="h" src="data:image/gif;base64,{0}">'.format(video_encoded1.decode()),
                 video_tag2 = '<img class="a" src="data:image/gif;base64,{0}">'.format(video_encoded2.decode()),
                 video_tag3 = '<img class="c" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode()),
-                #video_tag4 = '<img class="g" src="data:image/gif;base64,{0}">'.format(video_encoded3.decode())
+                video_tag4 = '<img class="g" src="data:image/gif;base64,{0}">'.format(video_encoded4.decode())
             ))
 
     elif cfg_par['plots']['plot_details']['movies']['movies_in_report'] == False:
