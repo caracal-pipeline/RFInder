@@ -153,7 +153,7 @@ cabs:
             info: "Generate Alt/Az GIF movies"
             dtype: bool
             default: true
-          movies-in-report:
+          in-report:
             info: "Include movies in the generated report"
             dtype: bool
             default: true

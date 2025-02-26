@@ -115,9 +115,9 @@ class Rfinder:
         elif kwargs.get('chunks_spw_enable') is False:
             self.cfg_par['rfi']['chunks']['spw_enable'] = False
 
-        if kwargs.get('plot_details_movies_movies_in_report') is True:
+        if kwargs.get('plot_details_movies_in_report') is True:
             self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = True
-        elif kwargs.get('plot_details_movies_movies_in_report') is False:
+        elif kwargs.get('plot_details_movies_in_report') is False:
             self.cfg_par['plots']['plot_details']['movies']['movies_in_report'] = False
 
         if kwargs.get('cleanup_enable') is True:
@@ -138,7 +138,10 @@ class Rfinder:
                 self.cfg_par['rfi']['noise_measure_edges'] = kwargs['frequency_interval']
             if kwargs.get('plot_details_enable'):
                 self.cfg_par['plots']['plot_details']['enable'] = True
-        if kwargs.get('rfi_enable') is False:
+        if kwargs.get('rfi_enable') is True:
+            self.cfg_par['rfi']['rfi_enable'] = True
+            self.cfg_par['plots']['plot_details']['enable'] = True
+        elif kwargs.get('rfi_enable') is False:
             self.cfg_par['rfi']['rfi_enable'] = False
             self.cfg_par['plots']['plot_details']['enable'] = False
         if kwargs.get('plot_summary_enable') is True:
