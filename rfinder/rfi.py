@@ -311,7 +311,7 @@ class rfi:
         #flag autocorrelations and bad antennas
         for i in range(self.flag.shape[0]):
 
-            if self.aperfi_badant not in [None, '[]', []]:
+            if self.aperfi_badant not in [None, []]:
                 if (any(x == self.ant1[i] for x in self.aperfi_badant) or any(x == self.ant2[i] for x in self.aperfi_badant)):
                     self.flag[i,:,0] = True
             if self.ant1[i] == self.ant2[i]:
