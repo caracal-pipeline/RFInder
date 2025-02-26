@@ -28,7 +28,7 @@ rfi:
     chunks:
         __helpstr: separate visibilities in small time intervals and/or larger spectral windows 
         time_enable: true
-        time_step: 60                                  #time chunks in minutes
+        time_step: 30                                  #time chunks in minutes
         spw_enable: true
         spw_width: 60                                 #channel width of rebinned output table [MHz]
 
