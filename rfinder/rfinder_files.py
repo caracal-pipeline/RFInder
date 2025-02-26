@@ -294,7 +294,7 @@ def write_html_fullreport(cfg_par):
         video_encoded3 = base64.b64encode(open(video_name3, "rb").read())
 
     video_name4 = cfg_par['general']['moviedir']+'TimeChunks_1D_noise_factor.gif'
-    if os.path.exists(video_name34):
+    if os.path.exists(video_name4):
         video_encoded4 = base64.b64encode(open(video_name3, "rb").read())
 
     if cfg_par['plots']['plot_details']['movies']['movies_in_report'] == True:

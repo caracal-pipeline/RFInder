@@ -141,8 +141,17 @@ class Rfinder:
         if kwargs.get('rfi_enable') is False:
             self.cfg_par['rfi']['rfi_enable'] = False
             self.cfg_par['plots']['plot_details']['enable'] = False
-        if kwargs.get('plot_summary_enable') is False:
-            self.cfg_par['plots']['plot_summary']['enable'] = False
+        if kwargs.get('plot_summary_enable') is True:
+            self.cfg_par['plots']['plot_summary']['enable'] = True
+            if kwargs.get('plot_summary_options'):
+                self.cfg_par['plots']['plot_summary']['axis'] = kwargs['plot_summary_options']
+            if kwargs.get('freq_bin'):
+                self.cfg_par['plots']['plot_summary']['freq_bin'] = kwargs['plot_summary_freq_bin']
+            if kwargs.get('freq_bin'):
+                self.cfg_par['plots']['plot_summary']['report'] = kwargs['plot_summary_report']
+        elif kwargs.get('plot_summary_enable') in [False, None]:
+            if kwargs.get('plot_summary_enable') is False:
+                self.cfg_par['plots']['plot_summary']['enable'] = False
             if kwargs.get('plot_summary_options'):
                 self.cfg_par['plots']['plot_summary']['axis'] = kwargs['plot_summary_options']
             if kwargs.get('freq_bin'):
