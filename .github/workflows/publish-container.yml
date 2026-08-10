@@ -7,6 +7,7 @@ on:
     branches:
       - master
       - issue*
+      - prepare*
   pull_request:
     branches:
       - master
@@ -44,8 +45,10 @@ jobs:
             type=semver,pattern={{version}}
             # For main branch: use 'latest'
             type=raw,value=latest,enable={{is_default_branch}}
-            # For issue branch: use 'issue-<branch-name>'
-            type=ref,event=branch,enable=${{ startsWith(github.ref, 'refs/heads/issue') }}
+            # For every other branch (including manual workflow_dispatch runs): use the branch name.
+            # Without this, non-default/non-issue branches produce zero tags and the build never
+            # gets pushed to ghcr.io (silently - build succeeds, nothing appears under Packages).
+            type=ref,event=branch,enable=${{ github.ref_name != 'master' }}
 
       # Build and push
       - name: Build and push Docker image

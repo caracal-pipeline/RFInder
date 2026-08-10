@@ -107,69 +107,83 @@ If `rfinder` runs correctly, you will find the following output products in your
 `rfinder -h` will show you a (minimal) help:
 
 ```
-usage: rfinder [-h] [-v] [-c CONFIG] [-w WORKING_DIR] [-odir OUTPUT_DIR]
-               [-i INPUT] [-fl FIELD] [-tel TELESCOPE] [-mode RFIMODE]
-               [-pol POLARIZATION]
-               [-fint [FREQUENCY_INTERVAL [FREQUENCY_INTERVAL ...]]]
-               [-spwAv SPW_AV] [-tStep TIME_STEP] [-sig SIGMA_CLIP]
-               [-baseCut BASELINE_CUT] [-noCh] [-yesCh] [-noSpw] [-yesSpw]
-               [-noClp] [-yesClp]
-
 RFInder: package to visualize the flagged RFI in a dataset
-
-version 1.0.3
-
-install path /home/maccagni/programs/RFInder/rfinder
-
+version 1.2.0
+install path /path/to/RFInder/rfinder
 Filippo Maccagni <filippo.maccagni@gmial.com>
 
-optional arguments:
-  -h, --help            Print help message and exit
-  -v, --version         show program's version number and exit
-  -c CONFIG, --config CONFIG
-                        RFInder configuration file (YAML format)
-  -idir INPUT_DIR, --input_dir WORKING_DIR
-                        select working directory (MS file assumed to be here)
-  -odir OUTPUT_DIR, --output_dir OUTPUT_DIR
-                        select output directory
-  -i INPUT, --input INPUT
-                        input ['MS'] file
-  -fl FIELD, --field FIELD
-                        select field of MS file to analyze
-  -tel TELESCOPE, --telescope TELESCOPE
-                        select telescope: meerkat, apertif, wsrt
-  -mode RFIMODE, --rfimode RFIMODE
-                        select mode where to investigate RFI: use_flags or
-                        rms_clip
-  -pol POLARIZATION, --polarization POLARIZATION
-                        select stokes parameter: xx, yy, xy, yx, q (also in
-                        CAPS)
-  -fint [FREQUENCY_INTERVAL [FREQUENCY_INTERVAL ...]], --frequency_interval [FREQUENCY_INTERVAL [FREQUENCY_INTERVAL ...]]
-                        select frequency interval where to measure noise in
-                        GHz
-  -spwAv SPW_AV, --spw_av SPW_AV
-                        select number of channels to average
-  -tStep TIME_STEP, --time_step TIME_STEP
-                        select time step in minutes in which divide the
-                        analysis of the MSfile
-  -sig SIGMA_CLIP, --sigma_clip SIGMA_CLIP
-                        select sigma clip for rms_clip mode to find RFI
-  -baseCut BASELINE_CUT, --baseline_cut BASELINE_CUT
-                        select cut in baseline lenght [m] for differential RFI
-                        analysis
-  -noCh, --no_chunks    desable chunking in time
-  -yesCh, --yes_chunks  enable chunking in time
-  -noSpw, --no_spw_av   desable averaging in channels
-  -yesSpw, --yes_spw_av
-                        enable averaging in channels
-  -noClp, --no_cleanup  desable cleanup of intermediate products
-  -yesClp, --yes_cleanup
-                        enable cleanup of intermediate products
+Usage:  [OPTIONS]
 
-Run a command. This can be: 
+Options:
+  -idir, --input-dir Directory    Full path to the working directory
+  -c, --config File               RFInder configuration file (YAML format)
+  -i, --msname MS                 Name of the input Measurement Set (MS) file
+  -fl, --field int                Field ID of the target in the file
+  --cleanup-enable / --no-cleanup-enable
+                                  Remove intermediate results
+  -j, --ncpu int                  Number of CPUs to get the total flagged data
+  -l, --label str                 Label of the output directory. Result:
+                                  rfi_<stokes>_<label>
+  -tel, --telescope-name str      Name of the telescope.
+  --telescope-diameter float      Diameter of the telescope in meters
+  --telescope-tsyseff float       Effective system temperature in Kelvin
+  --telescope-long float          Longitude of the telescope
+  --telescope-lat float           Latitude of the telescope
+  --telescope-height float        Height/altitude of the telescope location
+  -rfi, --rfi-enable / --no-rfi-enable
+                                  Enable or disable the RFI detection module
+  -pol, --polarization str        Polarization type (e.g., 'xx', 'yy', 'q')
+  --bad-antenna str,str,...       List of bad antennas
+  -mode, --rfimode str            Mode of RFI detection ('rms_clip' or
+                                  'use_flags')
+  --sigma-clip, --sig float       Threshold for RFI identification
+  -fint, --frequency-interval float,float,...
+                                  Frequency range to measure average STD of
+                                  visibilities
+  --baseline-cut int              Cutoff baseline length
+  --chunks-time-enable / --no-chunks-time-enable
+                                  Enable splitting by time intervals
+  -tStep, --chunks-time-step int  Time chunk size in minutes
+  --chunks-spw-enable / --no-chunks-spw-enable
+                                  Enable splitting by spectral windows
+  -spwAv, --chunks-spw-width int  Channel width of rebinned output table in
+                                  MHz
+  --plot-details-enable / --no-plot-details-enable
+                                  Enable detailed plotting
+  --plot-details-plot-noise str   Type of noise/RFI to plot ('rfi', 'noise',
+                                  or 'noise_factor')
+  --plot-details-plot-long-short / --no-plot-details-plot-long-short
+                                  Plot all baselines or only long/short
+                                  baselines
+  --plot-details-plot-eps / --no-plot-details-plot-eps
+                                  Generate EPS plots
+  --plot-details-movies-2d-gif / --no-plot-details-movies-2d-gif
+                                  Generate 2D GIF movies
+  --plot-details-movies-1d-gif / --no-plot-details-movies-1d-gif
+                                  Generate 1D GIF movies
+  --plot-details-movies-altaz-gif / --no-plot-details-movies-altaz-gif
+                                  Generate Alt/Az GIF movies
+  --plot-details-movies-in-report / --no-plot-details-movies-in-report
+                                  Include movies in the generated report
+  --plot-summary-enable / --no-plot-summary-enable
+                                  Enable summary plotting of % flagged
+                                  visibilities
+  --plot-summary-axis str,str,...
+                                  Axes for summary plotting
+  --plot-summary-antenna str      Select an antenna for summary
+  --plot-summary-freq-bin int     Bin frequency channels for summary plotting
+  --plot-summary-report / --no-plot-summary-report
+                                  Generate HTML report with results
+  -odir, --output-dir Directory   Full path to the working output directory
+  -h, --help                      Show this message and exit.
+  --version                       Show the version and exit.
+
+Run a command. This can be:
+
 rfinder 
 rfinder -c path_to_config_file.yml
 rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt>
+rfinder -i <ngc1399.ms> -fl <num> -tel <meerkat/apertif/wsrt> -rfi -mode rms_clip
 ```
 
 ***
