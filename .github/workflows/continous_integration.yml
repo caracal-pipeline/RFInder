@@ -3,10 +3,15 @@
 
 name: Ubuntu CI
 
-on: [push, pull_request]
-
-env:
-  POETRY_VERSION: 1.4.0
+on:
+  push:
+    branches:
+      - "**"   # Triggers on push to any branch, including new ones
+    tags:
+      - "*"    # Triggers on push to any tag
+  pull_request:
+  schedule:
+    - cron: '30 2 * * 1'  # Every Monday at 2:30 AM UTC
 
 jobs:
   test:
@@ -14,45 +19,45 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04 ]
-        python-version: ["3.8", "3.9", "3.10"]
+        os: [ ubuntu-22.04, ubuntu-24.04 ]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Cache Installations
-        id: cache-installs
-        uses: actions/cache@v3
-        with:
-          path: ~/.local
-          key: install-${{ env.INSTALL_CACHE_HASH }}-2
-
-      - name: Install Poetry
-        if: steps.cache-installs.outputs.cache-hit != 'true'
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 - --version ${{ env.POETRY_VERSION }}
-      - name: Test poetry
-        run: poetry --version
-
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Install rfinder
-        run: poetry install --extras "testing"
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-      - name: Lint with flake8
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Install rfinder
+        run: uv sync
+
+      - name: Lint with Ruff
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-#      - name: Test with pytest
-#        run: poetry run pytest -s -vvv
+          uv run ruff check rfinder --show-fixes
+
+      - name: Format check with Ruff
+        run: |
+          uv run ruff format rfinder --check --line-length 120
+
+      - name: Test with pytest
+        run: uv run pytest rfinder/tests/ -v
+
+      - name: Download test dataset
+        run: curl https://ratt-public-data.s3.af-south-1.amazonaws.com/test-data/HLTau_B6cont.calavg.tav300s.tar.xz | tar xJf -
 
       - name: Test rfinder command
         run: |
-          poetry run rfinder --help
+          uv run rfinder --help
+
+      - name: Run end to end test
+        run: |
+          uv run rfinder -i HLTau_B6cont.calavg.tav300s -fl 0 -tel meerkat -l test
