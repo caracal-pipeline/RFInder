@@ -4,12 +4,13 @@ Regression tests for Rfinder.setArgs() (rfinder/main.py).
 Scoped deliberately to changes made during the mgpls-illuminati integration/testing effort
 (see RFINDER_CHANGES.md) - not a general test suite for the pre-existing codebase.
 """
+
 import copy
 import os
 
 import yaml
 
-from rfinder.main import RFINDER_DIR, DEFAULT_CONFIG, Rfinder
+from rfinder.main import DEFAULT_CONFIG, RFINDER_DIR, Rfinder
 
 # setArgs() unconditionally touches many cfg_par keys beyond input_dir/output_dir (label,
 # cleanup_enable, chunking, plot options, ...) and expects a fully-populated cfg_par as its
@@ -33,8 +34,8 @@ def test_input_dir_sets_workdir():
     flag was silently a no-op. Fixed 2026-08-10.
     """
     rfi = make_rfinder()
-    rfi.setArgs({'input_dir': '/some/input/path'})
-    assert rfi.cfg_par['general']['workdir'] == '/some/input/path'
+    rfi.setArgs({"input_dir": "/some/input/path"})
+    assert rfi.cfg_par["general"]["workdir"] == "/some/input/path"
 
 
 def test_output_dir_sets_outdir():
@@ -45,20 +46,20 @@ def test_output_dir_sets_outdir():
     Fixed 2026-08-10.
     """
     rfi = make_rfinder()
-    rfi.setArgs({'output_dir': '/some/output/path'})
-    assert rfi.cfg_par['general']['outdir'] == '/some/output/path'
+    rfi.setArgs({"output_dir": "/some/output/path"})
+    assert rfi.cfg_par["general"]["outdir"] == "/some/output/path"
 
 
 def test_input_output_dir_combined_and_unset_safe():
     """Both flags apply independently when set together, and leave workdir/outdir untouched
     (rather than clobbering them) when absent/falsy."""
     rfi = make_rfinder()
-    rfi.setArgs({'input_dir': '/in', 'output_dir': '/out'})
-    assert rfi.cfg_par['general']['workdir'] == '/in'
-    assert rfi.cfg_par['general']['outdir'] == '/out'
+    rfi.setArgs({"input_dir": "/in", "output_dir": "/out"})
+    assert rfi.cfg_par["general"]["workdir"] == "/in"
+    assert rfi.cfg_par["general"]["outdir"] == "/out"
 
-    workdir_before = rfi.cfg_par['general']['workdir']
-    outdir_before = rfi.cfg_par['general']['outdir']
-    rfi.setArgs({'input_dir': None, 'output_dir': None})
-    assert rfi.cfg_par['general']['workdir'] == workdir_before
-    assert rfi.cfg_par['general']['outdir'] == outdir_before
+    workdir_before = rfi.cfg_par["general"]["workdir"]
+    outdir_before = rfi.cfg_par["general"]["outdir"]
+    rfi.setArgs({"input_dir": None, "output_dir": None})
+    assert rfi.cfg_par["general"]["workdir"] == workdir_before
+    assert rfi.cfg_par["general"]["outdir"] == outdir_before

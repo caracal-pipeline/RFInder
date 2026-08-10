@@ -49,6 +49,14 @@ target-version = "py39"
 select = ["E", "W", "F", "I", "N"]
 ignore = [
     "E501", # Line length
+    # Pre-existing code style, deliberately not touched in the lint cleanup pass -
+    # that pass fixed everything ruff could auto-fix safely.
+    # Revisit/tighten
+    "E711", # none-comparison (`== None` instead of `is None`)
+    "E712", # true-false-comparison (`== True`/`== False` instead of `is`)
+    "E402", # module-import-not-at-top-of-file
+    "F841", # unused-variable (removal could have side effects, needs review per case)
+    "N801", "N802", "N803", "N806", "N812", "N816", # naming-convention (renames need care - could be part of a public/import-time API)
 ]
 
 [tool.uv]

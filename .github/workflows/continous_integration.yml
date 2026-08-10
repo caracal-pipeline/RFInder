@@ -47,9 +47,9 @@ jobs:
       - name: Format check with Ruff
         run: |
           uv run ruff format rfinder --check --line-length 120
-#      - name: Test with pytest
-#        run: uv run pytest -s -vvv
 
+      - name: Test with pytest
+        run: uv run pytest rfinder/tests/ -v
 
       - name: Download test dataset
         run: curl https://ratt-public-data.s3.af-south-1.amazonaws.com/test-data/HLTau_B6cont.calavg.tav300s.tar.xz | tar xJf -
