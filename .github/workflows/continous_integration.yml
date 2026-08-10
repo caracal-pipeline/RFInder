@@ -13,9 +13,6 @@ on:
   schedule:
     - cron: '30 2 * * 1'  # Every Monday at 2:30 AM UTC
 
-env:
-  POETRY_VERSION: 2.0.1
-
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -25,35 +22,33 @@ jobs:
         os: [ ubuntu-22.04 ]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
     steps:
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install Poetry
-        uses: abatilo/actions-poetry@v3
-        with:
-          poetry-version: ${{ env.POETRY_VERSION }}
-
-      - name: Test poetry
-        run: poetry --version
-
       - name: Checkout source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Install rfinder
-        run: poetry install --extras "testing"
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
 
-      - name: Lint with flake8
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Install rfinder
+        run: uv sync
+
+      - name: Lint with Ruff
         run: |
-          # stop the build if there are Python syntax errors or undefined names
-          poetry run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          uv run ruff check rfinder --show-fixes
+
+      - name: Format check with Ruff
+        run: |
+          uv run ruff format rfinder --check --line-length 120
 #      - name: Test with pytest
-#        run: poetry run pytest -s -vvv
+#        run: uv run pytest -s -vvv
 
 
       - name: Download test dataset
@@ -61,8 +56,8 @@ jobs:
 
       - name: Test rfinder command
         run: |
-          poetry run rfinder --help
+          uv run rfinder --help
 
       - name: Run end to end test
         run: |
-          poetry run rfinder -i HLTau_B6cont.calavg.tav300s -fl 0 -tel meerkat -l test 
+          uv run rfinder -i HLTau_B6cont.calavg.tav300s -fl 0 -tel meerkat -l test

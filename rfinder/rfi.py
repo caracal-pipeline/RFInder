@@ -69,7 +69,7 @@ class rfi:
         }
 
         if counter == 0 :
-            self.logger.warning("\t ... Field, Antenna & Bandwidth Info ...\n")
+            self.logger.info("\t ... Field, Antenna & Bandwidth Info ...\n")
 
         self.msfile = cfg_par['general']['msfullpath']
         self.aperfi_badant = cfg_par['rfi']['bad_antenna'] 
@@ -84,7 +84,7 @@ class rfi:
         cfg_par['rfi']['coords'] = SkyCoord(self.coords[self.selectFieldID,:,0]*u.degree, self.coords[self.selectFieldID,:,1]*u.degree,  unit=(u.deg, u.deg))
 
         if counter == 0 :
-            self.logger.warning("\tField with name {0:s} (Field ID = {1:d})".format(selectFieldName,self.selectFieldID))
+            self.logger.info("\tField with name {0:s} (Field ID = {1:d})".format(selectFieldName,self.selectFieldID))
         #self.logger.info("\tCoordinates {}".format(selectFieldName,self.selectFieldID))
   
         antennas = tables.table(self.msfile +'/ANTENNA')
@@ -101,8 +101,8 @@ class rfi:
         cfg_par['rfi']['ant_names'] = self.ant_names
 
         if counter == 0 :
-            self.logger.warning("\tTotal number of antennas:\t"+str(self.nant))
-            self.logger.warning("\tAntenna names:\t\t"+str(self.ant_names))
+            self.logger.info("\tTotal number of antennas:\t"+str(self.nant))
+            self.logger.info("\tAntenna names:\t\t"+str(self.ant_names))
 
         antennas.close()
         self.ant_names = np.arange(0,self.ant_names.shape[0],1)
@@ -121,9 +121,9 @@ class rfi:
 
         if counter == 0 :
        
-            self.logger.warning("\tChannel Width [kHz]:\t"+str(cfg_par['rfi']['chan_widths']/1e3))
-            self.logger.warning("\tStart         [GHz]:\t"+str(cfg_par['rfi']['lowfreq']/1e9))
-            self.logger.warning("\tEnd           [GHz]:\t"+str(cfg_par['rfi']['highfreq']/1e9)+'\n')
+            self.logger.info("\tChannel Width [kHz]:\t"+str(cfg_par['rfi']['chan_widths']/1e3))
+            self.logger.info("\tStart         [GHz]:\t"+str(cfg_par['rfi']['lowfreq']/1e9))
+            self.logger.info("\tEnd           [GHz]:\t"+str(cfg_par['rfi']['highfreq']/1e9)+'\n')
 
 
         #determine start and end date
@@ -158,8 +158,8 @@ class rfi:
                 self.interval = t2.getcol('INTERVAL')[selection]
                 empty_table=0     
             else:
-                self.logger.warning('\t ### Table of selected interval is empty ')
-                self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
+                self.logger.warning('\t ### No data for the selected field in this time chunk ')
+                self.logger.warning('\t     Check the observation\'s scan/field timing - this time window may not include the selected field ###')
                 empty_table=1
             t2.close()
         
@@ -183,9 +183,9 @@ class rfi:
                 self.interval = t.getcol('INTERVAL')[selection]
                 empty_table=0     
             else:
-                self.logger.warning('\t ### Table of selected interval is empty ')
+                self.logger.warning('\t ### No data for the selected field in this time chunk ')
                 if cfg_par['rfi']['RFInder_mode'] == 'rms_clip':
-                    self.logger.warning('\t     Correct noise_measure_edges in rfi of parameter file ###')
+                    self.logger.warning('\t     Check the observation\'s scan/field timing - this time window may not include the selected field ###')
                 empty_table=1
        
         if not self.aperfi_badant:

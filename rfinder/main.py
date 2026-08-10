@@ -82,9 +82,9 @@ class Rfinder:
 
 
     def setArgs(self, kwargs):
-        if kwargs.get('indir'):
+        if kwargs.get('input_dir'):
             self.cfg_par['general']['workdir'] = kwargs['input_dir']
-        if kwargs.get('outdir'):
+        if kwargs.get('output_dir'):
             self.cfg_par['general']['outdir'] = kwargs['output_dir']
         if kwargs.get('msname'):
             self.cfg_par['general']['msname'] = kwargs['msname']
@@ -237,14 +237,14 @@ class Rfinder:
         task = 'rfi'
         rfiFL.set_dirs(self.cfg_par)
 
-        self.logger.warning("------ STARTING RFI analysis ------\n")
+        self.logger.info("------ STARTING RFI analysis ------\n")
 
         if self.cfg_par[task]['rfi_enable']==True:
             
             if self.cfg_par[task]['chunks']['time_enable']==True:
 
                 times, start, end = rfiST.time_chunk(self.cfg_par)
-                self.logger.warning("------ Working on time chunks ------\n")
+                self.logger.info("------ Working on time chunks ------\n")
 
                 for i in range(len(times)-1):
                     timez = [times[i],times[i+1]] 
@@ -255,8 +255,8 @@ class Rfinder:
                     time_delta_plus = TimeDelta(float(self.cfg_par['rfi']['chunks']['time_step'])*60., format='sec')
                     start = self.cfg_par['rfi']['startdate']+time_del
                     end = start+time_delta_plus
-                    self.logger.warning((" ------ Working on chunk #{0:d}:").format(i))
-                    self.logger.warning(("\tbetween {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}\n").format(start.datetime,end.datetime))
+                    self.logger.info((" ------ Working on chunk #{0:d}:").format(i))
+                    self.logger.info(("\tbetween {0:%d}{0:%b}{0:%y}: {0:%H}:{0:%M} - {1:%H}:{1:%M}\n").format(start.datetime,end.datetime))
 
                     result = rfi.load_from_ms(self.cfg_par,timez,i)
                     self.logger.info("------ MSfile Loaded ------\n")
@@ -277,7 +277,7 @@ class Rfinder:
                         rfiFL.rfi_frequency(self.cfg_par,i)
                         self.logger.info("------ RFI saved to table ------\n")
                     else:
-                        self.logger.warning(" ------ This chunk is empty ------\n")
+                        self.logger.info(" ------ This chunk is empty ------\n")
                         continue
 
                 self.logger.info("------ End of RFI analysis on time chunks ------\n")
@@ -287,20 +287,20 @@ class Rfinder:
                 rfi.load_from_ms(self.cfg_par,0,0)
                 #determine alt/az
 
-                self.logger.warning("------ MSfile Loaded -----\n")
+                self.logger.info("------ MSfile Loaded -----\n")
                 rfi.baselines_from_ms(self.cfg_par)
-                self.logger.warning("------ Dataset sorted by baseline lenght ------\n")
+                self.logger.info("------ Dataset sorted by baseline lenght ------\n")
                 datas = rfi.priors_flag(self.cfg_par)
-                self.logger.warning("------ Bad antennas and autocorrelations flagged ------\n")
+                self.logger.info("------ Bad antennas and autocorrelations flagged ------\n")
                 rfi.find_rfi(datas,self.cfg_par,-1)
-                self.logger.warning("------  RFI found  ------\n")
+                self.logger.info("------  RFI found  ------\n")
                 rfiFL.rfi_frequency(self.cfg_par,-1)
-                self.logger.warning("------ RFI saved to table ------\n")
-                self.logger.warning("------ End of RFI analysis ------\n")
+                self.logger.info("------ RFI saved to table ------\n")
+                self.logger.info("------ End of RFI analysis ------\n")
 
         else:
             rfi.load_from_ms(self.cfg_par,0,0)
-            self.logger.warning("------ MSfile Loaded -----\n")
+            self.logger.info("------ MSfile Loaded -----\n")
       
         task = 'plots'
 
@@ -309,7 +309,7 @@ class Rfinder:
             if self.cfg_par['rfi']['chunks']['time_enable']==True:
 
                 times, start, end = rfiST.time_chunk(self.cfg_par)
-                self.logger.warning(" ------ Plotting on time chunks ------\n")
+                self.logger.info(" ------ Plotting on time chunks ------\n")
 
                 for i in range(len(times)-1):
 
@@ -333,7 +333,7 @@ class Rfinder:
                             rfi.baselines_from_ms(self.cfg_par)
                             self.logger.info("------ Dataset sorted by baseline lenght ------\n")
                         else:
-                            self.logger.warning("------ This chunk is empty ------\n")
+                            self.logger.info("------ This chunk is empty ------\n")
                             continue       
 
                     rfiPL.plot_rfi_imshow(self.cfg_par,i)
@@ -347,15 +347,15 @@ class Rfinder:
                     rfiPL.plot_noise_frequency(self.cfg_par,i)
                     self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise'
                     rfiPL.plot_noise_frequency(self.cfg_par,i)         
-                    self.logger.warning("------ RFI in 1D plotted ------\n")
+                    self.logger.info("------ RFI in 1D plotted ------\n")
                 
                 rfiPL.plot_altaz(self.cfg_par,68)
-                self.logger.warning("------ RFI in ALT/AZ plotted ------\n")
+                self.logger.info("------ RFI in ALT/AZ plotted ------\n")
         
                 if (self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True or
                     self.cfg_par['plots']['plot_details']['movies']['2d_gif']==True or
                     self.cfg_par['plots']['plot_details']['movies']['1d_gif']==True):
-                    self.logger.warning("------ Making movies ------\n")
+                    self.logger.info("------ Making movies ------\n")
      
                 if self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True:
 
@@ -391,7 +391,7 @@ class Rfinder:
                 if (self.cfg_par['plots']['plot_details']['movies']['altaz_gif']==True or
                     self.cfg_par['plots']['plot_details']['movies']['2d_gif']==True or
                     self.cfg_par['plots']['plot_details']['movies']['1d_gif']==True):
-                    self.logger.warning("------ Movies done ------\n")
+                    self.logger.info("------ Movies done ------\n")
 
                 rfiFL.write_html_timereport(self.cfg_par)                 
 
@@ -408,9 +408,9 @@ class Rfinder:
                         self.logger.info("------ This dataset is empty ------\n")
 
                 rfiPL.plot_altaz_short(self.cfg_par)
-                self.logger.warning("------ Alt/Az plotted ------\n")                            
+                self.logger.info("------ Alt/Az plotted ------\n")                            
                 rfiPL.plot_rfi_imshow(self.cfg_par,-1)
-                self.logger.warning("------ RFI in 2D plotted ------\n")
+                self.logger.info("------ RFI in 2D plotted ------\n")
                 self.cfg_par['plots']['plot_details']['plot_noise'] = 'rfi'
                 self.cfg_par['plots']['plot_details']['long_short'] = False
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
@@ -420,7 +420,7 @@ class Rfinder:
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
                 self.cfg_par['plots']['plot_details']['plot_noise'] = 'noise'
                 rfiPL.plot_noise_frequency(self.cfg_par,-1)
-                self.logger.warning("------ RFI in 1D plotted ------\n")
+                self.logger.info("------ RFI in 1D plotted ------\n")
                 rfiFL.write_html_fullreport(self.cfg_par)
 
         if self.cfg_par[task]['plot_summary']['enable']==True:
@@ -429,12 +429,12 @@ class Rfinder:
             for axis in  self.cfg_par[task]['plot_summary']['axis']:
                 flag_stats = rfiST.get_flags_summary_stats(self.cfg_par, axis)
                 summary_results[axis] = dict(flag_stats)
-                self.logger.warning(f" ------ Plotting {axis} summary plots ------\n")
+                self.logger.info(f" ------ Plotting {axis} summary plots ------\n")
                 rfiPL.plot_summary_stats(flag_stats, self.cfg_par, axis)
                 self.logger.info("------ Summary plot done ------\n")
 
             if summary_results:
-                self.logger.warning(f'------ Total % Flagged: {round(sum(summary_results[axis].values())/len(summary_results[axis].values()),2)} ------')
+                self.logger.info(f'------ Total % Flagged: {round(sum(summary_results[axis].values())/len(summary_results[axis].values()),2)} ------')
                 json_file = cfg_par['general']['rfidir'] + f'summary.json'
                 with open(json_file, 'w') as f:
                     json.dump(summary_results, f)
@@ -446,7 +446,7 @@ class Rfinder:
         if self.cfg_par['general']['cleanup_enable'] == True:
             rfiFL.cleanup(self.cfg_par)
 
-        self.logger.warning("------ End of RFInder ------\n\n")
+        self.logger.info("------ End of RFInder ------\n\n")
 
         return 0
 
@@ -455,7 +455,7 @@ class Rfinder:
         config = kwargs.get('_config')
 
         if config:    #rfinder -c config_file.yml
-            self.logger.warning('------ Reading your parameter file ------\n')
+            self.logger.info('------ Reading your parameter file ------\n')
             # read database here
             cfg = open(config)
             self.cfg_par = yaml.load(cfg, Loader=yaml.Loader)
@@ -465,13 +465,13 @@ class Rfinder:
             workdir = workdir+'/'
             exists = os.path.isfile(workdir+'/'+DEFAULT_CONFIG)
             if exists:
-                self.logger.warning('------ Reading default parameter file in your directory ------\n')
+                self.logger.info('------ Reading default parameter file in your directory ------\n')
                 file_default = os.path.join(workdir, DEFAULT_CONFIG)
                 cfg = open(file_default)
                 self.cfg_par = yaml.load(cfg, Loader=yaml.Loader)
             else:
                 # Keep presets
-                self.logger.warning('------ Reading default installation parameter file ------\n')
+                self.logger.info('------ Reading default installation parameter file ------\n')
                 file_default = os.path.join(RFINDER_DIR, DEFAULT_CONFIG)
                 cfg = open(file_default)
                 self.cfg_par = yaml.load(cfg, Loader=yaml.Loader)
@@ -492,10 +492,10 @@ class Rfinder:
                     sys.exit(0)
 
                 else:
-                    self.logger.warning('''------ you provided MSname and telescope in your first run, 
+                    self.logger.info('''------ you provided MSname and telescope in your first run, 
                                         \tassuming MS is your current directory ------\n''')
             if any(kwargs.values()) and not (kwargs.get('help') or kwargs.get('config')):
-                self.logger.warning('------ Updating arguments given from terminal ------\n')
+                self.logger.info('------ Updating arguments given from terminal ------\n')
 
                 self.setArgs(kwargs)
                 with open(workdir+DEFAULT_CONFIG, 'w') as outfile:
@@ -530,7 +530,9 @@ def driver(help, **kw):
     logger.debug('info')
     logger.info('info')
 
-    fh = logging.FileHandler('log-rfinder.log')
+    log_dir = kw.get('output_dir') or '.'
+    os.makedirs(log_dir, exist_ok=True)
+    fh = logging.FileHandler(os.path.join(log_dir, LOG_FILE))
     fh.setLevel(logging.INFO)
 
     ch = logging.StreamHandler()
@@ -552,4 +554,4 @@ def driver(help, **kw):
     run = rfi_par.go(rfi_par.cfg_par)
 
     if run == 0:
-        logger.warning('\t+------+\n\t  Done\n\t+------+')
+        logger.info('\t+------+\n\t  Done\n\t+------+')

@@ -1,5 +1,5 @@
-# This workflows will upload a Python Package using Twine when a release is created
-# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions#publishing-to-package-registries
+# This workflow builds and uploads the Python package to PyPI using uv, on tag push.
+# For more information see: https://docs.astral.sh/uv/guides/publish/
 
 name: Upload Python Package
 
@@ -7,9 +7,6 @@ on:
   push:
     tags:
       - '**'
-
-env:
-  POETRY_VERSION: 1.4.0
 
 jobs:
   deploy:
@@ -20,42 +17,26 @@ jobs:
       (startsWith(github.event.ref, 'refs/tags') ||
        github.event.ref == 'refs/heads/master')
     steps:
-      - name: Set up Python 3
-        uses: actions/setup-python@v3
-        with:
-          python-version: '3.10'
-
-      - name: Install latest setuptools, wheel, pip
-        run: python3 -m pip install -U pip setuptools wheel
-
-      - name: Cache Installations
-        id: cache-installs
-        uses: actions/cache@v3
-        with:
-          path: ~/.local
-          key: install-${{ env.INSTALL_CACHE_HASH }}-3
-
-      - name: Install Poetry
-        if: steps.cache-installs.outputs.cache-hit != 'true'
-        run: |
-          curl -sSL https://install.python-poetry.org | python3 - --version ${{ env.POETRY_VERSION }}
-      - name: Test poetry
-        run: poetry --version
-
       - name: Checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: Install rfinder
-        run: poetry install
+      - name: Set up Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
 
       - name: Build distribution
-        run: poetry build
+        run: uv build
 
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@master
+      - name: Publish distribution to PyPI
         if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_TOKEN_RFINDER }}
+        run: uv publish
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN_RFINDER }}
